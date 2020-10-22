@@ -16,6 +16,32 @@ class QuAntrupedEnv(AntEnv):
         return 0.
 
     def _get_obs(self):
+        """ 
+        Observation space for the QuAntruped model.
+        
+        Following observation spaces are used: 
+        * position information
+        * velocity information
+        * passive forces acting on the joints
+        * last control signal
+        
+        Unfortunately, the numbering schemes are different for the legs depending on the
+        specific case: actions and measurements use each their own scheme.
+        
+        For actions (action_space and .sim.data.ctrl) ordering is 
+        (front means x direction, in rendering moving to the right; rewarded direction)
+            Front right: 0 = hip joint - positive counterclockwise (from top view), 
+                         1 = knee joint - negative is up
+            Front left: 2 - pos. ccw., 3 - neg. is up
+            Hind left: 4 - pos. ccw., 5 - pos. is up
+            Hind right: 6 - pos. ccw., 7 - pos. is up
+        
+        For measured observations (basically everything starting with a q) ordering is:
+            FL: 0, 1
+            HL: 2, 3
+            HR: 4, 5
+            FR: 6, 7
+        """
         position = self.sim.data.qpos.flat.copy()
         velocity = self.sim.data.qvel.flat.copy()
         #contact_force = self.contact_forces.flat.copy()

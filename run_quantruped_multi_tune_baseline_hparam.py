@@ -13,13 +13,14 @@ import time
 import simulation_envs
 import models
 from simulation_envs.quantruped_adaptor_multi_environment import QuantrupedMultiPoliciesEnv
+from simulation_envs.quantruped_adaptor_multi_configurations_environment import QuantrupedFullyDecentralizedEnv
 
 ray.init(ignore_reinit_error=True)
 
 config = ppo.DEFAULT_CONFIG.copy()
 
-config['env'] = "QuantrupedMultiEnv_Centralized"
-
+#config['env'] = "QuantrupedMultiEnv_Centralized"
+config['env'] = "QuantrupedMultiEnv_FullyDecentral"
 config['num_workers']=2
 config['num_envs_per_worker']=4
 #config['nump_gpus']=1
@@ -48,21 +49,22 @@ config['model']['fcnet_hiddens'] = [64, 64]
 
 #config['seed'] = round(time.time())
 
-single_env = gym.make("QuAntruped-v3")
-policies = QuantrupedMultiPoliciesEnv.return_policies(single_env.observation_space)
+#single_env = gym.make("QuAntruped-v3")
+#policies = QuantrupedMultiPoliciesEnv.return_policies(single_env.observation_space)
+policies = QuantrupedFullyDecentralizedEnv.return_policies( None )
 
 config["multiagent"] = {
         "policies": policies,
-        "policy_mapping_fn": QuantrupedMultiPoliciesEnv.policy_mapping_fn,
-        "policies_to_train": [list(policies.keys())[0]], #, "dec_B_policy"],
+        "policy_mapping_fn": QuantrupedFullyDecentralizedEnv.policy_mapping_fn,
+        "policies_to_train": QuantrupedFullyDecentralizedEnv.policy_names, #, "dec_B_policy"],
     }
 
 analysis = tune.run(
       "PPO",
-      name="exp1_centralized",
-      num_samples=10,
+      name="exp1_fullDecentral",
+      num_samples=1,
       checkpoint_at_end=True,
       checkpoint_freq=1042,
-      stop={"timesteps_total": 20006400},
+      stop={"timesteps_total": 5006400},
       config=config,
   )

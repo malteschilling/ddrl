@@ -34,7 +34,7 @@ class QuantrupedMultiPoliciesEnv(MultiAgentEnv):
         }
         
     def concatenate_actions(self, action_dict):
-        return action_dict[QuantrupedMultiPoliciesEnv.policy_names[0]]#np.concatenate( (action_dict[self.policy_A],
+        return action_dict[self.policy_names[0]]#np.concatenate( (action_dict[self.policy_A],
         
     def reset(self):
         # From TimeLimit
@@ -50,8 +50,8 @@ class QuantrupedMultiPoliciesEnv(MultiAgentEnv):
         obs_dict = self.distribute_observations(obs_full)
         
         rew = {}
-        for policy_name in QuantrupedMultiPoliciesEnv.policy_names:
-            rew[policy_name] = rew_w / len(QuantrupedMultiPoliciesEnv.policy_names)
+        for policy_name in self.policy_names:
+            rew[policy_name] = rew_w / len(self.policy_names)
         #rew = {
          #   QuantrupedMultiEnv_Centralized.policy_names[0]: rew_w,
         #}
