@@ -22,6 +22,7 @@ config['env'] = "QuantrupedMultiEnv_Centralized"
 
 config['num_workers']=2
 config['num_envs_per_worker']=4
+#config['nump_gpus']=1
 
 config['train_batch_size'] = 4000 #grid_search([4000, 65536]
 
