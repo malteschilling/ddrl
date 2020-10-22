@@ -4,7 +4,7 @@ import numpy as np
 import mujoco_py
 from gym import spaces
 
-class QuantrupedMultiEnv_Centralized(MultiAgentEnv):
+class QuantrupedMultiPoliciesEnv(MultiAgentEnv):
     """
     """    
     
@@ -27,14 +27,15 @@ class QuantrupedMultiEnv_Centralized(MultiAgentEnv):
          #   self.env.spec.max_episode_steps = max_episode_steps
         #self._max_episode_steps = max_episode_steps
         #self._elapsed_steps = None
-        
-    
 
     def distribute_observations(self, obs_full):
         return {
             self.policy_names[0]: obs_full,
         }
-
+        
+    def concatenate_actions(self, action_dict):
+        return action_dict[QuantrupedMultiPoliciesEnv.policy_names[0]]#np.concatenate( (action_dict[self.policy_A],
+        
     def reset(self):
         # From TimeLimit
         #self._elapsed_steps = 0
@@ -44,13 +45,16 @@ class QuantrupedMultiEnv_Centralized(MultiAgentEnv):
 
     def step(self, action_dict):
         #assert self._elapsed_steps is not None, "Cannot call env.step() before calling reset()"    
-        obs_full, rew_w, done_w, info_w = self.env.step(action_dict[QuantrupedMultiEnv_Centralized.policy_names[0]]) ##self.env.step( np.concatenate( (action_dict[self.policy_A],
+        obs_full, rew_w, done_w, info_w = self.env.step( self.concatenate_actions(action_dict) ) ##self.env.step( np.concatenate( (action_dict[self.policy_A],
             #action_dict[self.policy_B]) ))
         obs_dict = self.distribute_observations(obs_full)
         
-        rew = {
-            QuantrupedMultiEnv_Centralized.policy_names[0]: rew_w,
-        }
+        rew = {}
+        for policy_name in QuantrupedMultiPoliciesEnv.policy_names:
+            rew[policy_name] = rew_w / len(QuantrupedMultiPoliciesEnv.policy_names)
+        #rew = {
+         #   QuantrupedMultiEnv_Centralized.policy_names[0]: rew_w,
+        #}
         
         done = {
             "__all__": done_w,
@@ -63,14 +67,17 @@ class QuantrupedMultiEnv_Centralized(MultiAgentEnv):
         
         return obs_dict, rew, done, {}
         
+    def render(self):
+        self.env.render()
+        
     @staticmethod
     def policy_mapping_fn(agent_id):
-        return QuantrupedMultiEnv_Centralized.policy_names[0]
+        return QuantrupedMultiPoliciesEnv.policy_names[0]
             
     @staticmethod
     def return_policies(obs_space):
         policies = {
-            QuantrupedMultiEnv_Centralized.policy_names[0]: (None,
+            QuantrupedMultiPoliciesEnv.policy_names[0]: (None,
                 obs_space, spaces.Box(np.array([-1.,-1.,-1.,-1., -1.,-1.,-1.,-1.]), np.array([+1.,+1.,+1.,+1., +1.,+1.,+1.,+1.])), {}),
         }
         return policies

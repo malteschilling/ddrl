@@ -1,6 +1,10 @@
 from gym.envs.mujoco.ant_v3 import AntEnv
 import numpy as np
 
+DEFAULT_CAMERA_CONFIG = {
+    'distance': 10.0,
+}
+
 class QuAntrupedEnv(AntEnv):
 
     @property
@@ -27,3 +31,10 @@ class QuAntrupedEnv(AntEnv):
         observations = np.concatenate((position, velocity, joint_passive_forces, last_control))#, last_control)) #, contact_force))
 
         return observations
+        
+    def viewer_setup(self):
+        for key, value in DEFAULT_CAMERA_CONFIG.items():
+            if isinstance(value, np.ndarray):
+                 getattr(self.viewer.cam, key)[:] = value
+            else:
+                setattr(self.viewer.cam, key, value)
