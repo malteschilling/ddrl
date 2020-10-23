@@ -6,6 +6,9 @@ from simulation_envs.ant_v3_mujoco_2 import AntEnvMujoco2
 
 from simulation_envs.quantruped_adaptor_multi_environment import QuantrupedMultiPoliciesEnv
 from simulation_envs.quantruped_adaptor_multi_configurations_environment import QuantrupedFullyDecentralizedEnv
+from simulation_envs.quantruped_adaptor_multi_configurations_environment import Quantruped_LocalSingleNeighboringLeg_Env
+from simulation_envs.quantruped_adaptor_multi_configurations_environment import Quantruped_LocalSingleDiagonalLeg_Env
+from simulation_envs.quantruped_adaptor_multi_configurations_environment import Quantruped_Local_Env
 
 register(
 	id='QuAntruped-v3',
@@ -28,3 +31,7 @@ register_env("Ant_Muj2-v3", lambda config: TimeLimit(AntEnvMujoco2(), max_episod
 register_env("QuantrupedMultiEnv_Centralized", lambda config: QuantrupedMultiPoliciesEnv(config) )
 
 register_env("QuantrupedMultiEnv_FullyDecentral", lambda config: QuantrupedFullyDecentralizedEnv(config) )
+
+register_env("QuantrupedMultiEnv_SingleNeighbor", lambda config: Quantruped_LocalSingleNeighboringLeg_Env(config) )
+register_env("QuantrupedMultiEnv_SingleDiagonal", lambda config: Quantruped_LocalSingleDiagonalLeg_Env(config) )
+register_env("QuantrupedMultiEnv_Local", lambda config: Quantruped_Local_Env(config) )
