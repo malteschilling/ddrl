@@ -95,7 +95,7 @@ config["multiagent"] = {
 
 analysis = tune.run(
       "PPO",
-      name="exp1_local",
+      name=("exp_" + policy_scope),
       num_samples=1,
       checkpoint_at_end=True,
       checkpoint_freq=1042,
