@@ -43,7 +43,7 @@ else:
 #from simulation_envs.quantruped_adaptor_multi_configurations_environment import Quantruped_LocalSingleDiagonalLeg_Env as QuantrupedEnv
 #from simulation_envs.quantruped_adaptor_multi_configurations_environment import Quantruped_Local_Env as QuantrupedEnv
 
-ray.init(ignore_reinit_error=True)
+ray.init(num_cpus=15, ignore_reinit_error=True)
 
 config = ppo.DEFAULT_CONFIG.copy()
 
@@ -83,9 +83,9 @@ config['model']['fcnet_hiddens'] = [64, 64]
 
 #config['seed'] = round(time.time())
 
-#single_env = gym.make("QuAntruped-v3")
+single_env = gym.make("QuAntruped-v3")
 #policies = QuantrupedMultiPoliciesEnv.return_policies(single_env.observation_space)
-policies = QuantrupedEnv.return_policies( None )
+policies = QuantrupedEnv.return_policies( spaces.Box(-np.inf, np.inf, (43,), np.float64) )
 
 config["multiagent"] = {
         "policies": policies,
@@ -96,7 +96,7 @@ config["multiagent"] = {
 analysis = tune.run(
       "PPO",
       name=("exp_" + policy_scope),
-      num_samples=1,
+      num_samples=10,
       checkpoint_at_end=True,
       checkpoint_freq=1042,
       stop={"timesteps_total": 20006400},

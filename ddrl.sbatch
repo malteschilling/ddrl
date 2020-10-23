@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --job-name=ddrl_fd
-#SBATCH --time=18:00:00
+#SBATCH --time=22:00:00
 #SBATCH --mail-type=FAIL,END
 #SBTACH --mail-user=mschilli@techfak.uni-bielefeld.de
 #SBATCH --output=logs/job-centr-%j.log
