@@ -9,6 +9,8 @@ from simulation_envs.quantruped_adaptor_multi_configurations_environment import 
 from simulation_envs.quantruped_adaptor_multi_configurations_environment import Quantruped_LocalSingleNeighboringLeg_Env
 from simulation_envs.quantruped_adaptor_multi_configurations_environment import Quantruped_LocalSingleDiagonalLeg_Env
 from simulation_envs.quantruped_adaptor_multi_configurations_environment import Quantruped_Local_Env
+from simulation_envs.quantruped_adaptor_multi_configurations_environment import Quantruped_TwoSideControllers_Env
+from simulation_envs.quantruped_adaptor_multi_configurations_environment import Quantruped_TwoDiagControllers_Env
 
 register(
 	id='QuAntruped-v3',
@@ -35,3 +37,5 @@ register_env("QuantrupedMultiEnv_FullyDecentral", lambda config: QuantrupedFully
 register_env("QuantrupedMultiEnv_SingleNeighbor", lambda config: Quantruped_LocalSingleNeighboringLeg_Env(config) )
 register_env("QuantrupedMultiEnv_SingleDiagonal", lambda config: Quantruped_LocalSingleDiagonalLeg_Env(config) )
 register_env("QuantrupedMultiEnv_Local", lambda config: Quantruped_Local_Env(config) )
+register_env("QuantrupedMultiEnv_TwoSides", lambda config: Quantruped_TwoSideControllers_Env(config) )
+register_env("QuantrupedMultiEnv_TwoDiags", lambda config: Quantruped_TwoDiagControllers_Env(config) )

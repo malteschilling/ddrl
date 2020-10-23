@@ -33,6 +33,10 @@ elif policy_scope=="QuantrupedMultiEnv_SingleDiagonal":
     from simulation_envs.quantruped_adaptor_multi_configurations_environment import Quantruped_LocalSingleDiagonalLeg_Env as QuantrupedEnv
 elif policy_scope=="QuantrupedMultiEnv_Local":
     from simulation_envs.quantruped_adaptor_multi_configurations_environment import Quantruped_Local_Env as QuantrupedEnv
+elif policy_scope=="QuantrupedMultiEnv_TwoSides":
+    from simulation_envs.quantruped_adaptor_multi_configurations_environment import Quantruped_TwoSideControllers_Env as QuantrupedEnv
+elif policy_scope=="QuantrupedMultiEnv_TwoDiags":
+    from simulation_envs.quantruped_adaptor_multi_configurations_environment import Quantruped_TwoDiagControllers_Env as QuantrupedEnv
 else:
     from simulation_envs.quantruped_adaptor_multi_environment import QuantrupedMultiPoliciesEnv as QuantrupedEnv
 
@@ -44,6 +48,7 @@ else:
 #from simulation_envs.quantruped_adaptor_multi_configurations_environment import Quantruped_Local_Env as QuantrupedEnv
 
 ray.init(num_cpus=15, ignore_reinit_error=True)
+#ray.init(ignore_reinit_error=True)
 
 config = ppo.DEFAULT_CONFIG.copy()
 
