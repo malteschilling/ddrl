@@ -48,12 +48,23 @@ class QuantrupedMultiPoliciesEnv(MultiAgentEnv):
   #      for policy_name in self.policy_names:
    #         rew[policy_name] = reward_full / len(self.policy_names)
     #    return rew
+    
+    def distribute_contact_cost(self):
+        contact_cost = {}
+        raw_contact_forces = self.sim.data.cfrc_ext
+        contact_forces = np.clip(raw_contact_forces, -1., 1.)
+        contact_cost[policy_names[0]] = self.contact_cost_weight * np.sum(
+            np.square(contact_forces))
+        return contact_cost
 
     def distribute_reward(self, reward_full, info, action_dict):
         fw_reward = info['reward_forward']
-        rew = {}      
+        rew = {}    
+        contact_costs = self.distribute_contact_cost()  
         for policy_name in self.policy_names:
-            rew[policy_name] = fw_reward / len(self.policy_names) - self.env.ctrl_cost_weight * np.sum(np.square(action_dict[policy_name]))
+            rew[policy_name] = fw_reward / len(self.policy_names) \
+                - self.env.ctrl_cost_weight * np.sum(np.square(action_dict[policy_name])) \
+                - contact_costs[policy_name]
         return rew
         
     def concatenate_actions(self, action_dict):

@@ -8,7 +8,7 @@ DEFAULT_CAMERA_CONFIG = {
 class QuAntrupedEnv(AntEnv):
 
     def __init__(self, ctrl_cost_weight=0.5, contact_cost_weight=5e-4, healthy_reward=0.):
-        super().__init__(ctrl_cost_weight=ctrl_cost_weight, contact_cost_weight=0.)
+        super().__init__(ctrl_cost_weight=ctrl_cost_weight, contact_cost_weight=contact_cost_weight)
         self.ctrl_cost_weight = self._ctrl_cost_weight
         self.contact_cost_weight = self._contact_cost_weight
   #      self.frame_skip = 1

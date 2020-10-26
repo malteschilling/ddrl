@@ -70,7 +70,7 @@ config['train_batch_size'] = 2048 # BEFORE 4000 #grid_search([4000, 65536]
 config['gamma'] = 0.99
 config['lambda'] = 0.95 
        
-config['entropy_coeff'] = grid_search([0., 0.01])
+config['entropy_coeff'] = 0. #grid_search([0., 0.01])
 
 config['clip_param'] = 0.2
 
@@ -100,11 +100,11 @@ config["multiagent"] = {
         "policies_to_train": QuantrupedEnv.policy_names, #, "dec_B_policy"],
     }
 
-#config['env_config']['contact_cost_weight'] = grid_search([5e-4,5e-3,5e-2])
+config['env_config']['contact_cost_weight'] = grid_search([5e-4,5e-3,5e-2])
 
 analysis = tune.run(
       "PPO",
-      name=("exp_distRew_" + policy_scope),
+      name=("exp_distContact_" + policy_scope),
       num_samples=5,
       checkpoint_at_end=True,
       checkpoint_freq=1042,
