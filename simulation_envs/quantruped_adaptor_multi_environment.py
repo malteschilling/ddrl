@@ -33,6 +33,12 @@ class QuantrupedMultiPoliciesEnv(MultiAgentEnv):
             self.policy_names[0]: obs_full,
         }
         
+    def distribute_reward(self, reward_full, info, action_dict):
+        rew = {}
+        for policy_name in self.policy_names:
+            rew[policy_name] = reward_full / len(self.policy_names)
+        return rew
+        
     def concatenate_actions(self, action_dict):
         return action_dict[self.policy_names[0]]#np.concatenate( (action_dict[self.policy_A],
         
@@ -49,12 +55,7 @@ class QuantrupedMultiPoliciesEnv(MultiAgentEnv):
             #action_dict[self.policy_B]) ))
         obs_dict = self.distribute_observations(obs_full)
         
-        rew = {}
-        for policy_name in self.policy_names:
-            rew[policy_name] = rew_w / len(self.policy_names)
-        #rew = {
-         #   QuantrupedMultiEnv_Centralized.policy_names[0]: rew_w,
-        #}
+        rew_dict = self.distribute_reward(rew_w, info_w, action_dict)
         
         done = {
             "__all__": done_w,
@@ -65,7 +66,7 @@ class QuantrupedMultiPoliciesEnv(MultiAgentEnv):
          #   info_w['TimeLimit.truncated'] = not done
           #  done["__all__"] = True
         
-        return obs_dict, rew, done, {}
+        return obs_dict, rew_dict, done, {}
         
     def render(self):
         self.env.render()

@@ -7,6 +7,11 @@ DEFAULT_CAMERA_CONFIG = {
 
 class QuAntrupedEnv(AntEnv):
 
+    def __init__(self):
+        super().__init__()
+        self.ctrl_cost_weight = self._ctrl_cost_weight
+  #      self.frame_skip = 1
+
     @property
     def healthy_reward(self):
         return 0.

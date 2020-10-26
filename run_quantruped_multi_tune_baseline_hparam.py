@@ -100,8 +100,8 @@ config["multiagent"] = {
 
 analysis = tune.run(
       "PPO",
-      name=("exp_" + policy_scope),
-      num_samples=10,
+      name=("exp_distRew_" + policy_scope),
+      num_samples=1,
       checkpoint_at_end=True,
       checkpoint_freq=1042,
       stop={"timesteps_total": 20006400},
