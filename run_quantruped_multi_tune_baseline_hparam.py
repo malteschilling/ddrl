@@ -64,12 +64,14 @@ config['num_workers']=2
 config['num_envs_per_worker']=4
 #config['nump_gpus']=1
 
-config['train_batch_size'] = 4000 #grid_search([4000, 65536]
+config['train_batch_size'] = 2048 # BEFORE 4000 #grid_search([4000, 65536]
 
 # Baseline Defaults:
 config['gamma'] = 0.99
-config['lambda'] = 0.95        
-config['entropy_coeff'] = 0.
+config['lambda'] = 0.95 
+       
+config['entropy_coeff'] = grid_search([0., 0.01])
+
 config['clip_param'] = 0.2
 
 config['vf_loss_coeff'] = 0.5
@@ -77,7 +79,7 @@ config['vf_loss_coeff'] = 0.5
 
 config['observation_filter'] = 'MeanStdFilter' #grid_search(['MeanStdFilter', 'NoFilter'])
 
-config['sgd_minibatch_size'] = 2048 # Default: 128, or horizon?
+config['sgd_minibatch_size'] = 64 # BEFORE 2048 # Default: 128, or horizon?
 config['num_sgd_iter'] = 10
 config['lr'] = 3e-4
 config['grad_clip']=0.5
@@ -98,10 +100,12 @@ config["multiagent"] = {
         "policies_to_train": QuantrupedEnv.policy_names, #, "dec_B_policy"],
     }
 
+#config['env_config']['contact_cost_weight'] = grid_search([5e-4,5e-3,5e-2])
+
 analysis = tune.run(
       "PPO",
       name=("exp_distRew_" + policy_scope),
-      num_samples=1,
+      num_samples=5,
       checkpoint_at_end=True,
       checkpoint_freq=1042,
       stop={"timesteps_total": 20006400},

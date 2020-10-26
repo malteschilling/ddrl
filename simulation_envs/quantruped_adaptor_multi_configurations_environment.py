@@ -308,12 +308,12 @@ class Quantruped_Local_Env(QuantrupedMultiPoliciesEnv):
             obs_distributed[policy_name] = obs_full[self.obs_indices[policy_name],]
         return obs_distributed
         
-    def distribute_reward(self, reward_full, info, action_dict):
-        fw_reward = info['reward_forward']
-        rew = {}      
-        for policy_name in self.policy_names:
-            rew[policy_name] = fw_reward / len(self.policy_names) - self.env.ctrl_cost_weight * np.sum(np.square(action_dict[policy_name]))
-        return rew
+#    def distribute_reward(self, reward_full, info, action_dict):
+ #       fw_reward = info['reward_forward']
+  #      rew = {}      
+   #     for policy_name in self.policy_names:
+    #        rew[policy_name] = fw_reward / len(self.policy_names) - self.env.ctrl_cost_weight * np.sum(np.square(action_dict[policy_name]))
+     #   return rew
         
     def concatenate_actions(self, action_dict):
         # Return actions in the (DIFFERENT in Mujoco) order FR - FL - HL - HR
