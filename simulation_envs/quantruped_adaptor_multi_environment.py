@@ -3,6 +3,7 @@ from ray.rllib.env.multi_agent_env import MultiAgentEnv
 import numpy as np
 import mujoco_py
 from gym import spaces
+from mujoco_py import functions
 
 class QuantrupedMultiPoliciesEnv(MultiAgentEnv):
     """
@@ -31,6 +32,11 @@ class QuantrupedMultiPoliciesEnv(MultiAgentEnv):
         
         #self.policy_B = "dec_B_policy"
         
+        #self.acc_forw_rew = 0.
+        #self.acc_ctrl_cost = 0.
+        #self.acc_contact_cost = 0.
+        #self.acc_step = 0
+        
         # From TimeLimit
         #max_episode_steps = 1000
         #if self.env.spec is not None:
@@ -51,9 +57,9 @@ class QuantrupedMultiPoliciesEnv(MultiAgentEnv):
     
     def distribute_contact_cost(self):
         contact_cost = {}
-        raw_contact_forces = self.sim.data.cfrc_ext
+        raw_contact_forces = self.env.sim.data.cfrc_ext
         contact_forces = np.clip(raw_contact_forces, -1., 1.)
-        contact_cost[policy_names[0]] = self.contact_cost_weight * np.sum(
+        contact_cost[self.policy_names[0]] = self.env.contact_cost_weight * np.sum(
             np.square(contact_forces))
         return contact_cost
 
@@ -78,6 +84,7 @@ class QuantrupedMultiPoliciesEnv(MultiAgentEnv):
         return self.distribute_observations(obs_original)
 
     def step(self, action_dict):
+        #functions.mj_rnePostConstraint(self.env.model, self.env.data)
         #assert self._elapsed_steps is not None, "Cannot call env.step() before calling reset()"    
         obs_full, rew_w, done_w, info_w = self.env.step( self.concatenate_actions(action_dict) ) ##self.env.step( np.concatenate( (action_dict[self.policy_A],
             #action_dict[self.policy_B]) ))
@@ -89,6 +96,13 @@ class QuantrupedMultiPoliciesEnv(MultiAgentEnv):
             "__all__": done_w,
         }
         
+        #self.acc_forw_rew += info_w['reward_forward']
+        #self.acc_ctrl_cost += info_w['reward_ctrl']
+        #self.acc_contact_cost += info_w['reward_contact']
+        #self.acc_step +=1
+        #print("REWARDS: ", info_w['reward_forward'], " / ", self.acc_forw_rew/self.acc_step, "; ", 
+         #   info_w['reward_ctrl'], " / ", self.acc_ctrl_cost/(self.acc_step*self.env.ctrl_cost_weight), "; ",
+          #  info_w['reward_contact'], " / ", self.acc_contact_cost/(self.acc_step*self.env.contact_cost_weight), self.env.contact_cost_weight)
         #self._elapsed_steps += 1
         #if self._elapsed_steps >= self._max_episode_steps:
          #   info_w['TimeLimit.truncated'] = not done

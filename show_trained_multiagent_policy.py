@@ -34,8 +34,11 @@ def keep_going(steps, num_steps, episodes, num_episodes):
 def default_policy_agent_mapping(unused_agent_id):
     return DEFAULT_POLICY_ID
 
+config_checkpoint = "/Users/mschilling/Desktop/gpu_cluster/ray_results/exp_QuantrupedMultiEnv_Centralized/PPO_QuantrupedMultiEnv_Centralized_6e846_00000_0_2020-10-24_15-47-18/checkpoint_2084/checkpoint-2084"
+
 config_checkpoint="/Users/mschilling/Desktop/develop/Decentralized_DRL/ray_results/rllib_centralized_2/PPO_QuantrupedMultiEnv_Centralized_7443a_00000_0_2020-10-21_20-23-02/checkpoint_3125/checkpoint-3125"
 #config_checkpoint="/Users/mschilling/ray_results/rllib_quantruped/PPO_QuAntruped-v3_e38c0_00000_0_2020-10-14_11-51-53/checkpoint_625/checkpoint-625"
+config_checkpoint = "/Users/mschilling/ray_results/exp_distRew_QuantrupedMultiEnv_Local/PPO_QuantrupedMultiEnv_Local_d6587_00000_0_2020-10-26_10-44-27/checkpoint_4168/checkpoint-4168"
 config_dir = os.path.dirname(config_checkpoint)
 config_path = os.path.join(config_dir, "params.pkl")
 
@@ -57,7 +60,7 @@ agent = cls(env=config['env'], config=config)
 # Load state from checkpoint.
 agent.restore(config_checkpoint)
 num_steps = int(1000)
-num_episodes = int(3)
+num_episodes = int(1)
 
 if hasattr(agent, "workers") and isinstance(agent.workers, WorkerSet):
     env = agent.workers.local_worker().env
