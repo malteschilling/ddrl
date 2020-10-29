@@ -47,8 +47,8 @@ else:
 #from simulation_envs.quantruped_adaptor_multi_configurations_environment import Quantruped_LocalSingleDiagonalLeg_Env as QuantrupedEnv
 #from simulation_envs.quantruped_adaptor_multi_configurations_environment import Quantruped_Local_Env as QuantrupedEnv
 
-#ray.init(num_cpus=15, ignore_reinit_error=True)
-ray.init(ignore_reinit_error=True)
+ray.init(num_cpus=15, ignore_reinit_error=True)
+#ray.init(ignore_reinit_error=True)
 
 config = ppo.DEFAULT_CONFIG.copy()
 
