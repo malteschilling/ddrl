@@ -26,21 +26,25 @@ plt.rcParams['pdf.fonttype'] = 42
 # matplotlib.rcParams['ps.fonttype'] = 42
 
 # Log file directories
-exp_path = os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results/test/'
-experiment_dirs = [os.path.join(exp_path,dI) for dI in os.listdir(exp_path) if os.path.isdir(os.path.join(exp_path,dI))]
+exp_path = [os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results/1_flat_QuantrupedMultiEnv_Centralized',
+    os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results/1_flat_QuantrupedMultiEnv_Local']
+experiment_dirs = [[os.path.join(exp_path_item,dI) for dI in os.listdir(exp_path_item) if os.path.isdir(os.path.join(exp_path_item,dI))] for exp_path_item in exp_path]
 
-for i in range(0, len(experiment_dirs)):
-	df = pd.read_csv(experiment_dirs[i]+'/progress.csv')
-	rew_new =(df.iloc[:,2].values)
-	if i==0:
-		reward_values = np.vstack([rew_new])
-	else:
-		reward_values = np.vstack([reward_values,rew_new])
-
-rew_mean = np.mean(reward_values, axis=0)
-rew_std = np.std(reward_values, axis=0)
-rew_lower_std = rew_mean - rew_std
-rew_upper_std = rew_mean + rew_std
+all_exp_data = []
+for exp_dir in experiment_dirs:
+    for i in range(0, len(exp_dir)):
+        df = pd.read_csv(exp_dir[i]+'/progress.csv')
+        rew_new =(df.iloc[:,2].values)
+        if i==0:
+            reward_values = np.vstack([rew_new])
+            time_steps = (df.iloc[:,6].values)
+        else:
+            reward_values = np.vstack([reward_values,rew_new])
+    rew_mean = np.mean(reward_values, axis=0)
+    rew_std = np.std(reward_values, axis=0)
+    rew_lower_std = rew_mean - rew_std
+    rew_upper_std = rew_mean + rew_std
+    all_exp_data.append( [rew_mean, rew_std, rew_lower_std, rew_upper_std] )
 
 # Plotting functions
 fig = plt.figure(figsize=(10, 6))
@@ -53,14 +57,15 @@ ax_arch.spines["right"].set_visible(False)
 #ax_arch.set_xlim(0, 500)
 #ax_arch.set_ylim(0, 800)  
 
-# Use matplotlib's fill_between() call to create error bars.   
-plt.fill_between(range(0,len(rew_mean)), rew_lower_std,  
-                 rew_upper_std, color=tableau20[1], alpha=0.5)  
-plt.plot(range(0,len(rew_mean)), rew_mean, color=tableau20[0], lw=1)
+for i in range(0, len(all_exp_data)):
+    # Use matplotlib's fill_between() call to create error bars.   
+    plt.fill_between(time_steps, all_exp_data[i][2],  
+                     all_exp_data[i][3], color=tableau20[i*2 + 1], alpha=0.5)  
+    plt.plot(time_steps, all_exp_data[i][0], color=tableau20[i*2], lw=1)
+    print("Mean reward for ", i, ": ", all_exp_data[i][0][-1], " - at iter 625: ", all_exp_data[i][0][624])
 
-ax_arch.set_xlabel('Episodes', fontsize=14)
+ax_arch.set_xlabel('timesteps', fontsize=14)
 ax_arch.set_ylabel('Reward per Episode', fontsize=14)
-
 #plt.plot([0,500], [200,200], color=tableau20[6], linestyle='--')
 
 plt.show()
