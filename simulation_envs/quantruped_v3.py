@@ -48,7 +48,14 @@ class QuAntrupedEnv(AntEnv):
         velocity = self.sim.data.qvel.flat.copy()
         #contact_force = self.contact_forces.flat.copy()
         # Provide passive force instead -- in joint reference frame = eight dimensions
-        joint_passive_forces = self.sim.data.qfrc_passive.flat.copy()[6:]
+        # joint_passive_forces = self.sim.data.qfrc_passive.flat.copy()[6:]
+        # Sensor measurements in the joint:
+        # qfrc_unc is the sum of all forces outside constraints (passive, actuation, gravity, applied etc)
+        # qfrc_constraint is the sum of all constraint forces. 
+        # If you add up these two quantities you get the total force acting on each joint
+        # which is what a torque sensor should measure.
+        # See note in http://www.mujoco.org/forum/index.php?threads/best-way-to-represent-robots-torque-sensors.4181/
+        joint_sensor_forces = self.sim.data.qfrc_unc[6:] + self.sim.data.qfrc_constraint[6:]
 
         # Provide actions from last time step (as used in the simulator = clipped)
         last_control = self.sim.data.ctrl.flat.copy()
@@ -56,7 +63,7 @@ class QuAntrupedEnv(AntEnv):
         if self._exclude_current_positions_from_observation:
             position = position[2:]
 
-        observations = np.concatenate((position, velocity, joint_passive_forces, last_control))#, last_control)) #, contact_force))
+        observations = np.concatenate((position, velocity, joint_sensor_forces, last_control))#, last_control)) #, contact_force))
 
         return observations
         
