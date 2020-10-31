@@ -267,13 +267,13 @@ class Quantruped_LocalSingleToFront_Env(QuantrupedFourControllerSuperEnv):
     def return_policies(obs_space):
         obs_space = spaces.Box(-np.inf, np.inf, (27,), np.float64)
         policies = {
-            Quantruped_LocalSingleToFrontCoordination_Env.policy_names[0]: (None,
+            Quantruped_LocalSingleToFront_Env.policy_names[0]: (None,
                 obs_space, spaces.Box(np.array([-1.,-1.]), np.array([+1.,+1.])), {}),
-            Quantruped_LocalSingleToFrontCoordination_Env.policy_names[1]: (None,
+            Quantruped_LocalSingleToFront_Env.policy_names[1]: (None,
                 obs_space, spaces.Box(np.array([-1.,-1.]), np.array([+1.,+1.])), {}),
-            Quantruped_LocalSingleToFrontCoordination_Env.policy_names[2]: (None,
+            Quantruped_LocalSingleToFront_Env.policy_names[2]: (None,
                 obs_space, spaces.Box(np.array([-1.,-1.]), np.array([+1.,+1.])), {}),
-            Quantruped_LocalSingleToFrontCoordination_Env.policy_names[3]: (None,
+            Quantruped_LocalSingleToFront_Env.policy_names[3]: (None,
                 obs_space, spaces.Box(np.array([-1.,-1.]), np.array([+1.,+1.])), {}),
         }
         return policies
