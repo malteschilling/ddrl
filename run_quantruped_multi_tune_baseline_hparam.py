@@ -26,19 +26,19 @@ else:
     policy_scope = 'QuantrupedMultiEnv_Centralized'
  
 if policy_scope=="QuantrupedMultiEnv_FullyDecentral":
-    from simulation_envs.quantruped_adaptor_multi_configurations_environment import QuantrupedFullyDecentralizedEnv as QuantrupedEnv
+    from simulation_envs.quantruped_fourDecentralizedController_environments import QuantrupedFullyDecentralizedEnv as QuantrupedEnv
 elif policy_scope=="QuantrupedMultiEnv_SingleNeighbor":
-    from simulation_envs.quantruped_adaptor_multi_configurations_environment import Quantruped_LocalSingleNeighboringLeg_Env as QuantrupedEnv
+    from simulation_envs.quantruped_fourDecentralizedController_environments import Quantruped_LocalSingleNeighboringLeg_Env as QuantrupedEnv
 elif policy_scope=="QuantrupedMultiEnv_SingleDiagonal":
-    from simulation_envs.quantruped_adaptor_multi_configurations_environment import Quantruped_LocalSingleDiagonalLeg_Env as QuantrupedEnv
+    from simulation_envs.quantruped_fourDecentralizedController_environments import Quantruped_LocalSingleDiagonalLeg_Env as QuantrupedEnv
 elif policy_scope=="QuantrupedMultiEnv_SingleToFront":
-    from simulation_envs.quantruped_adaptor_multi_configurations_environment import Quantruped_LocalSingleToFront_Env as QuantrupedEnv
+    from simulation_envs.quantruped_fourDecentralizedController_environments import Quantruped_LocalSingleToFront_Env as QuantrupedEnv
 elif policy_scope=="QuantrupedMultiEnv_Local":
-    from simulation_envs.quantruped_adaptor_multi_configurations_environment import Quantruped_Local_Env as QuantrupedEnv
+    from simulation_envs.quantruped_fourDecentralizedController_environments import Quantruped_Local_Env as QuantrupedEnv
 elif policy_scope=="QuantrupedMultiEnv_TwoSides":
-    from simulation_envs.quantruped_adaptor_multi_configurations_environment import Quantruped_TwoSideControllers_Env as QuantrupedEnv
+    from simulation_envs.quantruped_twoDecentralizedController_environments import Quantruped_TwoSideControllers_Env as QuantrupedEnv
 elif policy_scope=="QuantrupedMultiEnv_TwoDiags":
-    from simulation_envs.quantruped_adaptor_multi_configurations_environment import Quantruped_TwoDiagControllers_Env as QuantrupedEnv
+    from simulation_envs.quantruped_twoDecentralizedController_environments import Quantruped_TwoDiagControllers_Env as QuantrupedEnv
 else:
     from simulation_envs.quantruped_adaptor_multi_environment import QuantrupedMultiPoliciesEnv as QuantrupedEnv
 
