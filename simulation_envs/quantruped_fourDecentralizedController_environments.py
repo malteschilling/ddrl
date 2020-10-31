@@ -258,7 +258,7 @@ class Quantruped_LocalSingleToFront_Env(QuantrupedFourControllerSuperEnv):
         # HL also gets local information from HR (from side at back)
         self.obs_indices["policy_HL"] = [0,1,2,3,4, 7, 8, 9,10,13,14,15,16,17,18,21,22,23,24,29,30,31,32,39,40,41,42]
         # HR also gets local information from HL (from side at back)
-        self.obs_indices["policy_HR"] = [0,1,2,3,4, 9,10, 7, 8,13,14,15,16,17,18,23,24,21,22,31,32,29,30,41,42,39,340]
+        self.obs_indices["policy_HR"] = [0,1,2,3,4, 9,10, 7, 8,13,14,15,16,17,18,23,24,21,22,31,32,29,30,41,42,39,40]
         # FR also gets local information from HR (towards front)
         self.obs_indices["policy_FR"] = [0,1,2,3,4,11,12, 9,10,13,14,15,16,17,18,25,26,23,24,33,34,31,32,35,36,41,42]
         super().__init__(config) 
