@@ -31,8 +31,8 @@ elif policy_scope=="QuantrupedMultiEnv_SingleNeighbor":
     from simulation_envs.quantruped_adaptor_multi_configurations_environment import Quantruped_LocalSingleNeighboringLeg_Env as QuantrupedEnv
 elif policy_scope=="QuantrupedMultiEnv_SingleDiagonal":
     from simulation_envs.quantruped_adaptor_multi_configurations_environment import Quantruped_LocalSingleDiagonalLeg_Env as QuantrupedEnv
-elif policy_scope=="Quantruped_LocalSingleToFrontCoordination_Env":
-    from simulation_envs.quantruped_adaptor_multi_configurations_environment import Quantruped_LocalSingleToFrontCoordination_Env as QuantrupedEnv
+elif policy_scope=="QuantrupedMultiEnv_SingleToFront":
+    from simulation_envs.quantruped_adaptor_multi_configurations_environment import Quantruped_LocalSingleToFront_Env as QuantrupedEnv
 elif policy_scope=="QuantrupedMultiEnv_Local":
     from simulation_envs.quantruped_adaptor_multi_configurations_environment import Quantruped_Local_Env as QuantrupedEnv
 elif policy_scope=="QuantrupedMultiEnv_TwoSides":
@@ -107,10 +107,10 @@ config['env_config']['contact_cost_weight'] =  5e-2 #grid_search([5e-4,5e-3,5e-2
 
 analysis = tune.run(
       "PPO",
-      name=("exp1_flat_" + policy_scope),
+      name=("exp1_20_" + policy_scope),
       num_samples=10,
       checkpoint_at_end=True,
       checkpoint_freq=312,
-      stop={"timesteps_total": 10000000},
+      stop={"timesteps_total": 20000000},
       config=config,
   )

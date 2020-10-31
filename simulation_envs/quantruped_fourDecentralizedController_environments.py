@@ -221,7 +221,7 @@ class Quantruped_LocalSingleDiagonalLeg_Env(QuantrupedFourControllerSuperEnv):
         }
         return policies
         
-class Quantruped_LocalSingleToFrontCoordination_Env(QuantrupedFourControllerSuperEnv):
+class Quantruped_LocalSingleToFront_Env(QuantrupedFourControllerSuperEnv):
     """
     """    
     
