@@ -31,6 +31,8 @@ elif policy_scope=="QuantrupedMultiEnv_SingleNeighbor":
     from simulation_envs.quantruped_adaptor_multi_configurations_environment import Quantruped_LocalSingleNeighboringLeg_Env as QuantrupedEnv
 elif policy_scope=="QuantrupedMultiEnv_SingleDiagonal":
     from simulation_envs.quantruped_adaptor_multi_configurations_environment import Quantruped_LocalSingleDiagonalLeg_Env as QuantrupedEnv
+elif policy_scope=="Quantruped_LocalSingleToFrontCoordination_Env":
+    from simulation_envs.quantruped_adaptor_multi_configurations_environment import Quantruped_LocalSingleToFrontCoordination_Env as QuantrupedEnv
 elif policy_scope=="QuantrupedMultiEnv_Local":
     from simulation_envs.quantruped_adaptor_multi_configurations_environment import Quantruped_Local_Env as QuantrupedEnv
 elif policy_scope=="QuantrupedMultiEnv_TwoSides":

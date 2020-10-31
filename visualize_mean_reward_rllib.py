@@ -28,6 +28,15 @@ plt.rcParams['pdf.fonttype'] = 42
 # Log file directories
 exp_path = [os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results/1_flat_QuantrupedMultiEnv_Centralized',
     os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results/1_flat_QuantrupedMultiEnv_Local']
+    
+exp_path = [os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_Freitag/exp1_10_flat_QuantrupedMultiEnv_Centralized', 
+    os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_Freitag/exp1_10_flat_QuantrupedMultiEnv_FullyDecentral', 
+    os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_Freitag/exp1_10_flat_QuantrupedMultiEnv_Local', 
+    os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_Freitag/exp1_10_flat_QuantrupedMultiEnv_SingleDiagonal', 
+    os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_Freitag/exp1_10_flat_QuantrupedMultiEnv_SingleNeighbor', 
+    os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_Freitag/exp1_10_flat_QuantrupedMultiEnv_TwoDiags'] 
+#    os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_Freitag/exp1_10_flat_QuantrupedMultiEnv_TwoSides']
+    
 experiment_dirs = [[os.path.join(exp_path_item,dI) for dI in os.listdir(exp_path_item) if os.path.isdir(os.path.join(exp_path_item,dI))] for exp_path_item in exp_path]
 
 all_exp_data = []
@@ -45,6 +54,7 @@ for exp_dir in experiment_dirs:
     rew_lower_std = rew_mean - rew_std
     rew_upper_std = rew_mean + rew_std
     all_exp_data.append( [rew_mean, rew_std, rew_lower_std, rew_upper_std] )
+    print("Loaded ", exp_dir)
 
 # Plotting functions
 fig = plt.figure(figsize=(10, 6))
