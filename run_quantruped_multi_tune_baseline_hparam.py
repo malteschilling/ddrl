@@ -49,7 +49,7 @@ else:
 #from simulation_envs.quantruped_adaptor_multi_configurations_environment import Quantruped_LocalSingleDiagonalLeg_Env as QuantrupedEnv
 #from simulation_envs.quantruped_adaptor_multi_configurations_environment import Quantruped_Local_Env as QuantrupedEnv
 
-ray.init(num_cpus=15, ignore_reinit_error=True)
+ray.init(num_cpus=3, ignore_reinit_error=True)
 #ray.init(ignore_reinit_error=True)
 
 config = ppo.DEFAULT_CONFIG.copy()
@@ -107,7 +107,7 @@ config['env_config']['contact_cost_weight'] =  5e-2 #grid_search([5e-4,5e-3,5e-2
 
 analysis = tune.run(
       "PPO",
-      name=("exp1_20_" + policy_scope),
+      name=("exp_hf_10_" + policy_scope),
       num_samples=10,
       checkpoint_at_end=True,
       checkpoint_freq=312,

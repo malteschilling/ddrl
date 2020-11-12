@@ -1,18 +1,65 @@
 from gym.envs.mujoco.ant_v3 import AntEnv
 import numpy as np
+import os
+from scipy import ndimage
+from scipy.signal import convolve2d
 
 DEFAULT_CAMERA_CONFIG = {
-    'distance': 10.0,
+    'distance': 15.0,
+    'type': 1,
+    'trackbodyid': 1,
+    'elevation': -20.0,
 }
+
+def create_new_hfield(mj_model, smoothness = 0.15, bump_scale=2.):
+    # Generation of the shape of the height field is taken from the dm_control suite,
+    # see dm_control/suite/quadruped.py in the escape task (but we don't use the bowl shape).
+    # Their parameters are TERRAIN_SMOOTHNESS = 0.15  # 0.0: maximally bumpy; 1.0: completely smooth.
+    # and TERRAIN_BUMP_SCALE = 2  # Spatial scale of terrain bumps (in meters). 
+    res = mj_model.hfield_ncol[0]
+    row_grid, col_grid = np.ogrid[-1:1:res*1j, -1:1:res*1j]
+    # Random smooth bumps.
+    terrain_size = 2 * mj_model.hfield_size[0, 0]
+    bump_res = int(terrain_size / bump_scale)
+    bumps = np.random.uniform(smoothness, 1, (bump_res, bump_res))
+    smooth_bumps = ndimage.zoom(bumps, res / float(bump_res))
+    # Terrain is elementwise product.
+    hfield = (smooth_bumps - np.min(smooth_bumps))[0:mj_model.hfield_nrow[0],0:mj_model.hfield_ncol[0]]
+
+    # Clears a patch shaped like box, assuming robot is placed in center of hfield.
+    # Function was implemented in an old rllab version.
+    h_center = int(0.5 * hfield.shape[0])
+    w_center = int(0.5 * hfield.shape[1])
+    patch_size = 8
+    fromrow, torow = h_center - int(0.5*patch_size), h_center + int(0.5*patch_size)
+    fromcol, tocol = w_center - int(0.5*patch_size), w_center + int(0.5*patch_size)
+    # convolve to smoothen edges somewhat, in case hills were cut off
+    K = np.ones((patch_size,patch_size)) / patch_size**2
+    s = convolve2d(hfield[fromrow-(patch_size-1):torow+(patch_size-1), fromcol-(patch_size-1):tocol+(patch_size-1)], K, mode='same', boundary='symm')
+    hfield[fromrow-(patch_size-1):torow+(patch_size-1), fromcol-(patch_size-1):tocol+(patch_size-1)] = s
+    # Last, we lower the hfield so that the centre aligns at zero height
+    # (importantly, we use a constant offset of -0.5 for rendering purposes)
+    hfield = hfield - np.max(hfield[fromrow:torow, fromcol:tocol])
+    
+    mj_model.hfield_data[:] = hfield.ravel()
 
 class QuAntrupedEnv(AntEnv):
 
     def __init__(self, ctrl_cost_weight=0.5, contact_cost_weight=5e-4, healthy_reward=0.):
-        super().__init__(ctrl_cost_weight=ctrl_cost_weight, contact_cost_weight=contact_cost_weight)
+        super().__init__(xml_file=os.path.join(os.path.dirname(__file__), 'assets','ant_hfield.xml'), ctrl_cost_weight=ctrl_cost_weight, contact_cost_weight=contact_cost_weight)
+#        super().__init__(ctrl_cost_weight=ctrl_cost_weight, contact_cost_weight=contact_cost_weight)
         self.ctrl_cost_weight = self._ctrl_cost_weight
         self.contact_cost_weight = self._contact_cost_weight
-  #      self.frame_skip = 1
+        self.hf_smoothness = 1.
+        self.hf_bump_scale = 2.
+        create_new_hfield(self.model, self.hf_smoothness, self.hf_bump_scale)
+    
+  #     self.frame_skip = 1
 
+#    def reset(self):
+ #       super().reset()
+  #      create_new_hfield(self.model, self.hf_smoothness, self.hf_bump_scale)
+        
 #    @property
  #   def healthy_reward(self):
   #      return 0.
@@ -66,7 +113,20 @@ class QuAntrupedEnv(AntEnv):
         observations = np.concatenate((position, velocity, joint_sensor_forces, last_control))#, last_control)) #, contact_force))
 
         return observations
-        
+    
+    def set_hf_parameter(self, smoothness, bump_scale=None):
+        self.hf_smoothness = smoothness
+        if bump_scale:
+            self.hf_bump_scale = bump_scale
+    
+#     def viewer_setup(self):
+#         print(self.viewer.cam.trackbodyid)
+#         self.viewer.cam.type = 1
+#         self.viewer.cam.trackbodyid = 1
+#         self.viewer.cam.distance = self.model.stat.extent * 0.5
+#         self.viewer.cam.lookat[2] = 1.15
+#         self.viewer.cam.elevation = -20
+           
     def viewer_setup(self):
         for key, value in DEFAULT_CAMERA_CONFIG.items():
             if isinstance(value, np.ndarray):

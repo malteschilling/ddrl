@@ -53,16 +53,17 @@ for exp_dir in experiment_dirs:
     for i in range(0, len(exp_dir)):
         df = pd.read_csv(exp_dir[i]+'/progress.csv')
         rew_new =(df.iloc[:,2].values)
+        mean_cum_rew_new = np.cumsum(rew_new)/np.arange(1,rew_new.shape[0]+1)
         if i==0:
-            reward_values = np.vstack([rew_new])
+            mean_cum_rew = np.vstack([mean_cum_rew_new])
             time_steps = (df.iloc[:,6].values)
         else:
-            reward_values = np.vstack([reward_values,rew_new])
-    rew_mean = np.mean(reward_values, axis=0)
-    rew_std = np.std(reward_values, axis=0)
-    rew_lower_std = rew_mean - rew_std
-    rew_upper_std = rew_mean + rew_std
-    all_exp_data.append( [rew_mean, rew_std, rew_lower_std, rew_upper_std] )
+            mean_cum_rew = np.vstack([mean_cum_rew,mean_cum_rew_new])
+    mc_rew_mean = np.mean(mean_cum_rew, axis=0)
+    mc_rew_std = np.std(mean_cum_rew, axis=0)
+    mc_rew_lower_std = mc_rew_mean - mc_rew_std
+    mc_rew_upper_std = mc_rew_mean + mc_rew_std
+    all_exp_data.append( [mc_rew_mean, mc_rew_std, mc_rew_lower_std, mc_rew_upper_std] )
     print("Loaded ", exp_dir)
 
 # Plotting functions
@@ -76,8 +77,6 @@ ax_arch.spines["right"].set_visible(False)
 ax_arch.set_xlim(0, 2e7)
 #ax_arch.set_ylim(0, 800)  
 
-
-
 for i in range(0, len(all_exp_data)):
     # Use matplotlib's fill_between() call to create error bars.   
     plt.fill_between(time_steps, all_exp_data[i][2],  
@@ -86,7 +85,8 @@ for i in range(0, len(all_exp_data)):
     #print("Mean reward for ", i, ": ", all_exp_data[i][0][-1], " - at iter 625: ", all_exp_data[i][0][624])
     print(exp_path[i].split('_')[-1], f' && {all_exp_data[i][0][311]:.2f} & ({all_exp_data[i][1][311]:.2f}) && {all_exp_data[i][0][624]:.2f} & ({all_exp_data[i][1][624]:.2f}) && {all_exp_data[i][0][1249]:.2f} & ({all_exp_data[i][1][1249]:.2f})')
 ax_arch.set_xlabel('timesteps', fontsize=14)
-ax_arch.set_ylabel('Return per Episode', fontsize=14)
-#plt.plot([0,500], [200,200], color=tableau20[6], linestyle='--')
+ax_arch.set_ylabel('Learning Performance \n Mean Return per Episode', fontsize=14)
 plt.legend(loc="lower right")
+#plt.plot([0,500], [200,200], color=tableau20[6], linestyle='--')
+
 plt.show()
