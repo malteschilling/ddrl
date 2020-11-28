@@ -17,8 +17,7 @@ class DefaultMapping(collections.defaultdict):
 def rollout_episodes(env, agent, num_episodes=1, num_steps=1000, render=True):
     multiagent = isinstance(env, MultiAgentEnv)
     if agent.workers.local_worker().multiagent:
-        policy_agent_mapping = agent.config["multiagent"][
-            "policy_mapping_fn"]
+        policy_agent_mapping = agent.config["multiagent"]["policy_mapping_fn"]
     policy_map = agent.workers.local_worker().policy_map
     state_init = {p: m.get_initial_state() for p, m in policy_map.items()}
     use_lstm = {p: len(s) > 0 for p, s in state_init.items()}
@@ -94,7 +93,7 @@ def rollout_episodes(env, agent, num_episodes=1, num_steps=1000, render=True):
             # multiplied by joint velocity for each joint.
             # Important: unfortunately there is a shift in the ctrl signals - therefore use roll
             # (control signals start with front right leg, front left leg starts at index 2)
-            current_power = np.sum(np.roll(env.env.sim.data.ctrl, -2) * env.env.sim.data.qvel[6:])
+            current_power = np.sum(np.abs(np.roll(env.env.sim.data.ctrl, -2) * env.env.sim.data.qvel[6:]))
             power_total += current_power
     #    saver.end_rollout()
         com_vel = (env.env.sim.data.qpos[0] - start_pos)/steps

@@ -50,7 +50,7 @@ class QuAntrupedEnv(AntEnv):
 #        super().__init__(ctrl_cost_weight=ctrl_cost_weight, contact_cost_weight=contact_cost_weight)
         self.ctrl_cost_weight = self._ctrl_cost_weight
         self.contact_cost_weight = self._contact_cost_weight
-        self.hf_smoothness = 1.
+        self.hf_smoothness = .6
         self.hf_bump_scale = 2.
         create_new_hfield(self.model, self.hf_smoothness, self.hf_bump_scale)
     
@@ -63,6 +63,9 @@ class QuAntrupedEnv(AntEnv):
 #    @property
  #   def healthy_reward(self):
   #      return 0.
+  
+    def create_new_random_hfield(self):
+        create_new_hfield(self.model, self.hf_smoothness, self.hf_bump_scale)
 
     def _get_obs(self):
         """ 

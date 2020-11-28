@@ -30,6 +30,19 @@ class QuantrupedMultiPoliciesEnv(MultiAgentEnv):
         self.action_space = self.env.action_space
         self.observation_space = self.env.observation_space
         
+        # For curriculum learning: scale smoothness of height field linearly over time
+        # Set parameter
+        if 'curriculum_learning' in config.keys(): 
+            self.curriculum_learning =  config['curriculum_learning']
+        else:
+            self.curriculum_learning = False
+        if 'range_smoothness' in config.keys():
+            self.curriculum_initial_smoothness = config['range_smoothness'][0]
+            self.current_smoothness = self.curriculum_initial_smoothness
+            self.curriculum_target_smoothness = config['range_smoothness'][1]
+        if 'range_last_timestep' in config.keys():
+            self.curriculum_last_timestep = config['range_last_timestep']
+        
         #self.policy_B = "dec_B_policy"
         
         #self.acc_forw_rew = 0.
@@ -43,6 +56,25 @@ class QuantrupedMultiPoliciesEnv(MultiAgentEnv):
          #   self.env.spec.max_episode_steps = max_episode_steps
         #self._max_episode_steps = max_episode_steps
         #self._elapsed_steps = None
+
+    def update_curriculum_for_environment(self, timesteps_total):
+        if self.curriculum_learning:
+            if self.curriculum_last_timestep > timesteps_total:
+                # Two different variants:
+                # First one is simply decreasing smoothness while in curriculum interval.
+                #self.current_smoothness = self.curriculum_initial_smoothness - (self.curriculum_initial_smoothness - self.curriculum_target_smoothness) * (timesteps_total/self.curriculum_last_timestep)
+                # Second one is selecting randomly a smoothness, chosen from an interval
+                # from flat (1.) towards the decreased minimum smoothness
+                self.current_smoothness = self.curriculum_initial_smoothness - np.random.rand()*(self.curriculum_initial_smoothness - self.curriculum_target_smoothness) * (timesteps_total/self.curriculum_last_timestep)
+            else:
+                # Two different variants:
+                # First one is simply decreasing smoothness while in curriculum interval.
+                #self.curriculum_learning = False
+                #self.current_smoothness = self.curriculum_target_smoothness
+                # Second one is selecting randomly a smoothness, chosen from an interval
+                # from flat (1.) towards the decreased minimum smoothness
+                self.current_smoothness = self.curriculum_target_smoothness + np.random.rand()*(self.curriculum_initial_smoothness - self.curriculum_target_smoothness)
+            self.env.set_hf_parameter(self.current_smoothness)
 
     def distribute_observations(self, obs_full):
         return {
@@ -80,6 +112,7 @@ class QuantrupedMultiPoliciesEnv(MultiAgentEnv):
         # From TimeLimit
         #self._elapsed_steps = 0
         
+        self.env.create_new_random_hfield()
         obs_original = self.env.reset()
         return self.distribute_observations(obs_original)
 

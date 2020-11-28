@@ -46,14 +46,12 @@ plt.rcParams['pdf.fonttype'] = 42
 #     os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_Freitag/exp1_10_flat_QuantrupedMultiEnv_TwoDiags'] 
 # #    os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_Freitag/exp1_10_flat_QuantrupedMultiEnv_TwoSides']
 
-exp_path = [os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_11_02/exp1_20_flat_QuantrupedMultiEnv_Centralized',
+exp_path = [os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_hf/exp_hf_06_QuantrupedMultiEnv_Centralized',
+    os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_11_02/exp1_20_flat_QuantrupedMultiEnv_Centralized',
+    os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_hf/exp_hf_06_QuantrupedMultiEnv_FullyDecentral',
     os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_11_02/exp1_20_flat_QuantrupedMultiEnv_FullyDecentral',
-    os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_11_02/exp1_20_flat_QuantrupedMultiEnv_Local',
-    os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_11_02/exp1_20_flat_QuantrupedMultiEnv_SingleDiagonal',
-    os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_11_02/exp1_20_flat_QuantrupedMultiEnv_SingleNeighbor',
-    os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_11_02/exp1_20_flat_QuantrupedMultiEnv_TwoDiags',
-    os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_11_02/exp1_20_flat_QuantrupedMultiEnv_TwoSides',
-    os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_11_02/exp1_20_QuantrupedMultiEnv_SingleToFront']
+    os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_hf/exp_hf_06_QuantrupedMultiEnv_Local',
+    os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_11_02/exp1_20_flat_QuantrupedMultiEnv_Local']
         
 experiment_dirs = [[os.path.join(exp_path_item,dI) for dI in os.listdir(exp_path_item) if os.path.isdir(os.path.join(exp_path_item,dI))] for exp_path_item in exp_path]
 
