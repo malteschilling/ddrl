@@ -30,6 +30,9 @@ def rollout_episodes(env, agent, num_episodes=1, num_steps=1000, render=True):
     reward_eps = []
     cot_eps = []
     vel_eps = []
+    dist_eps = []
+    steps_eps = []
+    power_total_eps = []
     for episodes in range(0, num_episodes):
         mapping_cache = {}  # in case policy_agent_mapping is stochastic
         #    saver.begin_rollout()
@@ -96,12 +99,18 @@ def rollout_episodes(env, agent, num_episodes=1, num_steps=1000, render=True):
             current_power = np.sum(np.abs(np.roll(env.env.sim.data.ctrl, -2) * env.env.sim.data.qvel[6:]))
             power_total += current_power
     #    saver.end_rollout()
-        com_vel = (env.env.sim.data.qpos[0] - start_pos)/steps
+        distance_x = env.env.sim.data.qpos[0] - start_pos
+        com_vel = distance_x/steps
         cost_of_transport = (power_total/steps) / (mujoco_py.functions.mj_getTotalmass(env.env.model) * com_vel)
+        # Weight is 8.78710174560547
+        #print(mujoco_py.functions.mj_getTotalmass(env.env.model))
         #print(steps, " - ", power_total, " / ", power_total/steps, "; CoT: ", cost_of_transport)
         cot_eps.append(cost_of_transport)
         reward_eps.append(reward_total)
         vel_eps.append(com_vel)
+        dist_eps.append(distance_x)
+        steps_eps.append(steps)
+        power_total_eps.append(power_total)
         #print(episodes, ' - ', reward_total, '; CoT: ', cost_of_transport, '; Vel: ', com_vel)
         
-    return (reward_eps, cot_eps, vel_eps)
+    return (reward_eps, steps_eps, dist_eps, power_total_eps, vel_eps, cot_eps )

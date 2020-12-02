@@ -44,13 +44,21 @@ def create_new_hfield(mj_model, smoothness = 0.15, bump_scale=2.):
     mj_model.hfield_data[:] = hfield.ravel()
 
 class QuAntrupedEnv(AntEnv):
-
-    def __init__(self, ctrl_cost_weight=0.5, contact_cost_weight=5e-4, healthy_reward=0.):
+    """ Environment with a quadruped walker - derived from the ant_v3 environment
+        
+        Uses a different observation space compared to the ant environment (less inputs).
+        Per default, healthy reward is turned of (unnecessary).
+        
+        The environment introduces a heightfield which allows to test or train
+        the system in uneven terrain (generating new heightfields has to be explicitly
+        called, ideally before a reset of the system).
+    """ 
+    def __init__(self, ctrl_cost_weight=0.5, contact_cost_weight=5e-4, healthy_reward=0., hf_smoothness=1.):
         super().__init__(xml_file=os.path.join(os.path.dirname(__file__), 'assets','ant_hfield.xml'), ctrl_cost_weight=ctrl_cost_weight, contact_cost_weight=contact_cost_weight)
 #        super().__init__(ctrl_cost_weight=ctrl_cost_weight, contact_cost_weight=contact_cost_weight)
         self.ctrl_cost_weight = self._ctrl_cost_weight
         self.contact_cost_weight = self._contact_cost_weight
-        self.hf_smoothness = .6
+        self.hf_smoothness = hf_smoothness
         self.hf_bump_scale = 2.
         create_new_hfield(self.model, self.hf_smoothness, self.hf_bump_scale)
     

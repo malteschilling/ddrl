@@ -42,13 +42,6 @@ elif policy_scope=="QuantrupedMultiEnv_TwoDiags":
 else:
     from simulation_envs.quantruped_adaptor_multi_environment import QuantrupedMultiPoliciesEnv as QuantrupedEnv
 
-
-#from simulation_envs.quantruped_adaptor_multi_environment import QuantrupedMultiPoliciesEnv as QuantrupedEnv
-#from simulation_envs.quantruped_adaptor_multi_configurations_environment import QuantrupedFullyDecentralizedEnv as QuantrupedEnv
-#from simulation_envs.quantruped_adaptor_multi_configurations_environment import Quantruped_LocalSingleNeighboringLeg_Env as QuantrupedEnv
-#from simulation_envs.quantruped_adaptor_multi_configurations_environment import Quantruped_LocalSingleDiagonalLeg_Env as QuantrupedEnv
-#from simulation_envs.quantruped_adaptor_multi_configurations_environment import Quantruped_Local_Env as QuantrupedEnv
-
 ray.init(num_cpus=15, ignore_reinit_error=True)
 #ray.init(ignore_reinit_error=True)
 
@@ -105,6 +98,8 @@ config["multiagent"] = {
 config['env_config']['ctrl_cost_weight'] = 0.5#grid_search([5e-4,5e-3,5e-2])
 config['env_config']['contact_cost_weight'] =  5e-2 #grid_search([5e-4,5e-3,5e-2])
 
+config['env_config']['hf_smoothness'] = 1.
+
 config['env_config']['curriculum_learning'] =  False
 config['env_config']['range_smoothness'] =  [1., 0.6]
 config['env_config']['range_last_timestep'] =  4000000
@@ -121,7 +116,7 @@ config["callbacks"]={"on_train_result": on_train_result,}
 
 analysis = tune.run(
       "PPO",
-      name=("exp_hf_06_" + policy_scope),
+      name=("HF_10_" + policy_scope),
       num_samples=10,
       checkpoint_at_end=True,
       checkpoint_freq=312,

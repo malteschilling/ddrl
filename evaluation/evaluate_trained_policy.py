@@ -9,7 +9,7 @@ from ray.rllib.evaluation.worker_set import WorkerSet
 
 import simulation_envs
 import models
-from rollout_episodes import rollout_episodes
+from evaluation.rollout_episodes import rollout_episodes
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--ray_results_dir", required=False)

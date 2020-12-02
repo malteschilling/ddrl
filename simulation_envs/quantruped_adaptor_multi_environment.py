@@ -6,7 +6,24 @@ from gym import spaces
 from mujoco_py import functions
 
 class QuantrupedMultiPoliciesEnv(MultiAgentEnv):
-    """
+    """ RLLib multiagent Environment that encapsulates a quadruped walker environment.
+    
+        This is the parent class for rllib environments in which control can be 
+        distributed onto multiple agents.
+        One simulation environment is spawned (a QuAntruped-v3) and this wrapper
+        class organizes control and sensory signals.
+        
+        This parent class realizes still a central approach which means that
+        all sensory inputs are routed to the single, central control instance and 
+        all of the control signals of that instance are directly send towards the 
+        simulation.
+        
+        Deriving classes have to overwrite basically four classes when distributing 
+        control to different controllers:
+        - policy_mapping_fn: defines names of the distributed controllers
+        - distribute_observations: how to distribute observations towards these controllers
+        - distribute_contact_cost: how to distribute (contact) costs individually to controllers 
+        - concatenate_actions: how to integrate the control signals from the controllers
     """    
     
     policy_names = ["centr_A_policy"]
@@ -16,13 +33,20 @@ class QuantrupedMultiPoliciesEnv(MultiAgentEnv):
             contact_cost_weight = config['contact_cost_weight']
         else: 
             contact_cost_weight = 5e-4
+            
         if 'ctrl_cost_weight' in config.keys():
             ctrl_cost_weight = config['ctrl_cost_weight']
         else: 
             ctrl_cost_weight = 0.5
+        
+        if 'hf_smoothness' in config.keys():
+            hf_smoothness = config['hf_smoothness']
+        else: 
+            hf_smoothness = 1.
+              
         self.env = gym.make("QuAntruped-v3", 
             ctrl_cost_weight=ctrl_cost_weight,
-            contact_cost_weight=contact_cost_weight)
+            contact_cost_weight=contact_cost_weight, hf_smoothness=hf_smoothness)
         
         ant_mass = mujoco_py.functions.mj_getTotalmass(self.env.model)
         mujoco_py.functions.mj_setTotalmass(self.env.model, 10. * ant_mass)
