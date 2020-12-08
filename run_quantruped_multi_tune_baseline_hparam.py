@@ -25,6 +25,8 @@ if 'policy_scope' in args and args.policy_scope:
 else:
     policy_scope = 'QuantrupedMultiEnv_Centralized'
  
+# To run: SingleDiagonal, SingleToFront, TwoSides, TwoDiags
+# Central for 40 Mill.
 if policy_scope=="QuantrupedMultiEnv_FullyDecentral":
     from simulation_envs.quantruped_fourDecentralizedController_environments import QuantrupedFullyDecentralizedEnv as QuantrupedEnv
 elif policy_scope=="QuantrupedMultiEnv_SingleNeighbor":
@@ -40,7 +42,7 @@ elif policy_scope=="QuantrupedMultiEnv_TwoSides":
 elif policy_scope=="QuantrupedMultiEnv_TwoDiags":
     from simulation_envs.quantruped_twoDecentralizedController_environments import Quantruped_TwoDiagControllers_Env as QuantrupedEnv
 else:
-    from simulation_envs.quantruped_adaptor_multi_environment import QuantrupedMultiPoliciesEnv as QuantrupedEnv
+    from simulation_envs.quantruped_adaptor_multi_environment import Quantruped_Centralized_Env as QuantrupedEnv
 
 ray.init(num_cpus=15, ignore_reinit_error=True)
 #ray.init(ignore_reinit_error=True)
@@ -57,6 +59,7 @@ print("SELECTED ENVIRONMENT: ", policy_scope, " = ", QuantrupedEnv)
 
 config['num_workers']=2
 config['num_envs_per_worker']=4
+config["eager"] = False
 #config['nump_gpus']=1
 
 config['train_batch_size'] = 16000 # BEFORE 4000 #grid_search([4000, 65536]
@@ -104,15 +107,14 @@ config['env_config']['curriculum_learning'] =  False
 config['env_config']['range_smoothness'] =  [1., 0.6]
 config['env_config']['range_last_timestep'] =  4000000
 
-def on_train_result(info):
-    result = info["result"]
-    trainer = info["trainer"]
-    timesteps_res = result["timesteps_total"]
-    trainer.workers.foreach_worker(
-        lambda ev: ev.foreach_env( lambda env: env.update_curriculum_for_environment( timesteps_res ) )) 
+#def on_train_result(info):
+ #   result = info["result"]
+  #  trainer = info["trainer"]
+   # timesteps_res = result["timesteps_total"]
+    #trainer.workers.foreach_worker(
+     #   lambda ev: ev.foreach_env( lambda env: env.update_curriculum_for_environment( timesteps_res ) )) 
 
-#config["callbacks"]["on_train_result"] = on_train_result
-config["callbacks"]={"on_train_result": on_train_result,}
+#config["callbacks"]={"on_train_result": on_train_result,}
 
 analysis = tune.run(
       "PPO",
