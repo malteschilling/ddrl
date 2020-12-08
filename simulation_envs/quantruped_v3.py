@@ -25,7 +25,6 @@ def create_new_hfield(mj_model, smoothness = 0.15, bump_scale=2.):
     smooth_bumps = ndimage.zoom(bumps, res / float(bump_res))
     # Terrain is elementwise product.
     hfield = (smooth_bumps - np.min(smooth_bumps))[0:mj_model.hfield_nrow[0],0:mj_model.hfield_ncol[0]]
-
     # Clears a patch shaped like box, assuming robot is placed in center of hfield.
     # Function was implemented in an old rllab version.
     h_center = int(0.5 * hfield.shape[0])
@@ -39,8 +38,8 @@ def create_new_hfield(mj_model, smoothness = 0.15, bump_scale=2.):
     hfield[fromrow-(patch_size-1):torow+(patch_size-1), fromcol-(patch_size-1):tocol+(patch_size-1)] = s
     # Last, we lower the hfield so that the centre aligns at zero height
     # (importantly, we use a constant offset of -0.5 for rendering purposes)
+    #print(np.min(hfield), np.max(hfield))
     hfield = hfield - np.max(hfield[fromrow:torow, fromcol:tocol])
-    
     mj_model.hfield_data[:] = hfield.ravel()
 
 class QuAntrupedEnv(AntEnv):
@@ -61,7 +60,11 @@ class QuAntrupedEnv(AntEnv):
         self.hf_smoothness = hf_smoothness
         self.hf_bump_scale = 2.
         create_new_hfield(self.model, self.hf_smoothness, self.hf_bump_scale)
-    
+        
+        # Otherwise when learning from scratch might abort
+        # This allows for more collisions.
+        self.model.nconmax = 500 
+        self.model.njmax = 2000
   #     self.frame_skip = 1
 
 #    def reset(self):
