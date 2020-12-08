@@ -42,7 +42,7 @@ elif policy_scope=="QuantrupedMultiEnv_TwoSides":
 elif policy_scope=="QuantrupedMultiEnv_TwoDiags":
     from simulation_envs.quantruped_twoDecentralizedController_environments import Quantruped_TwoDiagControllers_Env as QuantrupedEnv
 else:
-    from simulation_envs.quantruped_adaptor_multi_environment import Quantruped_Centralized_Env as QuantrupedEnv
+    from simulation_envs.quantruped_centralizedController_environment import Quantruped_Centralized_Env as QuantrupedEnv
 
 ray.init(num_cpus=15, ignore_reinit_error=True)
 #ray.init(ignore_reinit_error=True)
