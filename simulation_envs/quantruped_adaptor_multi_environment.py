@@ -81,7 +81,7 @@ class QuantrupedMultiPoliciesEnv(MultiAgentEnv):
         #self._max_episode_steps = max_episode_steps
         #self._elapsed_steps = None
 
-    def update_curriculum_for_environment(self, timesteps_total):
+    def update_environment_after_epoch(self, timesteps_total):
         if self.curriculum_learning:
             if self.curriculum_last_timestep > timesteps_total:
                 # Two different variants:
@@ -99,6 +99,7 @@ class QuantrupedMultiPoliciesEnv(MultiAgentEnv):
                 # from flat (1.) towards the decreased minimum smoothness
                 self.current_smoothness = self.curriculum_target_smoothness + np.random.rand()*(self.curriculum_initial_smoothness - self.curriculum_target_smoothness)
             self.env.set_hf_parameter(self.current_smoothness)
+        self.env.create_new_random_hfield()
 
     def distribute_observations(self, obs_full):
         return {
@@ -136,7 +137,6 @@ class QuantrupedMultiPoliciesEnv(MultiAgentEnv):
         # From TimeLimit
         #self._elapsed_steps = 0
         
-        self.env.create_new_random_hfield()
         obs_original = self.env.reset()
         return self.distribute_observations(obs_original)
 

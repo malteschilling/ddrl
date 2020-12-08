@@ -112,7 +112,7 @@ config['env_config']['range_last_timestep'] =  4000000
   #  trainer = info["trainer"]
    # timesteps_res = result["timesteps_total"]
     #trainer.workers.foreach_worker(
-     #   lambda ev: ev.foreach_env( lambda env: env.update_curriculum_for_environment( timesteps_res ) )) 
+     #   lambda ev: ev.foreach_env( lambda env: env.update_environment_after_epoch( timesteps_res ) )) 
 
 #config["callbacks"]={"on_train_result": on_train_result,}
 
