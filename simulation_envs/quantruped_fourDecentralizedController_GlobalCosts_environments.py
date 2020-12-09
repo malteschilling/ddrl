@@ -5,9 +5,8 @@ import mujoco_py
 from gym import spaces
 
 from simulation_envs import QuantrupedMultiPoliciesEnv
-from simulation_envs import QuantrupedFourControllerSuperEnv
 
-class QuantrupedFullyDecentralizedGlobalCostEnv(QuantrupedFourControllerSuperEnv):
+class QuantrupedFullyDecentralizedGlobalCostEnv(QuantrupedMultiPoliciesEnv):
     """
     """    
     
@@ -45,6 +44,16 @@ class QuantrupedFullyDecentralizedGlobalCostEnv(QuantrupedFourControllerSuperEnv
         self.obs_indices["policy_FR"] = [0,1,2,3,4,11,12,13,14,15,16,17,18,25,26,33,34,35,36]
         super().__init__(config)
 
+    def distribute_observations(self, obs_full):
+        """ 
+        Construct dictionary that routes to each policy only the relevant
+        local information.
+        """
+        obs_distributed = {}
+        for policy_name in self.policy_names:
+            obs_distributed[policy_name] = obs_full[self.obs_indices[policy_name],]
+        return obs_distributed
+
     def distribute_contact_cost(self):
     
         contact_cost = {}
@@ -67,6 +76,14 @@ class QuantrupedFullyDecentralizedGlobalCostEnv(QuantrupedFourControllerSuperEnv
          #   sum_c += contact_cost[i]
         #print("Calculated: ", sum_c)
         return contact_cost
+        
+    def concatenate_actions(self, action_dict):
+        # Return actions in the (DIFFERENT in Mujoco) order FR - FL - HL - HR
+        actions = np.concatenate( (action_dict[self.policy_names[3]],
+            action_dict[self.policy_names[0]],
+            action_dict[self.policy_names[1]],
+            action_dict[self.policy_names[2]]) )
+        return actions
 
     @staticmethod
     def return_policies(obs_space):
@@ -82,3 +99,14 @@ class QuantrupedFullyDecentralizedGlobalCostEnv(QuantrupedFourControllerSuperEnv
                 obs_space, spaces.Box(np.array([-1.,-1.]), np.array([+1.,+1.])), {}),
         }
         return policies
+        
+    @staticmethod
+    def policy_mapping_fn(agent_id):
+        if agent_id.startswith("policy_FL"):
+            return "policy_FL"
+        elif agent_id.startswith("policy_HL"):
+            return "policy_HL"
+        elif agent_id.startswith("policy_HR"):
+            return "policy_HR"
+        else:
+            return "policy_FR" 
