@@ -76,7 +76,22 @@ class QuantrupedFullyDecentralizedGlobalCostEnv(QuantrupedMultiPoliciesEnv):
          #   sum_c += contact_cost[i]
         #print("Calculated: ", sum_c)
         return contact_cost
-        
+
+    def distribute_reward(self, reward_full, info, action_dict):
+        fw_reward = info['reward_forward']
+        rew = {}    
+        contact_costs = self.distribute_contact_cost()  
+        # Compute control costs:
+        sum_control_cost = 0
+        for policy_name in self.policy_names:
+            sum_control_cost += self.env.ctrl_cost_weight * np.sum(np.square(action_dict[policy_name]))
+                
+        for policy_name in self.policy_names:
+            rew[policy_name] = fw_reward / len(self.policy_names) \
+                - 0.25 * sum_control_cost \
+                - contact_costs[policy_name]
+        return rew
+
     def concatenate_actions(self, action_dict):
         # Return actions in the (DIFFERENT in Mujoco) order FR - FL - HL - HR
         actions = np.concatenate( (action_dict[self.policy_names[3]],
