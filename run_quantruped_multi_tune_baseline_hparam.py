@@ -41,6 +41,8 @@ elif policy_scope=="QuantrupedMultiEnv_TwoSides":
     from simulation_envs.quantruped_twoDecentralizedController_environments import Quantruped_TwoSideControllers_Env as QuantrupedEnv
 elif policy_scope=="QuantrupedMultiEnv_TwoDiags":
     from simulation_envs.quantruped_twoDecentralizedController_environments import Quantruped_TwoDiagControllers_Env as QuantrupedEnv
+elif policy_scope=="QuantrupedMultiEnv_FullyDecentralGlobalCost":
+    from simulation_envs.quantruped_fourDecentralizedController_GlobalCosts_environments import QuantrupedFullyDecentralizedGlobalCostEnv as QuantrupedEnv
 else:
     from simulation_envs.quantruped_centralizedController_environment import Quantruped_Centralized_Env as QuantrupedEnv
 

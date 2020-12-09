@@ -13,6 +13,8 @@ from simulation_envs.quantruped_fourDecentralizedController_environments import 
 from simulation_envs.quantruped_twoDecentralizedController_environments import Quantruped_TwoSideControllers_Env
 from simulation_envs.quantruped_twoDecentralizedController_environments import Quantruped_TwoDiagControllers_Env
 
+from simulation_envs.quantruped_fourDecentralizedController_GlobalCosts_environments import QuantrupedFullyDecentralizedGlobalCostEnv
+
 register(
 	id='QuAntruped-v3',
 	entry_point='simulation_envs.quantruped_v3:QuAntrupedEnv',
@@ -34,6 +36,8 @@ register_env("Ant_Muj2-v3", lambda config: TimeLimit(AntEnvMujoco2(), max_episod
 register_env("QuantrupedMultiEnv_Centralized", lambda config: QuantrupedMultiPoliciesEnv(config) )
 
 register_env("QuantrupedMultiEnv_FullyDecentral", lambda config: QuantrupedFullyDecentralizedEnv(config) )
+
+register_env("QuantrupedMultiEnv_FullyDecentralGlobalCost", lambda config: QuantrupedFullyDecentralizedGlobalCostEnv(config) )
 
 register_env("QuantrupedMultiEnv_SingleNeighbor", lambda config: Quantruped_LocalSingleNeighboringLeg_Env(config) )
 register_env("QuantrupedMultiEnv_SingleDiagonal", lambda config: Quantruped_LocalSingleDiagonalLeg_Env(config) )
