@@ -66,10 +66,10 @@ class QuantrupedFullyDecentralizedGlobalCostEnv(QuantrupedMultiPoliciesEnv):
         #contact_costs = self.env.contact_cost_weight * np.square(contact_forces)
         #global_contact_costs = np.sum(contact_costs[0:2])/4.
         
-        contact_cost[self.policy_names[0]] = all_contact_costs #global_contact_costs + np.sum(contact_costs[2:5])
-        contact_cost[self.policy_names[1]] = all_contact_costs #global_contact_costs + np.sum(contact_costs[5:8])
-        contact_cost[self.policy_names[2]] = all_contact_costs #global_contact_costs + np.sum(contact_costs[8:11])
-        contact_cost[self.policy_names[3]] = all_contact_costs #global_contact_costs + np.sum(contact_costs[11:])
+        contact_cost[self.policy_names[0]] = 0.25 * all_contact_costs #global_contact_costs + np.sum(contact_costs[2:5])
+        contact_cost[self.policy_names[1]] = 0.25 * all_contact_costs #global_contact_costs + np.sum(contact_costs[5:8])
+        contact_cost[self.policy_names[2]] = 0.25 * all_contact_costs #global_contact_costs + np.sum(contact_costs[8:11])
+        contact_cost[self.policy_names[3]] = 0.25 * all_contact_costs #global_contact_costs + np.sum(contact_costs[11:])
         #print(contact_cost)
         #sum_c = 0.
         #for i in self.policy_names:
