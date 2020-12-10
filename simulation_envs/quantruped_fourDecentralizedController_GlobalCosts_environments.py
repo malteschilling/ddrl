@@ -55,21 +55,17 @@ class QuantrupedFullyDecentralizedGlobalCostEnv(QuantrupedMultiPoliciesEnv):
         return obs_distributed
 
     def distribute_contact_cost(self):
-    
         contact_cost = {}
         raw_contact_forces = self.env.sim.data.cfrc_ext
-        contact_forces = np.clip(raw_contact_forces, -1., 1.)
-
-        all_contact_costs = self.env.contact_cost_weight * np.sum(
-            np.square(contact_forces))        
-        
-        #contact_costs = self.env.contact_cost_weight * np.square(contact_forces)
-        #global_contact_costs = np.sum(contact_costs[0:2])/4.
-        
-        contact_cost[self.policy_names[0]] = 0.25 * all_contact_costs #global_contact_costs + np.sum(contact_costs[2:5])
-        contact_cost[self.policy_names[1]] = 0.25 * all_contact_costs #global_contact_costs + np.sum(contact_costs[5:8])
-        contact_cost[self.policy_names[2]] = 0.25 * all_contact_costs #global_contact_costs + np.sum(contact_costs[8:11])
-        contact_cost[self.policy_names[3]] = 0.25 * all_contact_costs #global_contact_costs + np.sum(contact_costs[11:])
+        contact_forces = np.clip(raw_contact_forces, -1., 1.) 
+        contact_cost[self.policy_names[0]] = 0.25 * self.env.contact_cost_weight * np.sum(
+            np.square(contact_forces)) #global_contact_costs + np.sum(contact_costs[2:5])
+        contact_cost[self.policy_names[1]] = 0.25 * self.env.contact_cost_weight * np.sum(
+            np.square(contact_forces)) #global_contact_costs + np.sum(contact_costs[5:8])
+        contact_cost[self.policy_names[2]] = 0.25 * self.env.contact_cost_weight * np.sum(
+            np.square(contact_forces)) #global_contact_costs + np.sum(contact_costs[8:11])
+        contact_cost[self.policy_names[3]] = 0.25 * self.env.contact_cost_weight * np.sum(
+            np.square(contact_forces)) #global_contact_costs + np.sum(contact_costs[11:])
         #print(contact_cost)
         #sum_c = 0.
         #for i in self.policy_names:
@@ -81,14 +77,15 @@ class QuantrupedFullyDecentralizedGlobalCostEnv(QuantrupedMultiPoliciesEnv):
         fw_reward = info['reward_forward']
         rew = {}    
         contact_costs = self.distribute_contact_cost()  
+        
         # Compute control costs:
         sum_control_cost = 0
         for policy_name in self.policy_names:
             sum_control_cost += self.env.ctrl_cost_weight * np.sum(np.square(action_dict[policy_name]))
-                
+        print("COSTs: ", sum_control_cost, " / ", action_dict)
         for policy_name in self.policy_names:
             rew[policy_name] = fw_reward / len(self.policy_names) \
-                - 0.25 * sum_control_cost \
+                - self.env.ctrl_cost_weight * np.sum(np.square(action_dict[policy_name])) \ #* sum_control_cost \
                 - contact_costs[policy_name]
         return rew
 
