@@ -38,10 +38,10 @@ class QuantrupedFullyDecentralizedGlobalCostEnv(QuantrupedMultiPoliciesEnv):
         # 39: hip HL angle, 40: knee HL angle
         # 41: hip HR angle, 42: knee HR angle
         # 35: hip FR angle, 36: knee FR angle
-        self.obs_indices["policy_FL"] = [0,1,2,3,4, 5, 6,13,14,15,16,17,18,19,20,27,28,37,38]
-        self.obs_indices["policy_HL"] = [0,1,2,3,4, 7, 8,13,14,15,16,17,18,21,22,29,30,39,40]
-        self.obs_indices["policy_HR"] = [0,1,2,3,4, 9,10,13,14,15,16,17,18,23,24,31,32,41,42]
-        self.obs_indices["policy_FR"] = [0,1,2,3,4,11,12,13,14,15,16,17,18,25,26,33,34,35,36]
+        self.obs_indices["policy_FL"] = range(0,43) #[0,1,2,3,4, 5, 6,13,14,15,16,17,18,19,20,27,28,37,38]
+        self.obs_indices["policy_HL"] = range(0,43) #[0,1,2,3,4, 7, 8,13,14,15,16,17,18,21,22,29,30,39,40]
+        self.obs_indices["policy_HR"] = range(0,43) #[0,1,2,3,4, 9,10,13,14,15,16,17,18,23,24,31,32,41,42]
+        self.obs_indices["policy_FR"] = range(0,43) #[0,1,2,3,4,11,12,13,14,15,16,17,18,25,26,33,34,35,36]
         super().__init__(config)
 
     def distribute_observations(self, obs_full):
@@ -54,18 +54,39 @@ class QuantrupedFullyDecentralizedGlobalCostEnv(QuantrupedMultiPoliciesEnv):
             obs_distributed[policy_name] = obs_full[self.obs_indices[policy_name],]
         return obs_distributed
 
+#     def distribute_contact_cost(self):
+#         contact_cost = {}
+#         raw_contact_forces = self.env.sim.data.cfrc_ext
+#         contact_forces = np.clip(raw_contact_forces, -1., 1.) 
+#         contact_cost[self.policy_names[0]] = 0.25 * self.env.contact_cost_weight * np.sum(
+#             np.square(contact_forces)) #global_contact_costs + np.sum(contact_costs[2:5])
+#         contact_cost[self.policy_names[1]] = 0.25 * self.env.contact_cost_weight * np.sum(
+#             np.square(contact_forces)) #global_contact_costs + np.sum(contact_costs[5:8])
+#         contact_cost[self.policy_names[2]] = 0.25 * self.env.contact_cost_weight * np.sum(
+#             np.square(contact_forces)) #global_contact_costs + np.sum(contact_costs[8:11])
+#         contact_cost[self.policy_names[3]] = 0.25 * self.env.contact_cost_weight * np.sum(
+#             np.square(contact_forces)) #global_contact_costs + np.sum(contact_costs[11:])
+#         #print(contact_cost)
+#         #sum_c = 0.
+#         #for i in self.policy_names:
+#          #   sum_c += contact_cost[i]
+#         #print("Calculated: ", sum_c)
+#         return contact_cost
+        
     def distribute_contact_cost(self):
         contact_cost = {}
+        #print("CONTACT COST")
+        #from mujoco_py import functions
+        #functions.mj_rnePostConstraint(self.env.model, self.env.data)
+        #print("From Ant Env: ", self.env.contact_cost)
         raw_contact_forces = self.env.sim.data.cfrc_ext
-        contact_forces = np.clip(raw_contact_forces, -1., 1.) 
-        contact_cost[self.policy_names[0]] = 0.25 * self.env.contact_cost_weight * np.sum(
-            np.square(contact_forces)) #global_contact_costs + np.sum(contact_costs[2:5])
-        contact_cost[self.policy_names[1]] = 0.25 * self.env.contact_cost_weight * np.sum(
-            np.square(contact_forces)) #global_contact_costs + np.sum(contact_costs[5:8])
-        contact_cost[self.policy_names[2]] = 0.25 * self.env.contact_cost_weight * np.sum(
-            np.square(contact_forces)) #global_contact_costs + np.sum(contact_costs[8:11])
-        contact_cost[self.policy_names[3]] = 0.25 * self.env.contact_cost_weight * np.sum(
-            np.square(contact_forces)) #global_contact_costs + np.sum(contact_costs[11:])
+        contact_forces = np.clip(raw_contact_forces, -1., 1.)
+        contact_costs = self.env.contact_cost_weight * np.square(contact_forces)
+        global_contact_costs = np.sum(contact_costs[0:2])/4.
+        contact_cost[self.policy_names[0]] = global_contact_costs + np.sum(contact_costs[2:5])
+        contact_cost[self.policy_names[1]] = global_contact_costs + np.sum(contact_costs[5:8])
+        contact_cost[self.policy_names[2]] = global_contact_costs + np.sum(contact_costs[8:11])
+        contact_cost[self.policy_names[3]] = global_contact_costs + np.sum(contact_costs[11:])
         #print(contact_cost)
         #sum_c = 0.
         #for i in self.policy_names:
@@ -73,21 +94,21 @@ class QuantrupedFullyDecentralizedGlobalCostEnv(QuantrupedMultiPoliciesEnv):
         #print("Calculated: ", sum_c)
         return contact_cost
 
-    def distribute_reward(self, reward_full, info, action_dict):
-        fw_reward = info['reward_forward']
-        rew = {}    
-        contact_costs = self.distribute_contact_cost()  
-        
-        # Compute control costs:
-        sum_control_cost = 0
-        for policy_name in self.policy_names:
-            sum_control_cost += self.env.ctrl_cost_weight * np.sum(np.square(action_dict[policy_name]))
-        print("COSTs: ", sum_control_cost, " / ", action_dict)
-        for policy_name in self.policy_names:
-            rew[policy_name] = fw_reward / len(self.policy_names) \
-                - self.env.ctrl_cost_weight * np.sum(np.square(action_dict[policy_name])) \ #* sum_control_cost \
-                - contact_costs[policy_name]
-        return rew
+#     def distribute_reward(self, reward_full, info, action_dict):
+#         fw_reward = info['reward_forward']
+#         rew = {}    
+#         contact_costs = self.distribute_contact_cost()  
+#         
+#         # Compute control costs:
+#         sum_control_cost = 0
+#         for policy_name in self.policy_names:
+#             sum_control_cost += self.env.ctrl_cost_weight * np.sum(np.square(action_dict[policy_name]))
+#         print("COSTs: ", sum_control_cost, " / ", action_dict)
+#         for policy_name in self.policy_names:
+#             rew[policy_name] = fw_reward / len(self.policy_names) \
+#                 - self.env.ctrl_cost_weight * np.sum(np.square(action_dict[policy_name])) \ #* sum_control_cost \
+#                 - contact_costs[policy_name]
+#         return rew
 
     def concatenate_actions(self, action_dict):
         # Return actions in the (DIFFERENT in Mujoco) order FR - FL - HL - HR
