@@ -1,22 +1,21 @@
-import ray
-import pickle5 as pickle
+# import ray
+# import pickle5 as pickle
 import os
-import numpy as np
+# import numpy as np
 import argparse
-
-import pandas as pd
-
-from ray.tune.registry import get_trainable_cls
-from ray.rllib.evaluation.worker_set import WorkerSet
-
-import simulation_envs
-import models
-from evaluation.rollout_episodes import rollout_episodes
-
-hf_smoothness_eval = 1.0
+# 
+# import pandas as pd
+# 
+# from ray.tune.registry import get_trainable_cls
+# from ray.rllib.evaluation.worker_set import WorkerSet
+# 
+# import simulation_envs
+# import models
+# from evaluation.rollout_episodes import rollout_episodes
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--ray_results_dir", required=False)
+parser.add_argument("--hf_smoothness", required=False)
 args = parser.parse_args()
 if args.ray_results_dir is not None and args.ray_results_dir: 
     ray_results_dir = args.ray_results_dir
@@ -26,14 +25,6 @@ if args.hf_smoothness is not None:
     hf_smoothness_eval = args.hf_smoothness
 else:
     hf_smoothness_eval = 1.0
-# exp_path = [os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_11_02/exp1_20_flat_QuantrupedMultiEnv_Centralized',
-#     os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_11_02/exp1_20_flat_QuantrupedMultiEnv_FullyDecentral',
-#     os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_11_02/exp1_20_flat_QuantrupedMultiEnv_Local',
-#     os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_11_02/exp1_20_flat_QuantrupedMultiEnv_SingleDiagonal',
-#     os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_11_02/exp1_20_flat_QuantrupedMultiEnv_SingleNeighbor',
-#     os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_11_02/exp1_20_flat_QuantrupedMultiEnv_TwoDiags',
-#     os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_11_02/exp1_20_flat_QuantrupedMultiEnv_TwoSides',
-#     os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_11_02/exp1_20_QuantrupedMultiEnv_SingleToFront']
 
 # exp_path = [os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_11_02/exp1_20_flat_QuantrupedMultiEnv_Centralized',
 #     os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_11_02/exp1_20_flat_QuantrupedMultiEnv_FullyDecentral',
@@ -44,14 +35,23 @@ else:
 #     os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_11_02/exp1_20_flat_QuantrupedMultiEnv_TwoSides',
 #     os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_11_02/exp1_20_QuantrupedMultiEnv_SingleToFront']
 
-#exp_path = [os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_12_09/HF_10_QuantrupedMultiEnv_Centralized', 
-exp_path = [os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_12_09/HF_10_QuantrupedMultiEnv_FullyDecentral', 
-     os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_12_09/HF_10_QuantrupedMultiEnv_Local', 
-     os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_12_09/HF_10_QuantrupedMultiEnv_SingleDiagonal', 
-     os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_12_09/HF_10_QuantrupedMultiEnv_SingleNeighbor', 
-     os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_12_09/HF_10_QuantrupedMultiEnv_SingleToFront', 
-     os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_12_09/HF_10_QuantrupedMultiEnv_TwoDiags', 
-     os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_12_09/HF_10_QuantrupedMultiEnv_TwoSides']
+# exp_path = [os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_11_02/exp1_20_flat_QuantrupedMultiEnv_Centralized',
+#     os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_11_02/exp1_20_flat_QuantrupedMultiEnv_FullyDecentral',
+#     os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_11_02/exp1_20_flat_QuantrupedMultiEnv_Local',
+#     os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_11_02/exp1_20_flat_QuantrupedMultiEnv_SingleDiagonal',
+#     os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_11_02/exp1_20_flat_QuantrupedMultiEnv_SingleNeighbor',
+#     os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_11_02/exp1_20_flat_QuantrupedMultiEnv_TwoDiags',
+#     os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_11_02/exp1_20_flat_QuantrupedMultiEnv_TwoSides',
+#     os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_11_02/exp1_20_QuantrupedMultiEnv_SingleToFront']
+
+exp_path = [os.getenv("HOME") + 'eval/ray_results_12_09/HF_10_QuantrupedMultiEnv_Centralized', 
+    os.getenv("HOME") + 'eval/ray_results_12_09/HF_10_QuantrupedMultiEnv_FullyDecentral', 
+    os.getenv("HOME") + 'eval/ray_results_12_09/HF_10_QuantrupedMultiEnv_Local', 
+    os.getenv("HOME") + 'eval/ray_results_12_09/HF_10_QuantrupedMultiEnv_SingleDiagonal', 
+    os.getenv("HOME") + 'eval/ray_results_12_09/HF_10_QuantrupedMultiEnv_SingleNeighbor', 
+    os.getenv("HOME") + 'eval/ray_results_12_09/HF_10_QuantrupedMultiEnv_SingleToFront', 
+    os.getenv("HOME") + 'eval/ray_results_12_09/HF_10_QuantrupedMultiEnv_TwoDiags', 
+    os.getenv("HOME") + 'eval/ray_results_12_09/HF_10_QuantrupedMultiEnv_TwoSides']
          
 #exp_path = [os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_12_09/HF_10_QuantrupedMultiEnv_Centralized']
         

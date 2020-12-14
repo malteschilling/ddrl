@@ -41,6 +41,7 @@ def create_new_hfield(mj_model, smoothness = 0.15, bump_scale=2.):
     #print(np.min(hfield), np.max(hfield))
     hfield = hfield - np.max(hfield[fromrow:torow, fromcol:tocol])
     mj_model.hfield_data[:] = hfield.ravel()
+    #print("Smoothness set to: ", smoothness)
 
 class QuAntrupedEnv(AntEnv):
     """ Environment with a quadruped walker - derived from the ant_v3 environment

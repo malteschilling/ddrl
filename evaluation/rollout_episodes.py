@@ -46,6 +46,7 @@ def rollout_episodes(env, agent, num_episodes=1, num_steps=1000, render=True):
         power_total = 0.0
         steps = 0
         done = False
+        env.env.create_new_random_hfield()
         obs = env.reset()
         start_pos = env.env.sim.data.qpos[0]
         while not done and steps<num_steps:
