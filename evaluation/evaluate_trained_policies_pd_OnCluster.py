@@ -88,7 +88,8 @@ for exp_dir in experiment_dirs:
             config["num_workers"] = min(2, config["num_workers"])
         config["create_env_on_driver"] = True
         config['env_config']['hf_smoothness'] = hf_smoothness_eval
-        del config["no_eager_on_workers"]
+        if "no_eager_on_workers" in config:
+            del config["no_eager_on_workers"]
         cls = get_trainable_cls('PPO')
         agent = cls(env=config['env'], config=config)
         # Load state from checkpoint.

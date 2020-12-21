@@ -57,7 +57,9 @@ exp_path = [os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_12_09/HF_10_Qu
      os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_12_09/HF_10_QuantrupedMultiEnv_SingleToFront', 
      os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_12_09/HF_10_QuantrupedMultiEnv_TwoDiags', 
      os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_12_09/HF_10_QuantrupedMultiEnv_TwoSides'] 
-     
+
+exp_path = [os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_12_09/HF_10_QuantrupedMultiEnv_Centralized', 
+     os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_12_09/HF_10_QuantrupedMultiEnv_FullyDecentral']    
 #exp_path = [os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_12_09/HF_10_QuantrupedMultiEnv_Centralized']
 
 experiment_dirs = [[os.path.join(exp_path_item,dI) for dI in os.listdir(exp_path_item) if os.path.isdir(os.path.join(exp_path_item,dI))] for exp_path_item in exp_path]
@@ -76,7 +78,7 @@ for exp_dir in experiment_dirs:
     rew_std = np.std(reward_values, axis=0)
     rew_lower_std = rew_mean - rew_std
     rew_upper_std = rew_mean + rew_std
-    all_exp_data.append( [rew_mean, rew_std, rew_lower_std, rew_upper_std] )
+    all_exp_data.append( [rew_mean, rew_std, rew_lower_std, rew_upper_std, reward_values] )
     print("Loaded ", exp_dir)
 
 # Plotting functions
@@ -91,73 +93,22 @@ ax_arch.set_xlim(0, 2e7)
 #ax_arch.set_ylim(0, 800)  
 
 
-#for i in range(0, len(all_exp_data)):
+for i in range(0, len(all_exp_data)):
     # Use matplotlib's fill_between() call to create error bars.   
- #   plt.fill_between(time_steps, all_exp_data[i][2],  
-  #                   all_exp_data[i][3], color=tableau20[i*2 + 1], alpha=0.2)  
+    plt.fill_between(time_steps, all_exp_data[i][2],  
+                     all_exp_data[i][3], color=tableau20[i*2 + 1], alpha=0.2)  
     
 for i in range(0, len(all_exp_data)):
     plt.plot(time_steps, all_exp_data[i][0], color=tableau20[i*2], lw=1, label=exp_path[i].split('_')[-1])
+    for j in range(0, len(all_exp_data[i][4])):
+        plt.plot(time_steps, all_exp_data[i][4][j], color=tableau20[i*2], lw=1, ls='--')
     #print("Mean reward for ", i, ": ", all_exp_data[i][0][-1], " - at iter 625: ", all_exp_data[i][0][624])
     print(exp_path[i].split('_')[-1], f' && {all_exp_data[i][0][311]:.2f} & ({all_exp_data[i][1][311]:.2f}) && {all_exp_data[i][0][624]:.2f} & ({all_exp_data[i][1][624]:.2f}) && {all_exp_data[i][0][1249]:.2f} & ({all_exp_data[i][1][1249]:.2f})')
 ax_arch.set_xlabel('timesteps', fontsize=14)
 ax_arch.set_ylabel('Return per Episode', fontsize=14)
 #plt.plot([0,500], [200,200], color=tableau20[6], linestyle='--')
-file_name = 'learning_curve_mean'
+file_name = 'learning_curve_single_std'
 plt.savefig(file_name + '.pdf')
 plt.legend(loc="lower right")
 plt.savefig(file_name + '_legend.pdf')
-
-####################
-# Centralized long run
-####################
-
-exp_long_run_path = [os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_centralized_40M/'] 
-experiment_centr_longrun_dirs = [[os.path.join(exp_path_item,dI) for dI in os.listdir(exp_path_item) if os.path.isdir(os.path.join(exp_path_item,dI))] for exp_path_item in exp_path]
-
-for exp_dir in experiment_centr_longrun_dirs:
-    for i in range(0, len(exp_dir)):
-        df = pd.read_csv(exp_dir[i]+'/progress.csv')
-        rew_new =(df.iloc[:,2].values)
-        if i==0:
-            reward_longrun_values = np.vstack([rew_new])
-            time_steps_long = (df.iloc[:,6].values)
-        else:
-            reward_longrun_values = np.vstack([reward_longrun_values,rew_new])
-    rew_longrun_mean = np.mean(reward_longrun_values, axis=0)
-    rew_longrun_std = np.std(reward_longrun_values, axis=0)
-    rew_longrun_lower_std = rew_longrun_mean - rew_longrun_std
-    rew_longrun_upper_std = rew_longrun_mean + rew_longrun_std
-    #all_exp_data.append( [rew_longrun_mean, rew_longrun_std, rew_longrun_lower_std, rew_longrun_upper_std] )
-    print("Loaded ", exp_dir)
-
-# Plotting functions
-fig = plt.figure(figsize=(12, 8))
-# Remove the plot frame lines. They are unnecessary chartjunk.  
-ax_arch = plt.subplot(111)  
-ax_arch.spines["top"].set_visible(False)  
-ax_arch.spines["right"].set_visible(False) 
-
-#ax_arch.set_yscale('log')
-ax_arch.set_xlim(0, 4e7)
-
-#for i in range(0, len(all_exp_data)):
-# Use matplotlib's fill_between() call to create error bars.   
-plt.fill_between(time_steps_long, rew_longrun_lower_std,  
-    rew_longrun_upper_std, color=tableau20[i*2 + 1], alpha=0.2)  
-
-# For comparison: Fully decentralized
-plt.plot(time_steps, all_exp_data[1][0], color=tableau20[2], lw=1, label=exp_path[1].split('_')[-1])
-
-plt.plot(time_steps_long, rew_longrun_mean, color=tableau20[0], lw=1, label=exp_path[0].split('_')[-1])
-#print("Mean reward for ", i, ": ", all_exp_data[i][0][-1], " - at iter 625: ", all_exp_data[i][0][624])
-#print(exp_path[i].split('_')[-1], f' && {all_exp_data[i][0][311]:.2f} & ({all_exp_data[i][1][311]:.2f}) && {all_exp_data[i][0][624]:.2f} & ({all_exp_data[i][1][624]:.2f}) && {all_exp_data[i][0][1249]:.2f} & ({all_exp_data[i][1][1249]:.2f})')
-ax_arch.set_xlabel('timesteps', fontsize=14)
-ax_arch.set_ylabel('Return per Episode', fontsize=14)
-#plt.plot([0,500], [200,200], color=tableau20[6], linestyle='--')
-file_name = 'learning_curve__long_mean'
-plt.savefig(file_name + '.pdf')
-plt.legend(loc="lower right")
-plt.savefig(file_name + '_legend.pdf')
-
 plt.show()

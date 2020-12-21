@@ -4,7 +4,7 @@ import pandas as pd
 import os
 
 """
-    Visualizes the learning performances over time, taken from the rllib logs.
+    Visualizes the learning performances over time, taken from the ray_results json files.
     The measure calculates the running mean over all training epochs of returns.
     Taken from Andrychowicz et al. (2020): What Matters In On-Policy Reinforcement Learning? A Large-Scale Empirical Study.
     Google Brain Research: "We then average these score to obtain a single performance score of the seed which is proportional to the area under the learning curve. This ensures we assign higher scores to agents that learn quickly. The performance score of a hyperparameter configuration is finally set to the median performance score across the 3 seeds."
@@ -46,14 +46,23 @@ plt.rcParams['pdf.fonttype'] = 42
 #     os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_Freitag/exp1_10_flat_QuantrupedMultiEnv_TwoDiags'] 
 # #    os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_Freitag/exp1_10_flat_QuantrupedMultiEnv_TwoSides']
 
-exp_path = [os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_11_02/exp1_20_flat_QuantrupedMultiEnv_Centralized',
-    os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_11_02/exp1_20_flat_QuantrupedMultiEnv_FullyDecentral',
-    os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_11_02/exp1_20_flat_QuantrupedMultiEnv_Local',
-    os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_11_02/exp1_20_flat_QuantrupedMultiEnv_SingleDiagonal',
-    os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_11_02/exp1_20_flat_QuantrupedMultiEnv_SingleNeighbor',
-    os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_11_02/exp1_20_flat_QuantrupedMultiEnv_TwoDiags',
-    os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_11_02/exp1_20_flat_QuantrupedMultiEnv_TwoSides',
-    os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_11_02/exp1_20_QuantrupedMultiEnv_SingleToFront']
+# exp_path = [os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_11_02/exp1_20_flat_QuantrupedMultiEnv_Centralized',
+#     os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_11_02/exp1_20_flat_QuantrupedMultiEnv_FullyDecentral',
+#     os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_11_02/exp1_20_flat_QuantrupedMultiEnv_Local',
+#     os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_11_02/exp1_20_flat_QuantrupedMultiEnv_SingleDiagonal',
+#     os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_11_02/exp1_20_flat_QuantrupedMultiEnv_SingleNeighbor',
+#     os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_11_02/exp1_20_flat_QuantrupedMultiEnv_TwoDiags',
+#     os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_11_02/exp1_20_flat_QuantrupedMultiEnv_TwoSides',
+#     os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_11_02/exp1_20_QuantrupedMultiEnv_SingleToFront']
+
+exp_path = [os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_12_09/HF_10_QuantrupedMultiEnv_Centralized', 
+     os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_12_09/HF_10_QuantrupedMultiEnv_FullyDecentral', 
+     os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_12_09/HF_10_QuantrupedMultiEnv_Local', 
+     os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_12_09/HF_10_QuantrupedMultiEnv_SingleDiagonal', 
+     os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_12_09/HF_10_QuantrupedMultiEnv_SingleNeighbor', 
+     os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_12_09/HF_10_QuantrupedMultiEnv_SingleToFront', 
+     os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_12_09/HF_10_QuantrupedMultiEnv_TwoDiags', 
+     os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_12_09/HF_10_QuantrupedMultiEnv_TwoSides']
         
 experiment_dirs = [[os.path.join(exp_path_item,dI) for dI in os.listdir(exp_path_item) if os.path.isdir(os.path.join(exp_path_item,dI))] for exp_path_item in exp_path]
 
@@ -90,12 +99,17 @@ for i in range(0, len(all_exp_data)):
     # Use matplotlib's fill_between() call to create error bars.   
     plt.fill_between(time_steps, all_exp_data[i][2],  
                      all_exp_data[i][3], color=tableau20[i*2 + 1], alpha=0.25)  
+
+for i in range(0, len(all_exp_data)): 
     plt.plot(time_steps, all_exp_data[i][0], color=tableau20[i*2], lw=1, label=exp_path[i].split('_')[-1])
     #print("Mean reward for ", i, ": ", all_exp_data[i][0][-1], " - at iter 625: ", all_exp_data[i][0][624])
     print(exp_path[i].split('_')[-1], f' && {all_exp_data[i][0][311]:.2f} & ({all_exp_data[i][1][311]:.2f}) && {all_exp_data[i][0][624]:.2f} & ({all_exp_data[i][1][624]:.2f}) && {all_exp_data[i][0][1249]:.2f} & ({all_exp_data[i][1][1249]:.2f})')
 ax_arch.set_xlabel('timesteps', fontsize=14)
 ax_arch.set_ylabel('Learning Performance \n Mean Return per Episode', fontsize=14)
-plt.legend(loc="lower right")
 #plt.plot([0,500], [200,200], color=tableau20[6], linestyle='--')
+file_name = 'learning_performance_std'
+plt.savefig(file_name + '.pdf')
+plt.legend(loc="lower right")
+plt.savefig(file_name + '_legend.pdf')
 
 plt.show()
