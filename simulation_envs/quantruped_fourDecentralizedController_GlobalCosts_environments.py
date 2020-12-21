@@ -38,10 +38,10 @@ class QuantrupedFullyDecentralizedGlobalCostEnv(QuantrupedMultiPoliciesEnv):
         # 39: hip HL angle, 40: knee HL angle
         # 41: hip HR angle, 42: knee HR angle
         # 35: hip FR angle, 36: knee FR angle
-        self.obs_indices["policy_FL"] = range(0,43) #[0,1,2,3,4, 5, 6,13,14,15,16,17,18,19,20,27,28,37,38]
-        self.obs_indices["policy_HL"] = range(0,43) #[0,1,2,3,4, 7, 8,13,14,15,16,17,18,21,22,29,30,39,40]
-        self.obs_indices["policy_HR"] = range(0,43) #[0,1,2,3,4, 9,10,13,14,15,16,17,18,23,24,31,32,41,42]
-        self.obs_indices["policy_FR"] = range(0,43) #[0,1,2,3,4,11,12,13,14,15,16,17,18,25,26,33,34,35,36]
+        self.obs_indices["policy_FL"] = [0,1,2,3,4, 5, 6,13,14,15,16,17,18,19,20,27,28,37,38]
+        self.obs_indices["policy_HL"] = [0,1,2,3,4, 7, 8,13,14,15,16,17,18,21,22,29,30,39,40]
+        self.obs_indices["policy_HR"] = [0,1,2,3,4, 9,10,13,14,15,16,17,18,23,24,31,32,41,42]
+        self.obs_indices["policy_FR"] = [0,1,2,3,4,11,12,13,14,15,16,17,18,25,26,33,34,35,36]
         super().__init__(config)
 
     def distribute_observations(self, obs_full):
@@ -94,21 +94,21 @@ class QuantrupedFullyDecentralizedGlobalCostEnv(QuantrupedMultiPoliciesEnv):
         #print("Calculated: ", sum_c)
         return contact_cost
 
-#     def distribute_reward(self, reward_full, info, action_dict):
-#         fw_reward = info['reward_forward']
-#         rew = {}    
-#         contact_costs = self.distribute_contact_cost()  
-#         
-#         # Compute control costs:
-#         sum_control_cost = 0
-#         for policy_name in self.policy_names:
-#             sum_control_cost += self.env.ctrl_cost_weight * np.sum(np.square(action_dict[policy_name]))
-#         print("COSTs: ", sum_control_cost, " / ", action_dict)
-#         for policy_name in self.policy_names:
-#             rew[policy_name] = fw_reward / len(self.policy_names) \
-#                 - self.env.ctrl_cost_weight * np.sum(np.square(action_dict[policy_name])) \ #* sum_control_cost \
-#                 - contact_costs[policy_name]
-#         return rew
+    def distribute_reward(self, reward_full, info, action_dict):
+        fw_reward = info['reward_forward']
+        rew = {}
+        contact_costs = self.distribute_contact_cost()
+
+        # Compute control costs:
+        sum_control_cost = 0
+        for policy_name in self.policy_names:
+            sum_control_cost += np.sum(np.square(action_dict[policy_name]))
+        #print("COSTs: ", sum_control_cost, " / ", action_dict)
+        for policy_name in self.policy_names:
+            rew[policy_name] = (fw_reward / len(self.policy_names)) \
+                - (self.env.ctrl_cost_weight * 0.25 * sum_control_cost) \
+                - (contact_costs[policy_name])
+        return rew
 
     def concatenate_actions(self, action_dict):
         # Return actions in the (DIFFERENT in Mujoco) order FR - FL - HL - HR
