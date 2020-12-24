@@ -26,28 +26,17 @@ else:
     policy_scope = 'HexapodMultiEnv_Centralized'
  
 # To run: SingleDiagonal, SingleToFront, TwoSides, TwoDiags
-# Central for 40 Mill.
-if policy_scope=="QuantrupedMultiEnv_FullyDecentral":
-    from simulation_envs.quantruped_fourDecentralizedController_environments import QuantrupedFullyDecentralizedEnv as QuantrupedEnv
-elif policy_scope=="QuantrupedMultiEnv_SingleNeighbor":
-    from simulation_envs.quantruped_fourDecentralizedController_environments import Quantruped_LocalSingleNeighboringLeg_Env as QuantrupedEnv
-elif policy_scope=="QuantrupedMultiEnv_SingleDiagonal":
-    from simulation_envs.quantruped_fourDecentralizedController_environments import Quantruped_LocalSingleDiagonalLeg_Env as QuantrupedEnv
-elif policy_scope=="QuantrupedMultiEnv_SingleToFront":
-    from simulation_envs.quantruped_fourDecentralizedController_environments import Quantruped_LocalSingleToFront_Env as QuantrupedEnv
-elif policy_scope=="QuantrupedMultiEnv_Local":
-    from simulation_envs.quantruped_fourDecentralizedController_environments import Quantruped_Local_Env as QuantrupedEnv
-elif policy_scope=="QuantrupedMultiEnv_TwoSides":
-    from simulation_envs.quantruped_twoDecentralizedController_environments import Quantruped_TwoSideControllers_Env as QuantrupedEnv
-elif policy_scope=="QuantrupedMultiEnv_TwoDiags":
-    from simulation_envs.quantruped_twoDecentralizedController_environments import Quantruped_TwoDiagControllers_Env as QuantrupedEnv
-elif policy_scope=="QuantrupedMultiEnv_FullyDecentralGlobalCost":
-    from simulation_envs.quantruped_fourDecentralizedController_GlobalCosts_environments import QuantrupedFullyDecentralizedGlobalCostEnv as QuantrupedEnv
+if policy_scope=="HexapodMultiEnv_FullyDecentral":
+    from hexapod_envs.hexapod_sixDecentralizedController_environments import HexapodFullyDecentralizedEnv as HexapodEnv
+elif policy_scope=="HexapodMultiEnv_Local":
+    from hexapod_envs.hexapod_sixDecentralizedController_environments import Hexapod_Local_Env as HexapodEnv
+elif policy_scope=="HexapodMultiEnv_TwoSides":
+    from hexapod_envs.hexapod_twoDecentralizedController_environments import Hexapod_TwoSideControllers_Env as HexapodEnv
 else:
-    from hexapod_envs.hexapod_adaptor_multi_environment import HexapodMultiPoliciesEnv as HexapodEnv
+    from hexapod_envs.hexapod_centralizedController_environment import Hexapod_Centralized_Env as HexapodEnv
 
-ray.init(num_cpus=30, ignore_reinit_error=True)
-#ray.init(ignore_reinit_error=True)
+#ray.init(num_cpus=30, ignore_reinit_error=True)
+ray.init(ignore_reinit_error=True)
 
 config = ppo.DEFAULT_CONFIG.copy()
 
