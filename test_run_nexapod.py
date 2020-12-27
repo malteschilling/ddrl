@@ -35,7 +35,7 @@ args = parser.parse_args()
 # else:
 #     from hexapod_envs.hexapod_centralizedController_environment import Hexapod_Centralized_Env as HexapodEnv
 
-from hexapod_envs.hexapod_deploy_default import Hexapod
+#from hexapod_envs.hexapod_deploy_default import Hexapod
 
 #ray.init(num_cpus=30, ignore_reinit_error=True)
 ray.init(ignore_reinit_error=True)
@@ -55,7 +55,7 @@ config['num_envs_per_worker']=4
 #config["eager"] = False
 #config['nump_gpus']=1
 
-config['train_batch_size'] = grid_search([4000, 16000, 65536])
+config['train_batch_size'] = 16000#grid_search([4000, 16000, 65536])
 
 # Baseline Defaults:
 config['gamma'] = 0.99
@@ -70,13 +70,13 @@ config['vf_loss_coeff'] = 0.5
 
 config['observation_filter'] = 'MeanStdFilter' #grid_search(['MeanStdFilter', 'NoFilter'])
 
-config['sgd_minibatch_size'] = grid_search([128, 2048]) # BEFORE 2048 # Default: 128, or horizon?
+config['sgd_minibatch_size'] = 128#grid_search([128, 2048]) # BEFORE 2048 # Default: 128, or horizon?
 config['num_sgd_iter'] = 10
 config['lr'] = 3e-4
 config['grad_clip']=0.5
 
 config['model']['custom_model'] = "fc_glorot_uniform_init"
-config['model']['fcnet_hiddens'] = grid_search([ [32, 32],[64, 64],[128, 128]])
+config['model']['fcnet_hiddens'] = [64, 64] #grid_search([ [32, 32],[64, 64],[128, 128]])
 #config['model']['vf_share_layers'] = grid_search(['False', ' True'])
 
 #config['seed'] = round(time.time())
@@ -112,9 +112,9 @@ config['model']['fcnet_hiddens'] = grid_search([ [32, 32],[64, 64],[128, 128]])
 analysis = tune.run(
       "PPO",
       name=("Nexa_test"),
-      num_samples=2,
+      num_samples=10,
       checkpoint_at_end=True,
       checkpoint_freq=625,
-      stop={"timesteps_total": 10000000},
+      stop={"timesteps_total": 20000000},
       config=config,
   )
