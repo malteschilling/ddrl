@@ -47,7 +47,7 @@ config = ppo.DEFAULT_CONFIG.copy()
 #config['env'] = "QuantrupedMultiEnv_SingleNeighbor"
 #config['env'] = "QuantrupedMultiEnv_SingleDiagonal"
 #config['env'] = "QuantrupedMultiEnv_Local"
-config['env'] = "Nexapod-v1" #Hexapod
+config['env'] = "PhantomX-v1" #Hexapod
 #print("SELECTED ENVIRONMENT: ", policy_scope, " = ", HexapodEnv)
 
 config['num_workers']=2
@@ -91,9 +91,9 @@ config['model']['fcnet_hiddens'] = [64, 64] #grid_search([ [32, 32],[64, 64],[12
 #         "policies_to_train": HexapodEnv.policy_names, #, "dec_B_policy"],
 #     }
 # 
-# config['env_config']['ctrl_cost_weight'] = 0.5#grid_search([5e-4,5e-3,5e-2])
-# config['env_config']['contact_cost_weight'] =  5e-2 #grid_search([5e-4,5e-3,5e-2])
-# 
+config['env_config']['ctrl_cost_weight'] = 0.2537#grid_search([5e-4,5e-3,5e-2])
+config['env_config']['contact_cost_weight'] =  25e-3 #grid_search([5e-4,5e-3,5e-2])
+config['env_config']['frame_skip'] = grid_search([1,5])
 # config['env_config']['hf_smoothness'] = 1.0
 # 
 # config['env_config']['curriculum_learning'] =  False
@@ -112,9 +112,9 @@ config['model']['fcnet_hiddens'] = [64, 64] #grid_search([ [32, 32],[64, 64],[12
 analysis = tune.run(
       "PPO",
       name=("Nexa_test"),
-      num_samples=10,
+      num_samples=5,
       checkpoint_at_end=True,
       checkpoint_freq=625,
-      stop={"timesteps_total": 20000000},
+      stop={"timesteps_total": 60000000},
       config=config,
   )
