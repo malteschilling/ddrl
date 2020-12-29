@@ -90,7 +90,7 @@ config["multiagent"] = {
     }
 
 config['env_config']['ctrl_cost_weight'] = 0.5#grid_search([5e-4,5e-3,5e-2])
-config['env_config']['contact_cost_weight'] =  5e-2 #grid_search([5e-4,5e-3,5e-2])
+config['env_config']['contact_cost_weight'] =  5e-4 #5e-2 #grid_search([5e-4,5e-3,5e-2])
 
 config['env_config']['hf_smoothness'] = 1.0
 

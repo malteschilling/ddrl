@@ -6,6 +6,7 @@
   <default>
     <joint armature="1" damping="1.0" limited="true"/>
     <geom conaffinity="0" condim="3" density="5.0" friction="1.0 .5 .5" margin="0.01" rgba="0.8 0.6 0.4 1"/>
+    <!--<geom conaffinity="0" condim="3" density="5.0" friction="1.5 0.1 0.1" margin="0.01" rgba="0.8 0.6 0.4 1"/> -->
   </default>
 
   <asset>
@@ -174,23 +175,25 @@
     <motor ctrllimited="true" ctrlrange="-1.0 1.0" joint="hip_4" gear="150"/>
 -->
 
-    <motor joint="coxa_fl" ctrllimited="true" ctrlrange="-1.0 1.0" gear="100"/>
-    <motor joint="femur_fl" ctrllimited="true" ctrlrange="-1.0 1.0" gear="100"/>
-    <motor joint="tibia_fl" ctrllimited="true" ctrlrange="-1.0 1.0" gear="100"/>
-    <motor joint="coxa_fr" ctrllimited="true" ctrlrange="-1.0 1.0" gear="100"/>
-    <motor joint="femur_fr" ctrllimited="true" ctrlrange="-1.0 1.0" gear="100"/>
-    <motor joint="tibia_fr" ctrllimited="true" ctrlrange="-1.0 1.0" gear="100"/>
-    <motor joint="coxa_ml" ctrllimited="true" ctrlrange="-1.0 1.0" gear="100"/>
-    <motor joint="femur_ml" ctrllimited="true" ctrlrange="-1.0 1.0" gear="100"/>
-    <motor joint="tibia_ml" ctrllimited="true" ctrlrange="-1.0 1.0" gear="100"/>
-    <motor joint="coxa_mr" ctrllimited="true" ctrlrange="-1.0 1.0" gear="100"/>
-    <motor joint="femur_mr" ctrllimited="true" ctrlrange="-1.0 1.0" gear="100"/>
-    <motor joint="tibia_mr" ctrllimited="true" ctrlrange="-1.0 1.0" gear="100"/>
-    <motor joint="coxa_rl" ctrllimited="true" ctrlrange="-1.0 1.0" gear="100"/>
-    <motor joint="femur_rl" ctrllimited="true" ctrlrange="-1.0 1.0" gear="100"/>
-    <motor joint="tibia_rl" ctrllimited="true" ctrlrange="-1.0 1.0" gear="100"/>
-    <motor joint="coxa_rr" ctrllimited="true" ctrlrange="-1.0 1.0" gear="100"/>
-    <motor joint="femur_rr" ctrllimited="true" ctrlrange="-1.0 1.0" gear="100"/>
-    <motor joint="tibia_rr" ctrllimited="true" ctrlrange="-1.0 1.0" gear="100"/>
+<!-- Values for dynamixels taken from realant paper -->
+
+    <motor joint="coxa_fl" ctrllimited="true" ctrlrange="-1.0 1.0" gear="13"/>
+    <motor joint="femur_fl" ctrllimited="true" ctrlrange="-1.0 1.0" gear="13"/>
+    <motor joint="tibia_fl" ctrllimited="true" ctrlrange="-1.0 1.0" gear="13"/>
+    <motor joint="coxa_fr" ctrllimited="true" ctrlrange="-1.0 1.0" gear="13"/>
+    <motor joint="femur_fr" ctrllimited="true" ctrlrange="-1.0 1.0" gear="13"/>
+    <motor joint="tibia_fr" ctrllimited="true" ctrlrange="-1.0 1.0" gear="13"/>
+    <motor joint="coxa_ml" ctrllimited="true" ctrlrange="-1.0 1.0" gear="13"/>
+    <motor joint="femur_ml" ctrllimited="true" ctrlrange="-1.0 1.0" gear="13"/>
+    <motor joint="tibia_ml" ctrllimited="true" ctrlrange="-1.0 1.0" gear="13"/>
+    <motor joint="coxa_mr" ctrllimited="true" ctrlrange="-1.0 1.0" gear="13"/>
+    <motor joint="femur_mr" ctrllimited="true" ctrlrange="-1.0 1.0" gear="13"/>
+    <motor joint="tibia_mr" ctrllimited="true" ctrlrange="-1.0 1.0" gear="13"/>
+    <motor joint="coxa_rl" ctrllimited="true" ctrlrange="-1.0 1.0" gear="13"/>
+    <motor joint="femur_rl" ctrllimited="true" ctrlrange="-1.0 1.0" gear="13"/>
+    <motor joint="tibia_rl" ctrllimited="true" ctrlrange="-1.0 1.0" gear="13"/>
+    <motor joint="coxa_rr" ctrllimited="true" ctrlrange="-1.0 1.0" gear="13"/>
+    <motor joint="femur_rr" ctrllimited="true" ctrlrange="-1.0 1.0" gear="13"/>
+    <motor joint="tibia_rr" ctrllimited="true" ctrlrange="-1.0 1.0" gear="13"/>
   </actuator>
 </mujoco>

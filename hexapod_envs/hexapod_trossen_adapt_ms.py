@@ -34,7 +34,7 @@ class PhantomX(mujoco_env.MujocoEnv, utils.EzPickle):
     def __init__(self,
                  xml_file='hexapod_trossen_flat_ms.xml',
                  ctrl_cost_weight=0.5,
-                 contact_cost_weight=5e-5,
+                 contact_cost_weight=5e-4,
                  healthy_reward=0.,
                  terminate_when_unhealthy=True,
                  healthy_z_range=(0.025, 1.0),
@@ -46,7 +46,7 @@ class PhantomX(mujoco_env.MujocoEnv, utils.EzPickle):
         utils.EzPickle.__init__(**locals())
         
         self.leg_list = ["coxa_fl_geom","coxa_fr_geom","coxa_rr_geom","coxa_rl_geom","coxa_mr_geom","coxa_ml_geom"]
-
+        
         self._ctrl_cost_weight = ctrl_cost_weight
         self._contact_cost_weight = contact_cost_weight
         
@@ -67,60 +67,22 @@ class PhantomX(mujoco_env.MujocoEnv, utils.EzPickle):
         self.modelpath = os.path.join(os.path.dirname(__file__), 'assets', xml_file)
         
         self.max_steps = 1000
-        #self.mem_dim = 0
-        #self.cumulative_environment_reward = None
 
         self.joints_rads_low = np.array([-0.6, -1., -1.] * 6)
         self.joints_rads_high = np.array([0.6, 0.3, 1.] * 6)
         self.joints_rads_diff = self.joints_rads_high - self.joints_rads_low
 
-        self.step_ctr = 0
-        
+        # PID params
+        self.Kp = 0.8
+        self.Ki = 0
+        self.Kd = 1
+        self.int_err, self.past_err = 0, 0
+
+        self.start_pos = None
+        self.step_counter = 0
+
         mujoco_env.MujocoEnv.__init__(self, self.modelpath, frame_skip)
-        #print("FRAMESKIP ", frame_skip, contact_cost_weight)
-        #self.model = mujoco_py.load_model_from_path(self.modelpath)
-        #self.sim = mujoco_py.MjSim(self.model)
-
-        #self.model.opt.timestep = 0.02
-        # Environment inner parameters
-        #self.viewer = None
-
-        # Environment dimensions
-        #self.q_dim = self.sim.get_state().qpos.shape[0]
-        #self.qvel_dim = self.sim.get_state().qvel.shape[0]
-
-        self.obs_dim = 30 #+ self.mem_dim
-        self.act_dim = self.sim.data.actuator_length.shape[0] #+ self.mem_dim
-
-        #self.observation_space = spaces.Box(low=-1, high=1, shape=(self.obs_dim,))
-        #self.action_space = spaces.Box(low=-1, high=1, shape=(self.act_dim,))
-
-
-        # Reset env variables
-        #self.step_ctr = 0
-        #self.dead_leg_sums = [0,0,0,0,0,0]
-
-        #self.envgen = ManualGen(12)
-        #self.envgen = HMGen()
-        #self.envgen = EvoGen(12)
-        #self.episodes = 0
-
-#        self.reset()
-
-        # Initial methods
-        #if animate:
-         #   self.setupcam()
-
-
-#     def setupcam(self):
-#         if self.viewer is None:
-#             self.viewer = mujoco_py.MjViewer(self.sim)
-#         self.viewer.cam.trackbodyid = -1
-#         self.viewer.cam.distance = self.model.stat.extent * 1.3
-#         self.viewer.cam.lookat[0] = -0.1
-#         self.viewer.cam.lookat[1] = 0
-#         self.viewer.cam.lookat[2] = 0.5
-#         self.viewer.cam.elevation = -20
+        self.start_pos = self.get_body_com("torso")[:2].copy()
 
     def control_cost(self, action):
         control_cost = self._ctrl_cost_weight * np.sum(np.square(action))
@@ -156,74 +118,41 @@ class PhantomX(mujoco_env.MujocoEnv, utils.EzPickle):
 
     def scale_action(self, action):
         return (np.array(action) * 0.5 + 0.5) * self.joints_rads_diff + self.joints_rads_low
-# 
-# 
-#     def get_obs(self):
-#         qpos = self.sim.get_state().qpos.tolist()
-#         qvel = self.sim.get_state().qvel.tolist()
-#         a = qpos + qvel
-#         return np.asarray(a, dtype=np.float32)
-# 
-# 
-#     def get_obs_dict(self):
-#         od = {}
-#         # Intrinsic parameters
-#         for j in self.sim.model.joint_names:
-#             od[j + "_pos"] = self.sim.data.get_joint_qpos(j)
-#             od[j + "_vel"] = self.sim.data.get_joint_qvel(j)
-# 
-#         # Contacts:
-#         od['contacts'] = (np.abs(np.array(self.sim.data.cfrc_ext[[4, 7, 10, 13, 16, 19]])).sum(axis=1) > 0.05).astype(np.float32)
-#         #print(od['contacts'])
-#         #od['contacts'] = np.zeros(6)
-#         return od
-# 
-# 
-#     def get_state(self):
-#         return self.sim.get_state()
-# 
-# 
-#     def set_state(self, qpos, qvel=None):
-#         qvel = np.zeros(self.q_dim) if qvel is None else qvel
-#         old_state = self.sim.get_state()
-#         new_state = mujoco_py.MjSimState(old_state.time, qpos, qvel,
-#                                          old_state.act, old_state.udd_state)
-#         self.sim.set_state(new_state)
-#         self.sim.forward()
 
-
-#     def render(self, close=False):
-#         if self.viewer is None:
-#             self.viewer = mujoco_py.MjViewer(self.sim)
-# 
-#         self.viewer.render()
-
-
-    def step(self, action):
+    def step(self, setpoints):
         # From ant
         xy_position_before = self.get_body_com("torso")[:2].copy()
         
-        scaled_action = self.scale_action(action)
-        # For real robot: self.scale_action(action) instead of action
-        self.do_simulation(scaled_action, self.frame_skip)
-        #def do_simulation(self, ctrl, n_frames):
-        #self.sim.data.ctrl[:] = ctrl
-        #for _ in range(n_frames):
-         #   self.sim.step()
+        # motor control using a PID controller
+        ######################################
+        # compute torques
+        joint_positions = self.sim.data.qpos.flat[-18:]
+        joint_velocities = self.sim.data.qvel.flat[-18:]
         
-        # From Nexapod:
-        #act = ctrl
-        #ctrl = self.scale_action(act)
-        #else:
-         #   mem = ctrl[-self.mem_dim:]
-          #  act = ctrl[:-self.mem_dim]
-           # ctrl = self.scale_action(act)
+        # limit motor maximum speed (this matches the real servo motors)
+        timestep = self.dt
+        vel_limit = 0.1  # rotational units/s
+        #motor_setpoints = np.clip(2 * setpoints, joint_positions - timestep*vel_limit, joint_positions + timestep*vel_limit)
 
-        #self.prev_act = np.array(act)
-
-        #self.sim.data.ctrl[:] = ctrl
-        #self.sim.forward()
-        #self.sim.step()
+        # joint positions are scaled somehow roughly between -1.8...1.8
+        # to meet these limits, multiply setpoints by two.
+        err = 2 * setpoints - joint_positions
+        self.int_err += err
+        d_err = err - self.past_err
+        self.past_err = err
+        
+        torques = np.minimum(
+            1,
+            np.maximum(-1, self.Kp * err + self.Ki * self.int_err + self.Kd * d_err),
+        )
+        
+        # clip available torque if the joint is moving too fast
+        lowered_torque = 0.0
+        torques = np.clip(torques,
+            np.minimum(-lowered_torque, (-vel_limit-np.minimum(0, joint_velocities)) / vel_limit),
+            np.maximum(lowered_torque, (vel_limit-np.maximum(0, joint_velocities)) / vel_limit))
+        #print("Torques for joints: ", torques)
+        self.do_simulation(torques, self.frame_skip)
         
         xy_position_after = self.get_body_com("torso")[:2].copy()
 
@@ -231,49 +160,70 @@ class PhantomX(mujoco_env.MujocoEnv, utils.EzPickle):
         x_velocity, y_velocity = xy_velocity
 
         # Reward calculation
-
         # use scaled action (see above)
-        ctrl_cost = self.control_cost(scaled_action)
+        ctrl_cost = self.control_cost(torques)
         contact_cost = self.contact_cost
 
         forward_reward = x_velocity
-        #healthy_reward = self.healthy_reward
-
+        healthy_reward = 0. #self.healthy_reward
+        
         rewards = forward_reward #+ healthy_reward
         costs = ctrl_cost + contact_cost
 
         reward = rewards - costs
         done = self.done
-        #done = self.step_ctr > self.max_steps # or abs(y) > 0.3 or x < -0.2 or abs(yaw) > 0.8
-
-        # Reward calc from nexapod
-#        target_vel = 0.25
- #       velocity_rew = 1. / (abs(xd - target_vel) + 1.) - 1. / (target_vel + 1.)
-#        r = velocity_rew * 10 - \
- #           np.square(self.sim.data.actuator_force).mean() * 0.0001 - \
-  #          np.abs(roll) * 0.1 - \
-   #         np.square(pitch) * 0.1 - \
-    #        np.square(yaw) * .1 - \
-     #       np.square(y) * 0.1 - \
-      #      np.square(zd) * 0.01
-       # r = np.clip(r, -2, 2)
         
-        #ctrl_cost = self.control_cost(action)
-#        control_cost = 0.5 * np.sum(np.square(ctrl))
- #       contact_cost = 0.
-        #contact_cost = self.contact_cost
+        self.step_counter += 1
+        
+        if done or self.step_counter == self.max_steps:
+            vel_episode = (self.get_body_com("torso")[:2].copy() - self.start_pos)# / (self.step_counter * self.dt)
+            print("Velocity episode: ", vel_episode, x_velocity, self.ctrl_cost_weight, self.frame_skip)
+        
+        observation = self._get_obs()
+        
+        info = {
+            'reward_forward': forward_reward,
+            'reward_ctrl': -ctrl_cost,
+            'reward_contact': -contact_cost,
+            'reward_survive': healthy_reward,
+
+            'x_position': xy_position_after[0],
+            'y_position': xy_position_after[1],
+            'distance_from_origin': np.linalg.norm(xy_position_after, ord=2),
+
+            'x_velocity': x_velocity,
+            'y_velocity': y_velocity,
+            'forward_reward': forward_reward,
+        }
+
+        return observation, reward, done, info
+
+    def step_torque(self, action):
         # From ant
-#        forward_reward = x_velocity
+        xy_position_before = self.get_body_com("torso")[:2].copy()
+        
+        scaled_action = self.scale_action(action)
+        # For real robot: self.scale_action(action) instead of action
+        self.do_simulation(scaled_action, self.frame_skip)
+        
+        xy_position_after = self.get_body_com("torso")[:2].copy()
+
+        xy_velocity = (xy_position_after - xy_position_before) / self.dt
+        x_velocity, y_velocity = xy_velocity
+
+        # Reward calculation
+        # use scaled action (see above)
+        ctrl_cost = self.control_cost(scaled_action)
+        contact_cost = self.contact_cost
+
+        forward_reward = x_velocity
         healthy_reward = 0. #self.healthy_reward
-        # From ant
-#        rewards = forward_reward #+ healthy_reward
- #       costs = control_cost + contact_cost
-  #      reward = rewards - costs
-   #     r = reward
-        #self.cumulative_environment_reward += r
-        # Reevaluate termination condition
-        #done = self.step_ctr > self.max_steps # or abs(y) > 0.3 or x < -0.2 or abs(yaw) > 0.8
-#        done = self.done
+        
+        rewards = forward_reward #+ healthy_reward
+        costs = ctrl_cost + contact_cost
+
+        reward = rewards - costs
+        done = self.done
         
         observation = self._get_obs()
         
@@ -336,97 +286,7 @@ class PhantomX(mujoco_env.MujocoEnv, utils.EzPickle):
         observations = np.concatenate((position, velocity, joint_sensor_forces, last_control))#, last_control)) #, contact_force))
 
         return observations
-    
-        # From nexapod:
-        # obs = self.get_obs() 
-#               qpos = self.sim.get_state().qpos.tolist()
-#               qvel = self.sim.get_state().qvel.tolist()
-#               a = qpos + qvel
-#               return np.asarray(a, dtype=np.float32)
-#        obs_dict = self.get_obs_dict()
-        # Angle deviation
-#        x, y, z, qw, qx, qy, qz = obs[:7]
-#        xd, yd, zd, _, _, _ = self.sim.get_state().qvel.tolist()[:6]
- #       angle = 2 * acos(qw)
-#        roll, pitch, yaw = my_utils.quat_to_rpy((qw, qx, qy, qz))       
-#        obs = np.concatenate([np.array(self.sim.get_state().qpos.tolist()[3:]),
- #                             [xd, yd],
-  #                            obs_dict["contacts"]])
-        # if np.random.rand() < self.dead_leg_prob:
-        #     idx = np.random.randint(0,6)
-        #     self.dead_leg_vector[idx] = 1
-        #     self.dead_leg_sums[idx] += 1
-        #     self.model.geom_rgba[self.model._geom_name2id[self.leg_list[idx]]] = [1, 0, 0, 1]
-        #     self.dead_leg_prob = 0.
-#        return np.clip(obs, -1., 1.), r, done, obs_dict
-    
-        #position = self.sim.data.qpos.flat.copy()
-        #velocity = self.sim.data.qvel.flat.copy()
-        #contact_force = self.contact_forces.flat.copy()
-        #print(contact_force)
-        #if self._exclude_current_positions_from_observation:
-         #   position = position[2:]
-#        observations = np.concatenate((position, velocity, contact_force))
-#        return observations
-        
-    
 
-
-#     def reset(self):
-# 
-#         self.cumulative_environment_reward = 0
-#         self.dead_leg_prob = 0.004
-#         self.dead_leg_vector = [0, 0, 0, 0, 0, 0]
-#         self.step_ctr = 0
-# 
-#         for i in range(6):
-#             if self.dead_leg_vector[i] ==0:
-#                 self.model.geom_rgba[self.model._geom_name2id[self.leg_list[i]]] = [0.0, 0.6, 0.4, 1]
-#             else:
-#                 self.model.geom_rgba[self.model._geom_name2id[self.leg_list[i]]] = [1, 0, 0, 1]
-# 
-#         # Sample initial configuration
-#         init_q = np.zeros(self.q_dim, dtype=np.float32)
-#         init_q[0] = 0.05
-#         init_q[1] = 0
-#         init_q[2] = 0.15
-#         init_qvel = np.random.randn(self.qvel_dim).astype(np.float32) * 0.1
-# 
-#         # Set environment state
-#         self.set_state(init_q, init_qvel)
-# 
-#         self.prev_act = np.zeros((self.act_dim - self.mem_dim))
-# 
-#         obs, _, _, _ = self.step(np.zeros(self.act_dim))
-# 
-#         return obs
-
-#     def demo(self):
-#         self.reset()
-#         for i in range(1000):
-#             #self.step(np.random.randn(self.act_dim))
-#             for i in range(100):
-#                 self.step(np.zeros((self.act_dim)))
-#                 self.render()
-#             for i in range(100):
-#                 self.step(np.ones((self.act_dim)) * 1)
-#                 self.render()
-#             for i in range(100):
-#                 self.step(np.ones((self.act_dim)) * -1)
-#                 self.render()
-# 
-# 
-#     def info(self):
-#         self.reset()
-#         for i in range(100):
-#             a = np.ones((self.act_dim)) * 0
-#             obs, _, _, _ = self.step(a)
-#             print(obs[[3, 4, 5]])
-#             self.render()
-#             time.sleep(0.01)
-# 
-#         print("-------------------------------------------")
-#         print("-------------------------------------------")
 
     def reset_model(self):
         noise_low = -self._reset_noise_scale
@@ -440,6 +300,12 @@ class PhantomX(mujoco_env.MujocoEnv, utils.EzPickle):
 
         observation = self._get_obs()
 
+        self.int_err = 0
+        self.past_err = 0
+
+        self.start_pos = self.get_body_com("torso")[:2].copy()
+        self.step_counter = 0
+        
         return observation
      
     def viewer_setup(self):
@@ -448,10 +314,3 @@ class PhantomX(mujoco_env.MujocoEnv, utils.EzPickle):
                 getattr(self.viewer.cam, key)[:] = value
             else:
                 setattr(self.viewer.cam, key, value)
-
-
-# if __name__ == "__main__":
-#     ant = Hexapod(animate=True)
-#     print(ant.obs_dim)
-#     print(ant.act_dim)
-#     ant.demo()
