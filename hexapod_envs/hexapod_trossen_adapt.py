@@ -63,6 +63,8 @@ class Hexapod(gym.Env):
         if animate:
             self.setupcam()
 
+        self.start_pos = self.sim.data.qpos[:2].copy() #self.get_body_com("torso")[:2].copy()
+
 
     def setupcam(self):
         if self.viewer is None:
@@ -172,6 +174,11 @@ class Hexapod(gym.Env):
         # Reevaluate termination condition
         done = self.step_ctr > self.max_steps # or abs(y) > 0.3 or x < -0.2 or abs(yaw) > 0.8
 
+        if done:
+            vel_episode = (self.sim.data.qpos[:2].copy() - self.start_pos)# / (self.step_counter * self.dt)
+            print("Velocity episode: ", vel_episode, xd)
+        
+
         obs = np.concatenate([np.array(self.sim.get_state().qpos.tolist()[3:]),
                               [xd, yd],
                               obs_dict["contacts"],
@@ -188,6 +195,8 @@ class Hexapod(gym.Env):
 
 
     def reset(self):
+
+        self.start_pos = self.sim.data.qpos[:2].copy() #self.get_body_com("torso")[:2].copy()
 
         self.cumulative_environment_reward = 0
         self.dead_leg_prob = 0.004
