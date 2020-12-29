@@ -12,6 +12,8 @@ from hexapod_envs.hexapod_twoDecentralizedController_environments import Hexapod
 
 #from hexapod_envs.hexapod_deploy_default import Hexapod
 from hexapod_envs.hexapod_trossen_adapt_ms import PhantomX
+from hexapod_envs.phantomX_adaptor_multi_environment import PhantomXMultiPoliciesEnv
+from hexapod_envs.phantomX_centralizedController_environment import PhantomX_Centralized_Env
 
 register(
 	id='Hexapod-v1',
@@ -30,9 +32,10 @@ register(
 	reward_threshold=4000.0,
 )
 
-register_env("PhantomX-v1", lambda config: TimeLimit(PhantomX(frame_skip = config["frame_skip"]), max_episode_steps=1000))
+#register_env("PhantomX-v1", lambda config: TimeLimit(PhantomX(), max_episode_steps=1000))
 
-register_env("HexapodMultiEnv_Centralized", lambda config: Hexapod_Centralized_Env(config) )
+#register_env("PhantomXMultiEnv_Centralized", lambda config: PhantomXMultiPoliciesEnv(config) )
+register_env("PhantomXMultiEnv_Centralized", lambda config: PhantomX_Centralized_Env(config) )
 
 register_env("HexapodMultiEnv_FullyDecentral", lambda config: HexapodFullyDecentralizedEnv(config) )
 register_env("HexapodMultiEnv_Local", lambda config: Hexapod_Local_Env(config) )

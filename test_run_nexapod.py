@@ -47,7 +47,7 @@ config = ppo.DEFAULT_CONFIG.copy()
 #config['env'] = "QuantrupedMultiEnv_SingleNeighbor"
 #config['env'] = "QuantrupedMultiEnv_SingleDiagonal"
 #config['env'] = "QuantrupedMultiEnv_Local"
-config['env'] = "PhantomX-v1" #Hexapod
+config['env'] = "PhantomXMultiEnv_Centralized" #"PhantomX-v1" #Hexapod
 #print("SELECTED ENVIRONMENT: ", policy_scope, " = ", HexapodEnv)
 
 config['num_workers']=2
@@ -66,7 +66,7 @@ config['entropy_coeff'] = 0. #grid_search([0., 0.01])
 config['clip_param'] = 0.2
 
 config['vf_loss_coeff'] = 0.5
-#config['vf_clip_param'] = 4000.
+config['vf_clip_param'] = 2500.
 
 config['observation_filter'] = 'MeanStdFilter' #grid_search(['MeanStdFilter', 'NoFilter'])
 

@@ -33,15 +33,16 @@ class PhantomX(mujoco_env.MujocoEnv, utils.EzPickle):
     
     def __init__(self,
                  xml_file='hexapod_trossen_flat_ms.xml',
-                 ctrl_cost_weight=0.25,
-                 contact_cost_weight=25e-3,
+                 ctrl_cost_weight=0.5,
+                 contact_cost_weight=5e-5,
                  healthy_reward=0.,
                  terminate_when_unhealthy=True,
                  healthy_z_range=(0.025, 1.0),
                  contact_force_range=(-1.0, 1.0),
                  reset_noise_scale=0.1,
                  frame_skip=5,
-                 exclude_current_positions_from_observation=True):
+                 exclude_current_positions_from_observation=True,
+                 hf_smoothness=1.):
         utils.EzPickle.__init__(**locals())
         
         self.leg_list = ["coxa_fl_geom","coxa_fr_geom","coxa_rr_geom","coxa_rl_geom","coxa_mr_geom","coxa_ml_geom"]
@@ -76,7 +77,7 @@ class PhantomX(mujoco_env.MujocoEnv, utils.EzPickle):
         self.step_ctr = 0
         
         mujoco_env.MujocoEnv.__init__(self, self.modelpath, frame_skip)
-        print("FRAMESKIP ", frame_skip, contact_cost_weight)
+        #print("FRAMESKIP ", frame_skip, contact_cost_weight)
         #self.model = mujoco_py.load_model_from_path(self.modelpath)
         #self.sim = mujoco_py.MjSim(self.model)
 
@@ -294,6 +295,48 @@ class PhantomX(mujoco_env.MujocoEnv, utils.EzPickle):
         return observation, reward, done, info
         
     def _get_obs(self):
+        """ 
+        Observation space for the Hexapod model.
+        
+        Following observation spaces are used: 
+        * position information
+        * velocity information
+        * passive forces acting on the joints
+        * last control signal
+    
+        
+        For measured observations (basically everything starting with a q) ordering is:
+            FL: 0, 1, 2
+            FR: 3, 4, 5
+            ML: 6, 7, 8
+            MR: 9, 10, 11
+            HL: 12, 13, 14
+            HR: 15, 16, 17
+            Important: plus offset! The first entries are global coordinates, velocities.
+        """
+        position = self.sim.data.qpos.flat.copy()
+        velocity = self.sim.data.qvel.flat.copy()
+        #contact_force = self.contact_forces.flat.copy()
+        # Provide passive force instead -- in joint reference frame = eight dimensions
+        # joint_passive_forces = self.sim.data.qfrc_passive.flat.copy()[6:]
+        # Sensor measurements in the joint:
+        # qfrc_unc is the sum of all forces outside constraints (passive, actuation, gravity, applied etc)
+        # qfrc_constraint is the sum of all constraint forces. 
+        # If you add up these two quantities you get the total force acting on each joint
+        # which is what a torque sensor should measure.
+        # See note in http://www.mujoco.org/forum/index.php?threads/best-way-to-represent-robots-torque-sensors.4181/
+        joint_sensor_forces = self.sim.data.qfrc_unc[6:] + self.sim.data.qfrc_constraint[6:]
+
+        # Provide actions from last time step (as used in the simulator = clipped)
+        last_control = self.sim.data.ctrl.flat.copy()
+        
+        if self._exclude_current_positions_from_observation:
+            position = position[2:]
+
+        observations = np.concatenate((position, velocity, joint_sensor_forces, last_control))#, last_control)) #, contact_force))
+
+        return observations
+    
         # From nexapod:
         # obs = self.get_obs() 
 #               qpos = self.sim.get_state().qpos.tolist()
@@ -317,17 +360,16 @@ class PhantomX(mujoco_env.MujocoEnv, utils.EzPickle):
         #     self.dead_leg_prob = 0.
 #        return np.clip(obs, -1., 1.), r, done, obs_dict
     
-        position = self.sim.data.qpos.flat.copy()
-        velocity = self.sim.data.qvel.flat.copy()
-        contact_force = self.contact_forces.flat.copy()
+        #position = self.sim.data.qpos.flat.copy()
+        #velocity = self.sim.data.qvel.flat.copy()
+        #contact_force = self.contact_forces.flat.copy()
         #print(contact_force)
-
-        if self._exclude_current_positions_from_observation:
-            position = position[2:]
-
-        observations = np.concatenate((position, velocity, contact_force))
-
-        return observations
+        #if self._exclude_current_positions_from_observation:
+         #   position = position[2:]
+#        observations = np.concatenate((position, velocity, contact_force))
+#        return observations
+        
+    
 
 
 #     def reset(self):
