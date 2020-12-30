@@ -49,9 +49,12 @@ class PhantomXMultiPoliciesEnv(MultiAgentEnv):
         else: 
             frame_skip = 5
               
+        #self.env = gym.make("PhantomX-v1", 
+         #   ctrl_cost_weight=ctrl_cost_weight,
+          #  contact_cost_weight=contact_cost_weight,frame_skip=frame_skip, hf_smoothness=hf_smoothness)
         self.env = gym.make("PhantomX-v1", 
-            ctrl_cost_weight=ctrl_cost_weight,
-            contact_cost_weight=contact_cost_weight,frame_skip=frame_skip, hf_smoothness=hf_smoothness)
+            ctrl_cost_weight=0,
+            contact_cost_weight=0,frame_skip=5, hf_smoothness=hf_smoothness)
         
         #hexapod_mass = mujoco_py.functions.mj_getTotalmass(self.env.model)
         #print("Weight: ", hexapod_mass)

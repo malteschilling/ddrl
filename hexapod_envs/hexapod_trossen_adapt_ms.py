@@ -82,7 +82,7 @@ class PhantomX(mujoco_env.MujocoEnv, utils.EzPickle):
         self.step_counter = 0
 
         mujoco_env.MujocoEnv.__init__(self, self.modelpath, frame_skip)
-        self.start_pos = self.get_body_com("torso")[:2].copy()
+        self.start_pos = self.sim.data.qpos[0]
 
     def control_cost(self, action):
         control_cost = self._ctrl_cost_weight * np.sum(np.square(action))
@@ -176,8 +176,8 @@ class PhantomX(mujoco_env.MujocoEnv, utils.EzPickle):
         self.step_counter += 1
         
         if done or self.step_counter == self.max_steps:
-            vel_episode = (self.get_body_com("torso")[:2].copy() - self.start_pos)# / (self.step_counter * self.dt)
-            print("Velocity episode: ", vel_episode, x_velocity, self.ctrl_cost_weight, self.frame_skip)
+            vel_episode = (self.sim.data.qpos[0] - self.start_pos)# / (self.step_counter * self.dt)
+            print("Velocity episode: ", vel_episode, (vel_episode/ (self.step_counter * self.dt), x_velocity, self.ctrl_cost_weight, self.frame_skip)
         
         observation = self._get_obs()
         
@@ -303,7 +303,7 @@ class PhantomX(mujoco_env.MujocoEnv, utils.EzPickle):
         self.int_err = 0
         self.past_err = 0
 
-        self.start_pos = self.get_body_com("torso")[:2].copy()
+        self.start_pos = self.sim.data.qpos[0] #self.get_body_com("torso")[:2].copy()
         self.step_counter = 0
         
         return observation
