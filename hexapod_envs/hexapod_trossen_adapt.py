@@ -191,7 +191,7 @@ class Hexapod(gym.Env):
         #     self.model.geom_rgba[self.model._geom_name2id[self.leg_list[idx]]] = [1, 0, 0, 1]
         #     self.dead_leg_prob = 0.
 
-        return obs, r, done, obs_dict
+        return np.clip(obs, -1., 1.), r, done, obs_dict
 
 
     def reset(self):
