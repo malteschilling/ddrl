@@ -164,7 +164,7 @@ class PhantomX(mujoco_env.MujocoEnv, utils.EzPickle):
         ctrl_cost = self.control_cost(torques)
         contact_cost = self.contact_cost
 
-        forward_reward = x_velocity
+        forward_reward = x_velocity * 10 # Scaled as ant-sim env is much bigger
         healthy_reward = 0. #self.healthy_reward
         
         rewards = forward_reward #+ healthy_reward
