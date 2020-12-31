@@ -21,7 +21,7 @@ class Hexapod(gym.Env):
         self.leg_list = ["coxa_fl_geom","coxa_fr_geom","coxa_rr_geom","coxa_rl_geom","coxa_mr_geom","coxa_ml_geom"]
 
         self.modelpath = Hexapod.MODELPATH
-        self.max_steps = 1000
+        self.max_steps = 300
         self.mem_dim = 0
         self.cumulative_environment_reward = None
 
@@ -175,7 +175,7 @@ class Hexapod(gym.Env):
 
         if done:
             distance = (self.sim.data.qpos[0].copy() - self.start_pos)# / (self.step_counter * self.dt)
-            print("Velocity episode: ", distance, xd, self.step_ctr)
+            print("Velocity: ", distance, xd, self.step_ctr)
         
 
         obs = np.concatenate([np.array(self.sim.get_state().qpos.tolist()[3:]),

@@ -28,22 +28,25 @@ DEFAULT_CAMERA_CONFIG = {
     'elevation': -20.0,
 }
 
-class PhantomX(mujoco_env.MujocoEnv, utils.EzPickle):
+class AntSixEnv(mujoco_env.MujocoEnv, utils.EzPickle):
     #MODELPATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), "assets/")
     
     def __init__(self,
-                 xml_file='hexapod_trossen_flat_ms.xml',
+                 xml_file='Ant-6Leg-3Joints.xml',
                  ctrl_cost_weight=0.5,
                  contact_cost_weight=5e-4,
                  healthy_reward=0.,
                  terminate_when_unhealthy=True,
-                 healthy_z_range=(0.025, 1.0),
+                 healthy_z_range=(0.025, 1.5),
                  contact_force_range=(-1.0, 1.0),
                  reset_noise_scale=0.1,
                  frame_skip=5,
                  exclude_current_positions_from_observation=True,
                  hf_smoothness=1.):
         utils.EzPickle.__init__(**locals())
+        
+        ctrl_cost_weight = 0.
+        contact_cost_weight = 0.
         
         self.leg_list = ["coxa_fl_geom","coxa_fr_geom","coxa_rr_geom","coxa_rl_geom","coxa_mr_geom","coxa_ml_geom"]
         
@@ -66,23 +69,29 @@ class PhantomX(mujoco_env.MujocoEnv, utils.EzPickle):
 
         self.modelpath = os.path.join(os.path.dirname(__file__), 'assets', xml_file)
         
-        self.max_steps = 1000
+        self.max_steps = 300
 
-        self.joints_rads_low = np.array([-0.6, -1., -1.] * 6)
-        self.joints_rads_high = np.array([0.6, 0.3, 1.] * 6)
-        self.joints_rads_diff = self.joints_rads_high - self.joints_rads_low
+#        self.joints_rads_low = np.array([-0.6, -1., -1.] * 6)
+ #       self.joints_rads_high = np.array([0.6, 0.3, 1.] * 6)
+  #      self.joints_rads_diff = self.joints_rads_high - self.joints_rads_low
 
         # PID params
-        self.Kp = 0.8
-        self.Ki = 0
-        self.Kd = 1
-        self.int_err, self.past_err = 0, 0
+   #     self.Kp = 0.8
+    #    self.Ki = 0
+     #   self.Kd = 1
+      #  self.int_err, self.past_err = 0, 0
 
         self.start_pos = None
         self.step_counter = 0
-
+        self.ctrl_costs = 0.
+        self.contact_costs = 0.
+        self.vel_rewards = 0.
+        
         mujoco_env.MujocoEnv.__init__(self, self.modelpath, frame_skip)
-        self.start_pos = self.sim.data.qpos[0]
+        ant_mass = mujoco_py.functions.mj_getTotalmass(self.model)
+        mujoco_py.functions.mj_setTotalmass(self.model, 5. * ant_mass)
+        #print("Mass: ", mujoco_py.functions.mj_getTotalmass(self.model))
+        self.start_pos = self.sim.data.qpos[0].copy()
 
     def control_cost(self, action):
         control_cost = self._ctrl_cost_weight * np.sum(np.square(action))
@@ -106,6 +115,8 @@ class PhantomX(mujoco_env.MujocoEnv, utils.EzPickle):
         state = self.state_vector()
         min_z, max_z = self._healthy_z_range
         is_healthy = (np.isfinite(state).all() and min_z <= state[2] <= max_z)
+#        if not is_healthy:
+ #           print("Finish: ", state[2])
         return is_healthy
 
     @property
@@ -115,45 +126,45 @@ class PhantomX(mujoco_env.MujocoEnv, utils.EzPickle):
                 else False)
         return done
 
+#    def scale_action(self, action):
+ #       return (np.array(action) * 0.5 + 0.5) * self.joints_rads_diff + self.joints_rads_low
 
-    def scale_action(self, action):
-        return (np.array(action) * 0.5 + 0.5) * self.joints_rads_diff + self.joints_rads_low
-
-    def step(self, setpoints):
+    def step(self, action): #setpoints):
         # From ant
         xy_position_before = self.get_body_com("torso")[:2].copy()
         
         # motor control using a PID controller
         ######################################
         # compute torques
-        joint_positions = self.sim.data.qpos.flat[-18:]
-        joint_velocities = self.sim.data.qvel.flat[-18:]
+#        joint_positions = self.sim.data.qpos.flat[-18:]
+ #       joint_velocities = self.sim.data.qvel.flat[-18:]
         
         # limit motor maximum speed (this matches the real servo motors)
-        timestep = self.dt
-        vel_limit = 0.1  # rotational units/s
+  #      timestep = self.dt
+   #     vel_limit = 0.1  # rotational units/s
         #motor_setpoints = np.clip(2 * setpoints, joint_positions - timestep*vel_limit, joint_positions + timestep*vel_limit)
 
         # joint positions are scaled somehow roughly between -1.8...1.8
         # to meet these limits, multiply setpoints by two.
-        err = 2 * setpoints - joint_positions
-        self.int_err += err
-        d_err = err - self.past_err
-        self.past_err = err
+    #    err = 2 * setpoints - joint_positions
+     #   self.int_err += err
+      #  d_err = err - self.past_err
+       # self.past_err = err
         
-        torques = np.minimum(
-            1,
-            np.maximum(-1, self.Kp * err + self.Ki * self.int_err + self.Kd * d_err),
-        )
+        #torques = np.minimum(
+         #   1,
+          #  np.maximum(-1, self.Kp * err + self.Ki * self.int_err + self.Kd * d_err),
+#        )
         
         # clip available torque if the joint is moving too fast
-        lowered_torque = 0.0
-        torques = np.clip(torques,
-            np.minimum(-lowered_torque, (-vel_limit-np.minimum(0, joint_velocities)) / vel_limit),
-            np.maximum(lowered_torque, (vel_limit-np.maximum(0, joint_velocities)) / vel_limit))
+ #       lowered_torque = 0.0
+  #      torques = np.clip(torques,
+   #         np.minimum(-lowered_torque, (-vel_limit-np.minimum(0, joint_velocities)) / vel_limit),
+    #        np.maximum(lowered_torque, (vel_limit-np.maximum(0, joint_velocities)) / vel_limit))
         #print("Torques for joints: ", torques)
-        self.do_simulation(torques, self.frame_skip)
+     #   self.do_simulation(torques, self.frame_skip)
         
+        self.do_simulation(action, self.frame_skip)
         xy_position_after = self.get_body_com("torso")[:2].copy()
 
         xy_velocity = (xy_position_after - xy_position_before) / self.dt
@@ -161,16 +172,20 @@ class PhantomX(mujoco_env.MujocoEnv, utils.EzPickle):
 
         # Reward calculation
         # use scaled action (see above)
-        ctrl_cost = self.control_cost(torques)
+        ctrl_cost = self.control_cost(action) #torques
         contact_cost = self.contact_cost
 
-        forward_reward = x_velocity * 10 # Scaled as ant-sim env is much bigger
+        forward_reward = x_velocity #* 10 # Scaled as ant-sim env is much bigger
         healthy_reward = 0. #self.healthy_reward
         
         rewards = forward_reward #+ healthy_reward
         costs = ctrl_cost + contact_cost
 
-        reward = rewards - costs
+        self.ctrl_costs += ctrl_cost
+        self.contact_costs += contact_cost
+        self.vel_rewards += forward_reward
+
+        reward = rewards - 0*costs
         done = self.done
         
         self.step_counter += 1
@@ -178,8 +193,10 @@ class PhantomX(mujoco_env.MujocoEnv, utils.EzPickle):
         if done or self.step_counter == self.max_steps:
             distance = (self.sim.data.qpos[0] - self.start_pos)# / (self.step_counter * self.dt)
             print("PhantomX episode: ", distance, \
-                (distance/ (self.step_counter * self.dt), x_velocity, \
-                self.ctrl_cost_weight, self.frame_skip))
+                (distance/ (self.step_counter * self.dt)), x_velocity, \
+                " / ctrl: ", self.ctrl_costs, self.ctrl_cost_weight, \
+                " / contact: ", self.contact_costs, self.contact_cost_weight, \
+                self.step_counter)
         
         observation = self._get_obs()
         
@@ -307,6 +324,9 @@ class PhantomX(mujoco_env.MujocoEnv, utils.EzPickle):
 
         self.start_pos = self.sim.data.qpos[0] #self.get_body_com("torso")[:2].copy()
         self.step_counter = 0
+        self.ctrl_costs = 0.
+        self.contact_costs = 0.
+        self.vel_rewards = 0.
         
         return observation
      

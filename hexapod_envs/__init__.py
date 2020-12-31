@@ -23,8 +23,17 @@ register(
 	max_episode_steps=1000,
 	reward_threshold=4000.0,
 )
-
 register_env("Hexapod-v1", lambda config: TimeLimit(HexapodEnv(), max_episode_steps=1000))
+
+from hexapod_envs.ant_six import AntSixEnv
+
+register(
+	id='AntSix-v1',
+	entry_point='hexapod_envs.ant_six:AntSixEnv',
+	max_episode_steps=300,
+	reward_threshold=900.0,
+)
+register_env("AntSix-v1", lambda config: TimeLimit(AntSixEnv(), max_episode_steps=300))
 
 
 register(
