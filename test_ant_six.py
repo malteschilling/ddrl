@@ -39,8 +39,8 @@ args = parser.parse_args()
 
 #from hexapod_envs.phantomX_centralizedController_environment import PhantomX_Centralized_Env as HexapodEnv
 
-#ray.init(num_cpus=30, ignore_reinit_error=True)
-ray.init(ignore_reinit_error=True)
+ray.init(num_cpus=30, ignore_reinit_error=True)
+#ray.init(ignore_reinit_error=True)
 
 config = ppo.DEFAULT_CONFIG.copy()
 
@@ -113,10 +113,10 @@ config['env_config']['frame_skip'] = 5 #grid_search([1,2,5])
 
 analysis = tune.run(
       "PPO",
-      name=("Ant6_Vel"),
-      num_samples=1,
+      name=("Ant6_Small_Vel"),
+      num_samples=50,
       checkpoint_at_end=True,
       checkpoint_freq=625,
-      stop={"timesteps_total": 2000000},
+      stop={"timesteps_total": 5000000},
       config=config,
   )

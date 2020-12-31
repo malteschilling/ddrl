@@ -22,17 +22,17 @@ from gym import utils
 #from gym.envs.mujoco.ant_v3 import AntEnv
 
 DEFAULT_CAMERA_CONFIG = {
-    'distance': 15.0,
+    'distance': 2.5,
     'type': 1,
     'trackbodyid': 1,
-    'elevation': -20.0,
+    'elevation': -50.0,
 }
 
 class AntSixEnv(mujoco_env.MujocoEnv, utils.EzPickle):
     #MODELPATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), "assets/")
     
     def __init__(self,
-                 xml_file='Ant-6Leg-3Joints.xml',
+                 xml_file='Ant-6Leg-3Joints_small.xml',
                  ctrl_cost_weight=0.5,
                  contact_cost_weight=5e-4,
                  healthy_reward=0.,
