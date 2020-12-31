@@ -117,6 +117,6 @@ analysis = tune.run(
       num_samples=5,
       checkpoint_at_end=True,
       checkpoint_freq=625,
-      stop={"timesteps_total": 40000000},
+      stop={"timesteps_total": 2000000},
       config=config,
   )

@@ -21,7 +21,7 @@ class Hexapod(gym.Env):
         self.leg_list = ["coxa_fl_geom","coxa_fr_geom","coxa_rr_geom","coxa_rl_geom","coxa_mr_geom","coxa_ml_geom"]
 
         self.modelpath = Hexapod.MODELPATH
-        self.max_steps = 300
+        self.max_steps = 1000
         self.mem_dim = 0
         self.cumulative_environment_reward = None
 
@@ -63,8 +63,7 @@ class Hexapod(gym.Env):
         if animate:
             self.setupcam()
 
-        self.start_pos = self.sim.data.qpos[:2].copy() #self.get_body_com("torso")[:2].copy()
-
+        self.start_pos = self.sim.data.qpos[0].copy()
 
     def setupcam(self):
         if self.viewer is None:
@@ -160,13 +159,13 @@ class Hexapod(gym.Env):
         target_vel = 0.25
         velocity_rew = 1. / (abs(xd - target_vel) + 1.) - 1. / (target_vel + 1.)
 
-        r = velocity_rew * 10 - \
-            np.square(self.sim.data.actuator_force).mean() * 0.0001 - \
-            np.abs(roll) * 0.1 - \
-            np.square(pitch) * 0.1 - \
-            np.square(yaw) * .1 - \
-            np.square(y) * 0.1 - \
-            np.square(zd) * 0.01
+        r = velocity_rew * 10 #- \
+#            np.square(self.sim.data.actuator_force).mean() * 0.0001 - \
+ #           np.abs(roll) * 0.1 - \
+  #          np.square(pitch) * 0.1 - \
+   #         np.square(yaw) * .1 - \
+    #        np.square(y) * 0.1 - \
+     #       np.square(zd) * 0.01
         r = np.clip(r, -2, 2)
 
         self.cumulative_environment_reward += r
@@ -175,8 +174,8 @@ class Hexapod(gym.Env):
         done = self.step_ctr > self.max_steps # or abs(y) > 0.3 or x < -0.2 or abs(yaw) > 0.8
 
         if done:
-            vel_episode = (self.sim.data.qpos[:2].copy() - self.start_pos)# / (self.step_counter * self.dt)
-            print("Velocity episode: ", vel_episode, xd)
+            distance = (self.sim.data.qpos[0].copy() - self.start_pos)# / (self.step_counter * self.dt)
+            print("Velocity episode: ", distance, xd, self.step_ctr)
         
 
         obs = np.concatenate([np.array(self.sim.get_state().qpos.tolist()[3:]),
@@ -196,7 +195,7 @@ class Hexapod(gym.Env):
 
     def reset(self):
 
-        self.start_pos = self.sim.data.qpos[:2].copy() #self.get_body_com("torso")[:2].copy()
+        self.start_pos = self.sim.data.qpos[0].copy() #self.get_body_com("torso")[:2].copy()
 
         self.cumulative_environment_reward = 0
         self.dead_leg_prob = 0.004
