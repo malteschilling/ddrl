@@ -38,6 +38,11 @@ class AntSixMultiPoliciesEnv(MultiAgentEnv):
             ctrl_cost_weight = config['ctrl_cost_weight']
         else: 
             ctrl_cost_weight = 0.5
+            
+        if 'frame_skip' in config.keys():
+            frame_skip = config['frame_skip']
+        else: 
+            frame_skip = 5
         
         if 'hf_smoothness' in config.keys():
             hf_smoothness = config['hf_smoothness']
@@ -46,7 +51,9 @@ class AntSixMultiPoliciesEnv(MultiAgentEnv):
               
         self.env = gym.make("AntSix-v1", 
             ctrl_cost_weight=ctrl_cost_weight,
-            contact_cost_weight=contact_cost_weight, hf_smoothness=hf_smoothness)
+            contact_cost_weight=contact_cost_weight, 
+            frame_skip=frame_skip,
+            hf_smoothness=hf_smoothness)
         
         #hexapod_mass = mujoco_py.functions.mj_getTotalmass(self.env.model)
         #print("Weight: ", hexapod_mass)
