@@ -88,9 +88,7 @@ class AntSixEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         self.vel_rewards = 0.
         
         mujoco_env.MujocoEnv.__init__(self, self.modelpath, frame_skip)
-        ant_mass = mujoco_py.functions.mj_getTotalmass(self.model)
-        mujoco_py.functions.mj_setTotalmass(self.model, 5. * ant_mass)
-        #print("Mass: ", mujoco_py.functions.mj_getTotalmass(self.model))
+        print("Mass: ", mujoco_py.functions.mj_getTotalmass(self.model))
         self.start_pos = self.sim.data.qpos[0].copy()
 
     def control_cost(self, action):

@@ -35,6 +35,9 @@ register(
 )
 register_env("AntSix-v1", lambda config: TimeLimit(AntSixEnv(), max_episode_steps=1000))
 
+from hexapod_envs.ant_six_centralizedController_environment import AntSix_Centralized_Env
+register_env("AntSix-Centralized", lambda config: AntSix_Centralized_Env(config))
+
 
 register(
 	id='PhantomX-v1',

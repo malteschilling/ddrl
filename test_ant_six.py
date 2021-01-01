@@ -49,7 +49,7 @@ config = ppo.DEFAULT_CONFIG.copy()
 #config['env'] = "QuantrupedMultiEnv_SingleNeighbor"
 #config['env'] = "QuantrupedMultiEnv_SingleDiagonal"
 #config['env'] = "QuantrupedMultiEnv_Local"
-config['env'] = "AntSix-v1" #"PhantomX-v1" #Hexapod
+config['env'] = "AntSix-Centralized" #"PhantomX-v1" #Hexapod
 #print("SELECTED ENVIRONMENT: ", policy_scope, " = ", HexapodEnv)
 
 config['num_workers']=2
@@ -93,7 +93,7 @@ config['model']['fcnet_hiddens'] = [64, 64] #grid_search([ [32, 32],[64, 64],[12
 #         "policies_to_train": HexapodEnv.policy_names, #, "dec_B_policy"],
 #     }
 # 
-config['env_config']['ctrl_cost_weight'] = grid_search([0.005, 0.01, 0.02, 0.05, 0.1])
+config['env_config']['ctrl_cost_weight'] = grid_search([0.01, 0.02, 0.05, 0.1, 0.2])
 config['env_config']['contact_cost_weight'] =  0.#5e-4#5e-3 #grid_search([5e-4,5e-3,5e-2])
 config['env_config']['frame_skip'] = 5 #grid_search([1,2,5])
 # config['env_config']['hf_smoothness'] = 1.0
