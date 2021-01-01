@@ -1,7 +1,7 @@
 import numpy as np
 
 import mujoco_py
-import hexapod_envs.my_utils as my_utils
+import hexapod_target_envs.my_utils as my_utils
 
 #import time
 import os
@@ -50,6 +50,8 @@ class AntSixEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         
         self.leg_list = ["coxa_fl_geom","coxa_fr_geom","coxa_rr_geom","coxa_rl_geom","coxa_mr_geom","coxa_ml_geom"]
         
+        self.target_vel = 0.25
+        
         self._ctrl_cost_weight = ctrl_cost_weight
         self._contact_cost_weight = contact_cost_weight
         
@@ -88,7 +90,7 @@ class AntSixEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         self.vel_rewards = 0.
         
         mujoco_env.MujocoEnv.__init__(self, self.modelpath, frame_skip)
-        print("Mass: ", mujoco_py.functions.mj_getTotalmass(self.model))
+        #print("Mass: ", mujoco_py.functions.mj_getTotalmass(self.model))
         self.start_pos = self.sim.data.qpos[0].copy()
 
     def control_cost(self, action):
@@ -173,7 +175,9 @@ class AntSixEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         ctrl_cost = self.control_cost(action) #torques
         contact_cost = self.contact_cost
 
-        forward_reward = x_velocity #* 10 # Scaled as ant-sim env is much bigger
+        #forward_reward = x_velocity #* 10 # Scaled as ant-sim env is much bigger
+        forward_reward = (1. + 1./self.target_vel) * (1. / (np.abs(x_velocity - self.target_vel) + 1.) - 1. / (self.target_vel + 1.))
+                
         healthy_reward = 0. #self.healthy_reward
         
         rewards = forward_reward #+ healthy_reward
@@ -190,8 +194,8 @@ class AntSixEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         
         if done or self.step_counter == self.max_steps:
             distance = (self.sim.data.qpos[0] - self.start_pos)# / (self.step_counter * self.dt)
-            print("PhantomX ctrl episode: ", distance, \
-                (distance/ (self.step_counter * self.dt)), x_velocity, self.vel_rewards, self.sim.get_state().qvel.tolist()[0]\
+            print("PhantomX target vel episode: ", distance, \
+                (distance/ (self.step_counter * self.dt)), x_velocity, self.vel_rewards, self.sim.get_state().qvel.tolist()[0], \
                 " / ctrl: ", self.ctrl_costs, self.ctrl_cost_weight, \
                 " / contact: ", self.contact_costs, self.contact_cost_weight, \
                 self.step_counter, self.frame_skip)
