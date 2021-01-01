@@ -30,10 +30,10 @@ from hexapod_envs.ant_six import AntSixEnv
 register(
 	id='AntSix-v1',
 	entry_point='hexapod_envs.ant_six:AntSixEnv',
-	max_episode_steps=300,
-	reward_threshold=900.0,
+	max_episode_steps=1000,
+	reward_threshold=500.0,
 )
-register_env("AntSix-v1", lambda config: TimeLimit(AntSixEnv(), max_episode_steps=300))
+register_env("AntSix-v1", lambda config: TimeLimit(AntSixEnv(), max_episode_steps=1000))
 
 
 register(

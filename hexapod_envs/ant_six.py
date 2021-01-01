@@ -45,8 +45,8 @@ class AntSixEnv(mujoco_env.MujocoEnv, utils.EzPickle):
                  hf_smoothness=1.):
         utils.EzPickle.__init__(**locals())
         
-        ctrl_cost_weight = 0.
-        contact_cost_weight = 0.
+        #ctrl_cost_weight = 0.
+        #contact_cost_weight = 0.
         
         self.leg_list = ["coxa_fl_geom","coxa_fr_geom","coxa_rr_geom","coxa_rl_geom","coxa_mr_geom","coxa_ml_geom"]
         
@@ -69,7 +69,7 @@ class AntSixEnv(mujoco_env.MujocoEnv, utils.EzPickle):
 
         self.modelpath = os.path.join(os.path.dirname(__file__), 'assets', xml_file)
         
-        self.max_steps = 300
+        self.max_steps = 1000
 
 #        self.joints_rads_low = np.array([-0.6, -1., -1.] * 6)
  #       self.joints_rads_high = np.array([0.6, 0.3, 1.] * 6)
@@ -179,24 +179,24 @@ class AntSixEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         healthy_reward = 0. #self.healthy_reward
         
         rewards = forward_reward #+ healthy_reward
-        costs = ctrl_cost + contact_cost
+        costs = ctrl_cost + 0.*contact_cost
 
         self.ctrl_costs += ctrl_cost
         self.contact_costs += contact_cost
         self.vel_rewards += forward_reward
 
-        reward = rewards - 0*costs
+        reward = rewards - costs
         done = self.done
         
         self.step_counter += 1
         
         if done or self.step_counter == self.max_steps:
             distance = (self.sim.data.qpos[0] - self.start_pos)# / (self.step_counter * self.dt)
-            print("PhantomX episode: ", distance, \
-                (distance/ (self.step_counter * self.dt)), x_velocity, \
+            print("PhantomX ctrl episode: ", distance, \
+                (distance/ (self.step_counter * self.dt)), x_velocity, self.vel_rewards, \
                 " / ctrl: ", self.ctrl_costs, self.ctrl_cost_weight, \
                 " / contact: ", self.contact_costs, self.contact_cost_weight, \
-                self.step_counter)
+                self.step_counter, self.frame_skip)
         
         observation = self._get_obs()
         
