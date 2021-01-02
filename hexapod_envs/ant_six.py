@@ -32,7 +32,7 @@ class AntSixEnv(mujoco_env.MujocoEnv, utils.EzPickle):
     #MODELPATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), "assets/")
     
     def __init__(self,
-                 xml_file='Ant-6Leg-3Joints_small.xml',
+                 xml_file='Ant-6Leg-3Joints_large.xml',
                  ctrl_cost_weight=0.5,
                  contact_cost_weight=5e-4,
                  healthy_reward=0.,
@@ -190,8 +190,8 @@ class AntSixEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         
         if done or self.step_counter == self.max_steps:
             distance = (self.sim.data.qpos[0] - self.start_pos)# / (self.step_counter * self.dt)
-            print("PhantomX ctrl episode: ", distance, \
-                (distance/ (self.step_counter * self.dt)), x_velocity, self.vel_rewards, self.sim.get_state().qvel.tolist()[0]\
+            print("PhantomX large femur range: ", distance, \
+                (distance/ (self.step_counter * self.dt)), x_velocity, self.vel_rewards, self.sim.get_state().qvel.tolist()[0], \
                 " / ctrl: ", self.ctrl_costs, self.ctrl_cost_weight, \
                 " / contact: ", self.contact_costs, self.contact_cost_weight, \
                 self.step_counter, self.frame_skip)

@@ -107,8 +107,7 @@ class AntSixMultiPoliciesEnv(MultiAgentEnv):
                 # from flat (1.) towards the decreased minimum smoothness
                 self.current_smoothness = self.curriculum_target_smoothness + np.random.rand()*(self.curriculum_initial_smoothness - self.curriculum_target_smoothness)
             self.env.set_hf_parameter(self.current_smoothness)
-# CURRENTLY TURNED OFF FOR HEXAPOD - TODO
-        #self.env.create_new_random_hfield()
+        self.env.create_new_random_hfield()
         self.env.reset()
 
     def distribute_observations(self, obs_full):

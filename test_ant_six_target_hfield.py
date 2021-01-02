@@ -39,7 +39,7 @@ args = parser.parse_args()
 
 #from hexapod_envs.phantomX_centralizedController_environment import PhantomX_Centralized_Env as HexapodEnv
 
-ray.init(num_cpus=18, ignore_reinit_error=True)
+ray.init(num_cpus=12, ignore_reinit_error=True)
 #ray.init(ignore_reinit_error=True)
 
 config = ppo.DEFAULT_CONFIG.copy()
@@ -93,7 +93,7 @@ config['model']['fcnet_hiddens'] = [64, 64] #grid_search([ [32, 32],[64, 64],[12
 #         "policies_to_train": HexapodEnv.policy_names, #, "dec_B_policy"],
 #     }
 # 
-config['env_config']['ctrl_cost_weight'] = grid_search([0.025, 0.05])
+config['env_config']['ctrl_cost_weight'] = 0.025 #grid_search([0.025, 0.05])
 config['env_config']['contact_cost_weight'] =  0.02 #5e-4#5e-3 #grid_search([5e-4,5e-3,5e-2])
 config['env_config']['frame_skip'] = 2#grid_search([1,2,5])
 # config['env_config']['hf_smoothness'] = 1.0
@@ -102,19 +102,21 @@ config['env_config']['frame_skip'] = 2#grid_search([1,2,5])
 # config['env_config']['range_smoothness'] =  [1., 0.6]
 # config['env_config']['range_last_timestep'] =  4000000
 
-# def on_train_result(info):
-#     result = info["result"]
-#     trainer = info["trainer"]
-#     timesteps_res = result["timesteps_total"]
-#     trainer.workers.foreach_worker(
-#         lambda ev: ev.foreach_env( lambda env: env.update_environment_after_epoch( timesteps_res ) )) 
-# 
-# config["callbacks"]={"on_train_result": on_train_result,}
+config['env_config']['hf_smoothness'] = 0.6
+
+def on_train_result(info):
+    result = info["result"]
+    trainer = info["trainer"]
+    timesteps_res = result["timesteps_total"]
+    trainer.workers.foreach_worker(
+        lambda ev: ev.foreach_env( lambda env: env.update_environment_after_epoch( timesteps_res ) )) 
+
+config["callbacks"]={"on_train_result": on_train_result,}
 
 analysis = tune.run(
       "PPO",
-      name=("Ant6_f2conf"),
-      num_samples=3,
+      name=("Ant6_hfield"),
+      num_samples=4,
       checkpoint_at_end=True,
       checkpoint_freq=625,
       stop={"timesteps_total": 20000000},

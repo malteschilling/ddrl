@@ -39,8 +39,8 @@ args = parser.parse_args()
 
 #from hexapod_envs.phantomX_centralizedController_environment import PhantomX_Centralized_Env as HexapodEnv
 
-#ray.init(num_cpus=30, ignore_reinit_error=True)
-ray.init(ignore_reinit_error=True)
+ray.init(num_cpus=30, ignore_reinit_error=True)
+#ray.init(ignore_reinit_error=True)
 
 config = ppo.DEFAULT_CONFIG.copy()
 
@@ -93,9 +93,9 @@ config['model']['fcnet_hiddens'] = [64, 64] #grid_search([ [32, 32],[64, 64],[12
 #         "policies_to_train": HexapodEnv.policy_names, #, "dec_B_policy"],
 #     }
 # 
-config['env_config']['ctrl_cost_weight'] = 0.02 #grid_search([0.01, 0.02, 0.05, 0.1, 0.2])
-config['env_config']['contact_cost_weight'] =  0.05 #5e-4#5e-3 #grid_search([5e-4,5e-3,5e-2])
-config['env_config']['frame_skip'] = 5 #grid_search([1,2,5])
+config['env_config']['ctrl_cost_weight'] = 0.025 #grid_search([0.01, 0.02, 0.05, 0.1, 0.2])
+config['env_config']['contact_cost_weight'] =  0.#0.05 #5e-4#5e-3 #grid_search([5e-4,5e-3,5e-2])
+config['env_config']['frame_skip'] = 2 #grid_search([1,2,5])
 # config['env_config']['hf_smoothness'] = 1.0
 # 
 # config['env_config']['curriculum_learning'] =  False
@@ -113,10 +113,10 @@ config['env_config']['frame_skip'] = 5 #grid_search([1,2,5])
 
 analysis = tune.run(
       "PPO",
-      name=("Ant6_vel"),
-      num_samples=2,
+      name=("Ant6_large_range"),
+      num_samples=10,
       checkpoint_at_end=True,
       checkpoint_freq=625,
-      stop={"timesteps_total": 20000000},
+      stop={"timesteps_total": 50000000},
       config=config,
   )
