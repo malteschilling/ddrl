@@ -1,6 +1,6 @@
 <mujoco model="ant">
   <compiler angle="degree" coordinate="local" inertiafromgeom="true"/>
-  <option integrator="RK4" timestep="0.01"/>
+  <option integrator="RK4" timestep="0.004"/>
 
   <default>
     <joint armature="1" damping="1" limited="true"/>

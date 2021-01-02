@@ -90,6 +90,9 @@ class AntSixEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         mujoco_env.MujocoEnv.__init__(self, self.modelpath, frame_skip)
         print("Mass: ", mujoco_py.functions.mj_getTotalmass(self.model))
         self.start_pos = self.sim.data.qpos[0].copy()
+        
+        self.model.nconmax = 1000 
+        self.model.njmax = 2000
 
     def control_cost(self, action):
         control_cost = self._ctrl_cost_weight * np.sum(np.square(action))

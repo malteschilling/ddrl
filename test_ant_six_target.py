@@ -95,7 +95,7 @@ config['model']['fcnet_hiddens'] = [64, 64] #grid_search([ [32, 32],[64, 64],[12
 # 
 config['env_config']['ctrl_cost_weight'] = grid_search([0.025, 0.05])
 config['env_config']['contact_cost_weight'] =  0.02 #5e-4#5e-3 #grid_search([5e-4,5e-3,5e-2])
-config['env_config']['frame_skip'] = 2#grid_search([1,2,5])
+config['env_config']['frame_skip'] = 5#grid_search([1,2,5])
 # config['env_config']['hf_smoothness'] = 1.0
 # 
 # config['env_config']['curriculum_learning'] =  False
@@ -113,7 +113,7 @@ config['env_config']['frame_skip'] = 2#grid_search([1,2,5])
 
 analysis = tune.run(
       "PPO",
-      name=("Ant6_f2conf"),
+      name=("Ant6_f2ctrl5"),
       num_samples=3,
       checkpoint_at_end=True,
       checkpoint_freq=625,

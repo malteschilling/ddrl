@@ -108,7 +108,7 @@ class AntSixEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         
         self.hf_smoothness = hf_smoothness
         # Scaled to 1. as six legged robot is smaller compared to Ant environment
-        self.hf_bump_scale = 1.
+        self.hf_bump_scale = 2.
         
         self.max_steps = 1000
 
@@ -131,6 +131,9 @@ class AntSixEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         mujoco_env.MujocoEnv.__init__(self, self.modelpath, frame_skip)
         #print("Mass: ", mujoco_py.functions.mj_getTotalmass(self.model))
         self.start_pos = self.sim.data.qpos[0].copy()
+        
+        self.model.nconmax = 1000 
+        self.model.njmax = 2000
 
     def create_new_random_hfield(self):
         create_new_hfield(self.model, self.hf_smoothness, self.hf_bump_scale)
