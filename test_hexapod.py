@@ -37,10 +37,10 @@ args = parser.parse_args()
 
 #from hexapod_envs.hexapod_deploy_default import Hexapod
 
-from hexapod_envs.phantomX_centralizedController_environment import PhantomX_Centralized_Env as HexapodEnv
+#from hexapod_envs.phantomX_centralizedController_environment import PhantomX_Centralized_Env as HexapodEnv
 
-ray.init(num_cpus=30, ignore_reinit_error=True)
-#ray.init(ignore_reinit_error=True)
+#ray.init(num_cpus=30, ignore_reinit_error=True)
+ray.init(ignore_reinit_error=True)
 
 config = ppo.DEFAULT_CONFIG.copy()
 
@@ -49,7 +49,7 @@ config = ppo.DEFAULT_CONFIG.copy()
 #config['env'] = "QuantrupedMultiEnv_SingleNeighbor"
 #config['env'] = "QuantrupedMultiEnv_SingleDiagonal"
 #config['env'] = "QuantrupedMultiEnv_Local"
-config['env'] = "PhantomXMultiEnv_Centralized" #"PhantomX-v1" #Hexapod
+config['env'] = "Hexapod-v1" #"PhantomX-v1" #Hexapod
 #print("SELECTED ENVIRONMENT: ", policy_scope, " = ", HexapodEnv)
 
 config['num_workers']=2
@@ -68,7 +68,7 @@ config['entropy_coeff'] = 0. #grid_search([0., 0.01])
 config['clip_param'] = 0.2
 
 config['vf_loss_coeff'] = 0.5
-config['vf_clip_param'] = 2500.
+#config['vf_clip_param'] = 2500.
 
 config['observation_filter'] = 'MeanStdFilter' #grid_search(['MeanStdFilter', 'NoFilter'])
 
@@ -93,9 +93,9 @@ config['model']['fcnet_hiddens'] = [64, 64] #grid_search([ [32, 32],[64, 64],[12
 #         "policies_to_train": HexapodEnv.policy_names, #, "dec_B_policy"],
 #     }
 # 
-config['env_config']['ctrl_cost_weight'] = 0. #0.5 # grid_search([0.05, 0.1, 0.25, 0.5])
-config['env_config']['contact_cost_weight'] =  0.#5e-4#5e-3 #grid_search([5e-4,5e-3,5e-2])
-config['env_config']['frame_skip'] = grid_search([1,2,5])
+config['env_config']['ctrl_cost_weight'] = 0.05 #grid_search([0.01, 0.02, 0.05, 0.1, 0.2])
+config['env_config']['contact_cost_weight'] =  0.02#0.05 #5e-4#5e-3 #grid_search([5e-4,5e-3,5e-2])
+config['env_config']['frame_skip'] = 5 #grid_search([1,2,5])
 # config['env_config']['hf_smoothness'] = 1.0
 # 
 # config['env_config']['curriculum_learning'] =  False
@@ -113,10 +113,10 @@ config['env_config']['frame_skip'] = grid_search([1,2,5])
 
 analysis = tune.run(
       "PPO",
-      name=("PhX_orig"),
-      num_samples=1,
+      name=("Hexapod_"),
+      num_samples=10,
       checkpoint_at_end=True,
       checkpoint_freq=625,
-      stop={"timesteps_total": 50000000},
+      stop={"timesteps_total": 20000000},
       config=config,
   )

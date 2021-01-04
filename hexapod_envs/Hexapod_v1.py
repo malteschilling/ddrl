@@ -1,23 +1,13 @@
 import numpy as np
 
 import mujoco_py
-import hexapod_target_envs.my_utils as my_utils
 
 from scipy import ndimage
 from scipy.signal import convolve2d
 
-#import time
 import os
 
 from math import sqrt, acos, fabs
-
-#from src.envs.hexapod_terrain_env.hf_gen import ManualGen, EvoGen, HMGen
-#import random
-#import string
-
-#import gym
-#from gym import spaces
-#from gym.utils import seeding
 
 from gym.envs.mujoco import mujoco_env
 from gym import utils
@@ -58,16 +48,16 @@ def create_new_hfield(mj_model, smoothness = 0.15, bump_scale=2.):
     hfield[fromrow-(patch_size-1):torow+(patch_size-1), fromcol-(patch_size-1):tocol+(patch_size-1)] = s
     # Last, we lower the hfield so that the centre aligns at zero height
     # (importantly, we use a constant offset of -0.5 for rendering purposes)
-    print("CREATED RANDOM FIELD ", np.min(hfield), np.max(hfield))
+    print("CREATED RANDOM FIELD ", np.min(hfield), np.max(hfield), smoothness, bump_scale)
     hfield = hfield - np.max(hfield[fromrow:torow, fromcol:tocol])
     mj_model.hfield_data[:] = hfield.ravel()
     #print("Smoothness set to: ", smoothness)
 
-class AntSixEnv(mujoco_env.MujocoEnv, utils.EzPickle):
+class HexapodEnv(mujoco_env.MujocoEnv, utils.EzPickle):
     #MODELPATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), "assets/")
     
     def __init__(self,
-                 xml_file='Ant-6Leg-3Joints_small.xml',
+                 xml_file='Hexapod_PhantomX_smallJointRanges.xml',
                  ctrl_cost_weight=0.5,
                  contact_cost_weight=5e-4,
                  healthy_reward=0.,
@@ -80,12 +70,9 @@ class AntSixEnv(mujoco_env.MujocoEnv, utils.EzPickle):
                  hf_smoothness=1.):
         utils.EzPickle.__init__(**locals())
         
-        #ctrl_cost_weight = 0.
-        #contact_cost_weight = 0.
+        #self.leg_list = ["coxa_fl_geom","coxa_fr_geom","coxa_rr_geom","coxa_rl_geom","coxa_mr_geom","coxa_ml_geom"]
         
-        self.leg_list = ["coxa_fl_geom","coxa_fr_geom","coxa_rr_geom","coxa_rl_geom","coxa_mr_geom","coxa_ml_geom"]
-        
-        self.target_vel = 0.25
+        self.target_vel = np.array([0.25])
         
         self._ctrl_cost_weight = ctrl_cost_weight
         self._contact_cost_weight = contact_cost_weight
@@ -132,8 +119,8 @@ class AntSixEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         #print("Mass: ", mujoco_py.functions.mj_getTotalmass(self.model))
         self.start_pos = self.sim.data.qpos[0].copy()
         
-        self.model.nconmax = 1000 
-        self.model.njmax = 2000
+ #       self.model.nconmax = 1000 
+  #      self.model.njmax = 2000
 
     def create_new_random_hfield(self):
         create_new_hfield(self.model, self.hf_smoothness, self.hf_bump_scale)
@@ -142,6 +129,9 @@ class AntSixEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         self.hf_smoothness = smoothness
         if bump_scale:
             self.hf_bump_scale = bump_scale
+
+    def set_target_velocity(self, t_vel):
+        self.target_vel = np.array([t_vel])
 
     def control_cost(self, action):
         control_cost = self._ctrl_cost_weight * np.sum(np.square(action))
@@ -165,8 +155,6 @@ class AntSixEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         state = self.state_vector()
         min_z, max_z = self._healthy_z_range
         is_healthy = (np.isfinite(state).all() and min_z <= state[2] <= max_z)
-#        if not is_healthy:
- #           print("Finish: ", state[2])
         return is_healthy
 
     @property
@@ -226,7 +214,7 @@ class AntSixEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         contact_cost = self.contact_cost
 
         #forward_reward = x_velocity #* 10 # Scaled as ant-sim env is much bigger
-        forward_reward = (1. + 1./self.target_vel) * (1. / (np.abs(x_velocity - self.target_vel) + 1.) - 1. / (self.target_vel + 1.))
+        forward_reward = (1. + 1./self.target_vel[0]) * (1. / (np.abs(x_velocity - self.target_vel[0]) + 1.) - 1. / (self.target_vel[0] + 1.))
                 
         healthy_reward = 0. #self.healthy_reward
         
@@ -245,7 +233,8 @@ class AntSixEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         if done or self.step_counter == self.max_steps:
             distance = (self.sim.data.qpos[0] - self.start_pos)# / (self.step_counter * self.dt)
             print("PhantomX target vel episode: ", distance, \
-                (distance/ (self.step_counter * self.dt)), x_velocity, self.vel_rewards, self.sim.get_state().qvel.tolist()[0], \
+                (distance/ (self.step_counter * self.dt)), self.target_vel[0], \
+                x_velocity, self.vel_rewards, self.sim.get_state().qvel.tolist()[0], \
                 " / ctrl: ", self.ctrl_costs, self.ctrl_cost_weight, \
                 " / contact: ", self.contact_costs, self.contact_cost_weight, \
                 self.step_counter, self.frame_skip)
@@ -269,52 +258,6 @@ class AntSixEnv(mujoco_env.MujocoEnv, utils.EzPickle):
 
         return observation, reward, done, info
 
-    def step_torque(self, action):
-        # From ant
-        xy_position_before = self.get_body_com("torso")[:2].copy()
-        
-        scaled_action = self.scale_action(action)
-        # For real robot: self.scale_action(action) instead of action
-        self.do_simulation(scaled_action, self.frame_skip)
-        
-        xy_position_after = self.get_body_com("torso")[:2].copy()
-
-        xy_velocity = (xy_position_after - xy_position_before) / self.dt
-        x_velocity, y_velocity = xy_velocity
-
-        # Reward calculation
-        # use scaled action (see above)
-        ctrl_cost = self.control_cost(scaled_action)
-        contact_cost = self.contact_cost
-
-        forward_reward = x_velocity
-        healthy_reward = 0. #self.healthy_reward
-        
-        rewards = forward_reward #+ healthy_reward
-        costs = ctrl_cost + contact_cost
-
-        reward = rewards - costs
-        done = self.done
-        
-        observation = self._get_obs()
-        
-        info = {
-            'reward_forward': forward_reward,
-            'reward_ctrl': -ctrl_cost,
-            'reward_contact': -contact_cost,
-            'reward_survive': healthy_reward,
-
-            'x_position': xy_position_after[0],
-            'y_position': xy_position_after[1],
-            'distance_from_origin': np.linalg.norm(xy_position_after, ord=2),
-
-            'x_velocity': x_velocity,
-            'y_velocity': y_velocity,
-            'forward_reward': forward_reward,
-        }
-
-        return observation, reward, done, info
-        
     def _get_obs(self):
         """ 
         Observation space for the Hexapod model.
@@ -354,7 +297,7 @@ class AntSixEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         if self._exclude_current_positions_from_observation:
             position = position[2:]
 
-        observations = np.concatenate((position, velocity, joint_sensor_forces, last_control))#, last_control)) #, contact_force))
+        observations = np.concatenate((position, velocity, joint_sensor_forces, last_control, self.target_vel))#, last_control)) #, contact_force))
 
         return observations
 

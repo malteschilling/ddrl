@@ -4,9 +4,9 @@ import numpy as np
 import mujoco_py
 from gym import spaces
 
-from hexapod_envs import HexapodMultiPoliciesEnv
+from hexapod_envs.hexapod_adaptor_multi_environment import HexapodMultiPoliciesEnv
         
-class Hexapod_Centralized_Env(HexapodMultiPoliciesEnv):
+class HexapodMultiEnv_Centralized_Env(HexapodMultiPoliciesEnv):
     """
     """    
     
@@ -30,12 +30,12 @@ class Hexapod_Centralized_Env(HexapodMultiPoliciesEnv):
         
     @staticmethod
     def policy_mapping_fn(agent_id):
-        return Hexapod_Centralized_Env.policy_names[0]
+        return HexapodMultiEnv_Centralized_Env.policy_names[0]
             
     @staticmethod
     def return_policies(obs_space):
         policies = {
-            Hexapod_Centralized_Env.policy_names[0]: (None,
+            HexapodMultiEnv_Centralized_Env.policy_names[0]: (None,
                 obs_space, spaces.Box(-1., 1., (18,) ), {}),
         }
         return policies

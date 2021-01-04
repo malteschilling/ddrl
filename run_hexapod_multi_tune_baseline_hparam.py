@@ -27,31 +27,24 @@ else:
  
 # To run: SingleDiagonal, SingleToFront, TwoSides, TwoDiags
 if policy_scope=="HexapodMultiEnv_FullyDecentral":
-    from hexapod_envs.hexapod_sixDecentralizedController_environments import HexapodFullyDecentralizedEnv as HexapodEnv
-elif policy_scope=="HexapodMultiEnv_Local":
-    from hexapod_envs.hexapod_sixDecentralizedController_environments import Hexapod_Local_Env as HexapodEnv
-elif policy_scope=="HexapodMultiEnv_TwoSides":
-    from hexapod_envs.hexapod_twoDecentralizedController_environments import Hexapod_TwoSideControllers_Env as HexapodEnv
+    from hexapod_envs.hexapod_DecentralizedController_environments import HexapodFullyDecentralizedEnv as HexapodEnv
+#elif policy_scope=="HexapodMultiEnv_Local":
+ #   from hexapod_envs.hexapod_sixDecentralizedController_environments import Hexapod_Local_Env as HexapodEnv
+#elif policy_scope=="HexapodMultiEnv_TwoSides":
+ #   from hexapod_envs.hexapod_twoDecentralizedController_environments import Hexapod_TwoSideControllers_Env as HexapodEnv
 else:
-    from hexapod_envs.hexapod_centralizedController_environment import Hexapod_Centralized_Env as HexapodEnv
+    from hexapod_envs.hexapod_centralizedController_environment import HexapodMultiEnv_Centralized_Env as HexapodEnv
 
-#ray.init(num_cpus=30, ignore_reinit_error=True)
-ray.init(ignore_reinit_error=True)
+ray.init(num_cpus=15, ignore_reinit_error=True)
+#ray.init(ignore_reinit_error=True)
 
 config = ppo.DEFAULT_CONFIG.copy()
 
-#config['env'] = "QuantrupedMultiEnv_Centralized"
-#config['env'] = "QuantrupedMultiEnv_FullyDecentral"
-#config['env'] = "QuantrupedMultiEnv_SingleNeighbor"
-#config['env'] = "QuantrupedMultiEnv_SingleDiagonal"
-#config['env'] = "QuantrupedMultiEnv_Local"
 config['env'] = policy_scope
 print("SELECTED ENVIRONMENT: ", policy_scope, " = ", HexapodEnv)
 
 config['num_workers']=2
 config['num_envs_per_worker']=4
-#config["eager"] = False
-#config['nump_gpus']=1
 
 config['train_batch_size'] = 16000 # BEFORE 4000 #grid_search([4000, 65536]
 
@@ -79,7 +72,7 @@ config['model']['fcnet_hiddens'] = [64, 64]
 
 #config['seed'] = round(time.time())
 
-single_env = gym.make("Hexapod-v1")
+#single_env = gym.make("Hexapod-v1")
 #policies = QuantrupedMultiPoliciesEnv.return_policies(single_env.observation_space)
 policies = HexapodEnv.return_policies( spaces.Box(-np.inf, np.inf, (83,), np.float64) )
 
@@ -89,14 +82,15 @@ config["multiagent"] = {
         "policies_to_train": HexapodEnv.policy_names, #, "dec_B_policy"],
     }
 
-config['env_config']['ctrl_cost_weight'] = 0.5#grid_search([5e-4,5e-3,5e-2])
-config['env_config']['contact_cost_weight'] =  5e-4 #5e-2 #grid_search([5e-4,5e-3,5e-2])
+config['env_config']['ctrl_cost_weight'] = 0.05#grid_search([5e-4,5e-3,5e-2])
+config['env_config']['contact_cost_weight'] =  0.02 #5e-2 #grid_search([5e-4,5e-3,5e-2])
 
 config['env_config']['hf_smoothness'] = 1.0
+#config['env_config']['hf_smoothness'] = 1.0
 
-config['env_config']['curriculum_learning'] =  False
+config['env_config']['curriculum_learning'] =  True
 config['env_config']['range_smoothness'] =  [1., 0.6]
-config['env_config']['range_last_timestep'] =  4000000
+config['env_config']['range_last_timestep'] =  15000000
 
 def on_train_result(info):
     result = info["result"]
@@ -113,6 +107,6 @@ analysis = tune.run(
       num_samples=10,
       checkpoint_at_end=True,
       checkpoint_freq=625,
-      stop={"timesteps_total": 40000000},
+      stop={"timesteps_total": 20000000},
       config=config,
   )

@@ -4,6 +4,7 @@ import numpy as np
 import mujoco_py
 from gym import spaces
 from mujoco_py import functions
+import random
 
 class HexapodMultiPoliciesEnv(MultiAgentEnv):
     """ RLLib multiagent Environment that encapsulates a quadruped walker environment.
@@ -38,6 +39,11 @@ class HexapodMultiPoliciesEnv(MultiAgentEnv):
             ctrl_cost_weight = config['ctrl_cost_weight']
         else: 
             ctrl_cost_weight = 0.5
+            
+        if 'frame_skip' in config.keys():
+            frame_skip = config['frame_skip']
+        else: 
+            frame_skip = 5
         
         if 'hf_smoothness' in config.keys():
             hf_smoothness = config['hf_smoothness']
@@ -46,9 +52,11 @@ class HexapodMultiPoliciesEnv(MultiAgentEnv):
               
         self.env = gym.make("Hexapod-v1", 
             ctrl_cost_weight=ctrl_cost_weight,
-            contact_cost_weight=contact_cost_weight, hf_smoothness=hf_smoothness)
+            contact_cost_weight=contact_cost_weight, 
+            frame_skip=frame_skip,
+            hf_smoothness=hf_smoothness)
         
-        hexapod_mass = mujoco_py.functions.mj_getTotalmass(self.env.model)
+        #hexapod_mass = mujoco_py.functions.mj_getTotalmass(self.env.model)
         #print("Weight: ", hexapod_mass)
         #mujoco_py.functions.mj_setTotalmass(self.env.model, 10. * ant_mass)
         
@@ -68,19 +76,7 @@ class HexapodMultiPoliciesEnv(MultiAgentEnv):
         if 'range_last_timestep' in config.keys():
             self.curriculum_last_timestep = config['range_last_timestep']
         
-        #self.policy_B = "dec_B_policy"
-        
-        #self.acc_forw_rew = 0.
-        #self.acc_ctrl_cost = 0.
-        #self.acc_contact_cost = 0.
-        #self.acc_step = 0
-        
-        # From TimeLimit
-        #max_episode_steps = 1000
-        #if self.env.spec is not None:
-         #   self.env.spec.max_episode_steps = max_episode_steps
-        #self._max_episode_steps = max_episode_steps
-        #self._elapsed_steps = None
+        self.target_velocity_list = [0.16, 0.32]
 
     def update_environment_after_epoch(self, timesteps_total):
         if self.curriculum_learning:
@@ -100,8 +96,7 @@ class HexapodMultiPoliciesEnv(MultiAgentEnv):
                 # from flat (1.) towards the decreased minimum smoothness
                 self.current_smoothness = self.curriculum_target_smoothness + np.random.rand()*(self.curriculum_initial_smoothness - self.curriculum_target_smoothness)
             self.env.set_hf_parameter(self.current_smoothness)
-# CURRENTLY TURNED OFF FOR HEXAPOD - TODO
-        #self.env.create_new_random_hfield()
+        self.env.create_new_random_hfield()
         self.env.reset()
 
     def distribute_observations(self, obs_full):
@@ -139,8 +134,8 @@ class HexapodMultiPoliciesEnv(MultiAgentEnv):
     def reset(self):
         # From TimeLimit
         #self._elapsed_steps = 0
-        
         obs_original = self.env.reset()
+        self.env.set_target_velocity( random.choice( self.target_velocity_list ) )
         return self.distribute_observations(obs_original)
 
     def step(self, action_dict):
