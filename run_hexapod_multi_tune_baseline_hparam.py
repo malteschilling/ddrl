@@ -27,16 +27,16 @@ else:
  
 # To run: SingleDiagonal, SingleToFront, TwoSides, TwoDiags
 if policy_scope=="HexapodMultiEnv_FullyDecentral":
-    from hexapod_envs.hexapod_DecentralizedController_environments import HexapodFullyDecentralizedEnv as HexapodEnv
-#elif policy_scope=="HexapodMultiEnv_Local":
- #   from hexapod_envs.hexapod_sixDecentralizedController_environments import Hexapod_Local_Env as HexapodEnv
+    from hexapod_envs.hexapod_decentralizedController_environments import HexapodFullyDecentralizedEnv as HexapodEnv
+elif policy_scope=="HexapodMultiEnv_Local":
+    from hexapod_envs.hexapod_decentralizedController_environments import Hexapod_Local_Env as HexapodEnv
 #elif policy_scope=="HexapodMultiEnv_TwoSides":
  #   from hexapod_envs.hexapod_twoDecentralizedController_environments import Hexapod_TwoSideControllers_Env as HexapodEnv
 else:
     from hexapod_envs.hexapod_centralizedController_environment import HexapodMultiEnv_Centralized_Env as HexapodEnv
 
-ray.init(num_cpus=15, ignore_reinit_error=True)
-#ray.init(ignore_reinit_error=True)
+#ray.init(num_cpus=15, ignore_reinit_error=True)
+ray.init(ignore_reinit_error=True)
 
 config = ppo.DEFAULT_CONFIG.copy()
 
@@ -74,7 +74,7 @@ config['model']['fcnet_hiddens'] = [64, 64]
 
 #single_env = gym.make("Hexapod-v1")
 #policies = QuantrupedMultiPoliciesEnv.return_policies(single_env.observation_space)
-policies = HexapodEnv.return_policies( spaces.Box(-np.inf, np.inf, (83,), np.float64) )
+policies = HexapodEnv.return_policies()
 
 config["multiagent"] = {
         "policies": policies,

@@ -3,10 +3,6 @@
   <option integrator="RK4" timestep="0.004"/>
   <size nconmax="1000" njmax="2000"/>
 
-  <custom>
-    <numeric data="0.0 0.0 0.35 1.0 0.0 0.0 0.0 0.0 1.0 0.0 -1.0 0.0 -1.0 0.0 1.0" name="init_qpos"/>
-  </custom>
-
   <default>
     <joint armature="1" damping="1" limited="true"/>
     <geom conaffinity="0" condim="3" density="5.0" friction="1 0.5 0.5" margin="0.01" rgba="0.8 0.6 0.4 1"/>

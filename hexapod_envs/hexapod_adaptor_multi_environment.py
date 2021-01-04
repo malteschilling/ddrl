@@ -97,7 +97,7 @@ class HexapodMultiPoliciesEnv(MultiAgentEnv):
                 self.current_smoothness = self.curriculum_target_smoothness + np.random.rand()*(self.curriculum_initial_smoothness - self.curriculum_target_smoothness)
             self.env.set_hf_parameter(self.current_smoothness)
         self.env.create_new_random_hfield()
-        self.env.reset()
+        #self.env.reset()
 
     def distribute_observations(self, obs_full):
         return {
@@ -173,7 +173,8 @@ class HexapodMultiPoliciesEnv(MultiAgentEnv):
         return HexapodMultiPoliciesEnv.policy_names[0]
             
     @staticmethod
-    def return_policies(obs_space):
+    def return_policies():
+        obs_space = spaces.Box(-np.inf, np.inf, (84,), np.float64)
         policies = {
             HexapodMultiPoliciesEnv.policy_names[0]: (None,
                 obs_space, spaces.Box(-1., +1., (18,)), {}),

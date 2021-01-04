@@ -46,12 +46,8 @@ def create_new_hfield(mj_model, smoothness = 0.15, bump_scale=2.):
     K = np.ones((patch_size,patch_size)) / patch_size**2
     s = convolve2d(hfield[fromrow-(patch_size-1):torow+(patch_size-1), fromcol-(patch_size-1):tocol+(patch_size-1)], K, mode='same', boundary='symm')
     hfield[fromrow-(patch_size-1):torow+(patch_size-1), fromcol-(patch_size-1):tocol+(patch_size-1)] = s
-    # Last, we lower the hfield so that the centre aligns at zero height
-    # (importantly, we use a constant offset of -0.5 for rendering purposes)
     print("CREATED RANDOM FIELD ", np.min(hfield), np.max(hfield), smoothness, bump_scale)
-    hfield = hfield - np.max(hfield[fromrow:torow, fromcol:tocol])
     mj_model.hfield_data[:] = hfield.ravel()
-    #print("Smoothness set to: ", smoothness)
 
 class HexapodEnv(mujoco_env.MujocoEnv, utils.EzPickle):
     #MODELPATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), "assets/")
@@ -72,7 +68,7 @@ class HexapodEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         
         #self.leg_list = ["coxa_fl_geom","coxa_fr_geom","coxa_rr_geom","coxa_rl_geom","coxa_mr_geom","coxa_ml_geom"]
         
-        self.target_vel = np.array([0.25])
+        self.target_vel = np.array([0.32])
         
         self._ctrl_cost_weight = ctrl_cost_weight
         self._contact_cost_weight = contact_cost_weight
@@ -122,8 +118,20 @@ class HexapodEnv(mujoco_env.MujocoEnv, utils.EzPickle):
  #       self.model.nconmax = 1000 
   #      self.model.njmax = 2000
 
+    def reset(self):
+        obs = super().reset()
+        # Move agent above heightfield
+        h_center = int(0.5 * self.model.hfield_ncol)
+        v_center = int(0.5 * self.model.hfield_nrow)
+        initial_height = 0.2 + np.max(self.model.hfield_data.reshape(4000,400)[(h_center-3):(h_center+4),(v_center-3):(v_center+4)])
+        old_pos = self.sim.data.qpos[2]
+        self.sim.data.qpos[2] = initial_height
+        #print("RESET FROM : " , old_pos, initial_height)
+        return self._get_obs()
+
     def create_new_random_hfield(self):
         create_new_hfield(self.model, self.hf_smoothness, self.hf_bump_scale)
+        self.reset()
 
     def set_hf_parameter(self, smoothness, bump_scale=None):
         self.hf_smoothness = smoothness

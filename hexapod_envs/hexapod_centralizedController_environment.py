@@ -15,7 +15,7 @@ class HexapodMultiEnv_Centralized_Env(HexapodMultiPoliciesEnv):
     
     def __init__(self, config):
         self.obs_indices = {}
-        self.obs_indices["central_policy"] =  range(0,83)
+        self.obs_indices["central_policy"] =  range(0,84)
         super().__init__(config)
 
     def distribute_observations(self, obs_full):
@@ -33,7 +33,8 @@ class HexapodMultiEnv_Centralized_Env(HexapodMultiPoliciesEnv):
         return HexapodMultiEnv_Centralized_Env.policy_names[0]
             
     @staticmethod
-    def return_policies(obs_space):
+    def return_policies():
+        obs_space = spaces.Box(-np.inf, np.inf, (84,), np.float64)
         policies = {
             HexapodMultiEnv_Centralized_Env.policy_names[0]: (None,
                 obs_space, spaces.Box(-1., 1., (18,) ), {}),
