@@ -26,13 +26,13 @@ class HexapodSixControllerSuperEnv(HexapodMultiPoliciesEnv):
         raw_contact_forces = self.env.sim.data.cfrc_ext
         contact_forces = np.clip(raw_contact_forces, -1., 1.)
         contact_costs = self.env.contact_cost_weight * np.square(contact_forces)
-        global_contact_costs = np.sum(contact_costs[0:2])/4.
-        contact_cost[self.policy_names[0]] = global_contact_costs + np.sum(contact_costs[2:5])
-        contact_cost[self.policy_names[1]] = global_contact_costs + np.sum(contact_costs[5:8])
-        contact_cost[self.policy_names[2]] = global_contact_costs + np.sum(contact_costs[8:11])
-        contact_cost[self.policy_names[3]] = global_contact_costs + np.sum(contact_costs[11:14])
-        contact_cost[self.policy_names[4]] = global_contact_costs + np.sum(contact_costs[14:17])
-        contact_cost[self.policy_names[5]] = global_contact_costs + np.sum(contact_costs[17:])
+        global_contact_costs = np.sum(contact_costs[0:2])/6.
+        contact_cost[self.policy_names[0]] = global_contact_costs + np.sum(contact_costs[2:6])
+        contact_cost[self.policy_names[1]] = global_contact_costs + np.sum(contact_costs[6:10])
+        contact_cost[self.policy_names[2]] = global_contact_costs + np.sum(contact_costs[10:14])
+        contact_cost[self.policy_names[3]] = global_contact_costs + np.sum(contact_costs[14:18])
+        contact_cost[self.policy_names[4]] = global_contact_costs + np.sum(contact_costs[18:22])
+        contact_cost[self.policy_names[5]] = global_contact_costs + np.sum(contact_costs[22:])
         #print(contact_cost)
         #sum_c = 0.
         #for i in self.policy_names:
