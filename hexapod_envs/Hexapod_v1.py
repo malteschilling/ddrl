@@ -68,7 +68,7 @@ class HexapodEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         
         #self.leg_list = ["coxa_fl_geom","coxa_fr_geom","coxa_rr_geom","coxa_rl_geom","coxa_mr_geom","coxa_ml_geom"]
         
-        self.target_vel = np.array([0.32])
+        self.target_vel = np.array([0.24])
         
         self._ctrl_cost_weight = ctrl_cost_weight
         self._contact_cost_weight = contact_cost_weight
@@ -110,6 +110,8 @@ class HexapodEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         self.ctrl_costs = 0.
         self.contact_costs = 0.
         self.vel_rewards = 0.
+        self.upright_vector = np.array([0.,0.,1.])
+        self.healthy_rewards = 0
         
         mujoco_env.MujocoEnv.__init__(self, self.modelpath, frame_skip)
         #print("Mass: ", mujoco_py.functions.mj_getTotalmass(self.model))
@@ -224,14 +226,19 @@ class HexapodEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         #forward_reward = x_velocity #* 10 # Scaled as ant-sim env is much bigger
         forward_reward = (1. + 1./self.target_vel[0]) * (1. / (np.abs(x_velocity - self.target_vel[0]) + 1.) - 1. / (self.target_vel[0] + 1.))
                 
-        healthy_reward = 0. #self.healthy_reward
-        
-        rewards = forward_reward #+ healthy_reward
+        # Calculate if model keeps upright
+        # Current orientation as a matrix
+        torso_orient_mat = self.sim.data.body_xmat[1].reshape(3,3)
+        # Reward is projection of z axis of body onto world z-axis
+        healthy_reward = np.matmul(torso_orient_mat, self.upright_vector)#0. #self.healthy_reward
+
+        rewards = forward_reward + healthy_reward[2]
         costs = ctrl_cost + 0.*contact_cost
 
         self.ctrl_costs += ctrl_cost
         self.contact_costs += contact_cost
         self.vel_rewards += forward_reward
+        self.healthy_rewards += healthy_reward[2]
 
         reward = rewards - costs
         done = self.done
@@ -245,7 +252,7 @@ class HexapodEnv(mujoco_env.MujocoEnv, utils.EzPickle):
                 x_velocity, self.vel_rewards, self.sim.get_state().qvel.tolist()[0], \
                 " / ctrl: ", self.ctrl_costs, self.ctrl_cost_weight, \
                 " / contact: ", self.contact_costs, self.contact_cost_weight, \
-                self.step_counter, self.frame_skip)
+                " / healthy: ", self.healthy_rewards, self.step_counter)
         
         observation = self._get_obs()
         
@@ -330,6 +337,7 @@ class HexapodEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         self.ctrl_costs = 0.
         self.contact_costs = 0.
         self.vel_rewards = 0.
+        self.healthy_rewards = 0.
         
         return observation
      
