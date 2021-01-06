@@ -56,7 +56,7 @@ class HexapodEnv(mujoco_env.MujocoEnv, utils.EzPickle):
                  xml_file='Hexapod_PhantomX_smallJointRanges.xml',
                  ctrl_cost_weight=0.5,
                  contact_cost_weight=5e-4,
-                 healthy_reward=1.,
+                 healthy_reward=0.,
                  terminate_when_unhealthy=True,
                  healthy_z_range=(0.025, 1.5),
                  contact_force_range=(-1.0, 1.0),
@@ -68,7 +68,7 @@ class HexapodEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         
         #self.leg_list = ["coxa_fl_geom","coxa_fr_geom","coxa_rr_geom","coxa_rl_geom","coxa_mr_geom","coxa_ml_geom"]
         
-        self.target_vel = np.array([0.24])
+        self.target_vel = np.array([0.16])
         
         self._ctrl_cost_weight = ctrl_cost_weight
         self._contact_cost_weight = contact_cost_weight
@@ -116,6 +116,7 @@ class HexapodEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         
         mujoco_env.MujocoEnv.__init__(self, self.modelpath, frame_skip)
         #print("Mass: ", mujoco_py.functions.mj_getTotalmass(self.model))
+        self.create_new_random_hfield()
         self.start_pos = self.sim.data.qpos[0].copy()
         
  #       self.model.nconmax = 1000 
@@ -161,14 +162,17 @@ class HexapodEnv(mujoco_env.MujocoEnv, utils.EzPickle):
             np.square(self.contact_forces))
         return contact_cost
 
-    @property
-    def healthy_reward(self):
+    def calculate_torso_z_orientation(self):
         # Calculate if model keeps upright
         # Current orientation as a matrix
         torso_orient_mat = self.sim.data.body_xmat[1].reshape(3,3)
         # Reward is projection of z axis of body onto world z-axis
-        healthy_reward = np.matmul(torso_orient_mat, self.upright_vector)[2]#0. #self.healthy_reward
-        return (healthy_reward * self._healthy_reward)
+        z_direction = np.matmul(torso_orient_mat, self.upright_vector)[2]#0. #self.healthy_reward
+        return z_direction
+
+    @property
+    def healthy_reward(self):
+        return (self.calculate_torso_z_orientation() * self._healthy_reward)
 
     @property
     def is_healthy(self):
@@ -238,7 +242,13 @@ class HexapodEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         
         healthy_reward = self.healthy_reward
         
-        rewards = forward_reward + healthy_reward
+        done = self.done
+        
+        if (self.calculate_torso_z_orientation() < -0.7):
+            done = True
+            forward_reward += (self.step_counter - self.max_steps)
+        
+        rewards = forward_reward #+ healthy_reward
         costs = ctrl_cost + contact_cost
 
         self.ctrl_costs += ctrl_cost
@@ -250,17 +260,12 @@ class HexapodEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         self.sum_rewards += reward
         #if (self.step_counter % 50 == 0):
          #   print("REW: ", reward, forward_reward, healthy_reward)
-        done = self.done
-        
-        if (healthy_reward < -0.8):
-            done = True
-            reward += (self.step_counter - self.max_steps)
         
         self.step_counter += 1
         
         if done or self.step_counter == self.max_steps:
             distance = (self.sim.data.qpos[0] - self.start_pos)# / (self.step_counter * self.dt)
-            print("PhantomX target vel episode: ", distance, \
+            print("Hexapod target vel episode: ", distance, \
                 (distance/ (self.step_counter * self.dt)), self.target_vel[0], \
                 x_velocity, self.vel_rewards, self.sim.get_state().qvel.tolist()[0], \
                 " / ctrl: ", self.ctrl_costs, self.ctrl_cost_weight, \

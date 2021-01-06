@@ -11,6 +11,7 @@ from ray.rllib.env import MultiAgentEnv
 from ray.rllib.evaluation.worker_set import WorkerSet
 
 import simulation_envs
+import hexapod_envs
 import gym
 import models
 
@@ -35,8 +36,8 @@ def default_policy_agent_mapping(unused_agent_id):
     return DEFAULT_POLICY_ID
 
 #config_checkpoint = "/Users/mschilling/Desktop/gpu_cluster/ray_results_12_09/HF_10_QuantrupedMultiEnv_Centralized/PPO_QuantrupedMultiEnv_Centralized_989cd_00000_0_2020-12-08_18-34-16/checkpoint_1250/checkpoint-1250"
-config_checkpoint = "/Users/mschilling/Desktop/gpu_cluster/ray_results_12_09/HF_10_QuantrupedMultiEnv_Local/PPO_QuantrupedMultiEnv_Local_1a49c_00000_0_2020-12-04_12-08-56/checkpoint_1250/checkpoint-1250"
-
+#config_checkpoint = "/Users/mschilling/Desktop/gpu_cluster/ray_results_12_09/HF_10_QuantrupedMultiEnv_Local/PPO_QuantrupedMultiEnv_Local_1a49c_00000_0_2020-12-04_12-08-56/checkpoint_1250"
+config_checkpoint = "/Users/mschilling/ray_results/Hexa_HexapodMultiEnv_Centralized/PPO_HexapodMultiEnv_Centralized_09ee7_00000_0_2021-01-06_15-54-12/checkpoint_625/checkpoint-625"
 #"/Users/mschilling/Desktop/gpu_cluster/ray_results/exp_QuantrupedMultiEnv_Centralized/PPO_QuantrupedMultiEnv_Centralized_6e846_00000_0_2020-10-24_15-47-18/checkpoint_2084/checkpoint-2084"
 
 #config_checkpoint="/Users/mschilling/Desktop/develop/Decentralized_DRL/ray_results/rllib_centralized_2/PPO_QuantrupedMultiEnv_Centralized_7443a_00000_0_2020-10-21_20-23-02/checkpoint_3125/checkpoint-3125"
@@ -61,7 +62,7 @@ ray.init()
 cls = get_trainable_cls('PPO')
 
 config["create_env_on_driver"] = True
-config['env_config']['hf_smoothness'] = 0.8
+config['env_config']['hf_smoothness'] = 1.
 if "no_eager_on_workers" in config:
     del config["no_eager_on_workers"]
 
@@ -69,7 +70,7 @@ agent = cls(env=config['env'], config=config)
 # Load state from checkpoint.
 agent.restore(config_checkpoint)
 num_steps = int(1000)
-num_episodes = int(10)
+num_episodes = int(3)
 
 if hasattr(agent, "workers") and isinstance(agent.workers, WorkerSet):
     env = agent.workers.local_worker().env
