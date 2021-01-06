@@ -1,4 +1,4 @@
-#import numpy as np
+import numpy as np
 #import matplotlib.pyplot as plt
 import pandas as pd
 import glob
@@ -63,8 +63,10 @@ for i in range(0,8):
         mean_vel = np.sum(df.query('evaluated_on==' + str(data_smoothn_steps[j]) + 'and approach=="' + exp_name[i] + '"')['distance'])/ overall_duration
         # cost_of_transport = (power_total/steps) / (mujoco_py.functions.mj_getTotalmass(env.env.model) * com_vel)
         # Weight is 8.78710174560547
-        mean_cost_of_transport = (np.sum(df.query('evaluated_on==' + str(data_smoothn_steps[j]) + 'and approach=="' + exp_name[i] + '"')['power'])/overall_duration) \
-            /(8.7871 * mean_vel)
+        mean_cost_of_transport = (np.sum(df.query('evaluated_on==' + str(data_smoothn_steps[j]) + 'and approach=="' + exp_name[i] + '"')['power'])) \
+            /(8.7871 * np.sum(df.query('evaluated_on==' + str(data_smoothn_steps[j]) + 'and approach=="' + exp_name[i] + '"')['distance']) )
+        #mean_cost_of_transport = (np.sum(df.query('evaluated_on==' + str(data_smoothn_steps[j]) + 'and approach=="' + exp_name[i] + '"')['power'])/overall_duration) \
+         #   /(8.7871 *  mean_vel)
         mean_cots.append(mean_cost_of_transport)
         mean_returns.append(mean_return)
         mean_vels.append(mean_vel)

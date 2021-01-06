@@ -62,7 +62,7 @@
       </body>
 
       <body name="middle_left_leg" pos="0 0 0">
-        <geom fromto="0.0 0.0 0.0 0.0 0.1 0.0" name="aux_3_geom" size="0.015" type="capsule"/> 
+        <geom fromto="0.0 0.0 0.0 0.0 0.1 0.0" name="aux_ml_geom" size="0.015" type="capsule"/> 
         <body name="aux_ml" pos="0 0.1 0">
         <joint axis="0 0 1" name="coxa_ml" pos="0.0 0.0 0.0" range="-30 30" type="hinge" />
           <geom fromto="0.0 0.0 0.0 0.0 0.052 0.0" name="coxa_ml_geom" size="0.015" mass="0.015" type="capsule"/>
