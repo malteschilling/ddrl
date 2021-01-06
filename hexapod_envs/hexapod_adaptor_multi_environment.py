@@ -76,6 +76,7 @@ class HexapodMultiPoliciesEnv(MultiAgentEnv):
         if 'range_last_timestep' in config.keys():
             self.curriculum_last_timestep = config['range_last_timestep']
         
+        # TODO switch target velocities
         self.target_velocity_list = [0.16, 0.32]
 
     def update_environment_after_epoch(self, timesteps_total):
@@ -119,7 +120,7 @@ class HexapodMultiPoliciesEnv(MultiAgentEnv):
         return contact_cost
 
     def distribute_reward(self, reward_full, info, action_dict):
-        fw_reward = info['reward_forward']
+        fw_reward = info['reward_forward'] #+ info['reward_survive']
         rew = {}    
         contact_costs = self.distribute_contact_cost()  
         for policy_name in self.policy_names:

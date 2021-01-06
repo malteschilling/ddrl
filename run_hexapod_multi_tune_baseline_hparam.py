@@ -89,7 +89,7 @@ config['env_config']['hf_smoothness'] = 1.0
 #config['env_config']['hf_smoothness'] = 1.0
 
 config['env_config']['curriculum_learning'] =  True
-config['env_config']['range_smoothness'] =  [1., 0.6]
+config['env_config']['range_smoothness'] =  [1., 0.8]
 config['env_config']['range_last_timestep'] =  15000000
 
 def on_train_result(info):
@@ -103,7 +103,7 @@ config["callbacks"]={"on_train_result": on_train_result,}
 
 analysis = tune.run(
       "PPO",
-      name=("Hexa_" + policy_scope),
+      name=("Hex_2tvel_Cur08" + policy_scope),
       num_samples=10,
       checkpoint_at_end=True,
       checkpoint_freq=625,
