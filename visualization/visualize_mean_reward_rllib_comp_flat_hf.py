@@ -109,11 +109,13 @@ plt.legend(loc="lower right")
 plt.savefig(file_name + '_legend.pdf')
 
 ####################
+####################
 # Centralized long run
+####################
 ####################
 
 exp_long_run_path = [os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_centralized_40M/'] 
-experiment_centr_longrun_dirs = [[os.path.join(exp_path_item,dI) for dI in os.listdir(exp_path_item) if os.path.isdir(os.path.join(exp_path_item,dI))] for exp_path_item in exp_path]
+experiment_centr_longrun_dirs = [[os.path.join(exp_path_item,dI) for dI in os.listdir(exp_path_item) if os.path.isdir(os.path.join(exp_path_item,dI))] for exp_path_item in exp_long_run_path]
 
 for exp_dir in experiment_centr_longrun_dirs:
     for i in range(0, len(exp_dir)):
@@ -156,6 +158,64 @@ ax_arch.set_xlabel('timesteps', fontsize=14)
 ax_arch.set_ylabel('Return per Episode', fontsize=14)
 #plt.plot([0,500], [200,200], color=tableau20[6], linestyle='--')
 file_name = 'learning_curve__long_mean'
+plt.savefig(file_name + '.pdf')
+plt.legend(loc="lower right")
+plt.savefig(file_name + '_legend.pdf')
+
+####################
+####################
+# Comparison: 
+# Controller that all get global information
+# but cost information is local.
+####################
+####################
+
+exp_local_cost_path = [os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_localCosts_Central/HF_10_QuantrupedMultiEnv_FullyDecentralGlobalCost'] 
+experiment_local_cost_dirs = [[os.path.join(exp_path_item,dI) for dI in os.listdir(exp_path_item) if os.path.isdir(os.path.join(exp_path_item,dI))] for exp_path_item in exp_local_cost_path]
+
+for exp_dir in experiment_local_cost_dirs:
+    for i in range(0, len(exp_dir)):
+        df = pd.read_csv(exp_dir[i]+'/progress.csv')
+        rew_new =(df.iloc[:,2].values)
+        if i==0:
+            reward_local_cost_values = np.vstack([rew_new])
+            time_steps_local_cost = (df.iloc[:,6].values)
+        else:
+            reward_local_cost_values = np.vstack([reward_local_cost_values,rew_new])
+    rew_local_cost_mean = np.mean(reward_local_cost_values, axis=0)
+    rew_local_cost_std = np.std(reward_local_cost_values, axis=0)
+    rew_local_cost_lower_std = rew_local_cost_mean - rew_local_cost_std
+    rew_local_cost_upper_std = rew_local_cost_mean + rew_local_cost_std
+    #all_exp_data.append( [rew_local_cost_mean, rew_local_cost_std, rew_local_cost_lower_std, rew_local_cost_upper_std] )
+    print("Loaded ", exp_dir)
+
+# Plotting functions
+fig = plt.figure(figsize=(12, 8))
+# Remove the plot frame lines. They are unnecessary chartjunk.  
+ax_arch = plt.subplot(111)  
+ax_arch.spines["top"].set_visible(False)  
+ax_arch.spines["right"].set_visible(False) 
+
+#ax_arch.set_yscale('log')
+ax_arch.set_xlim(0, 2e7)
+
+#for i in range(0, len(all_exp_data)):
+# Use matplotlib's fill_between() call to create error bars.   
+plt.fill_between(time_steps_local_cost, rew_local_cost_lower_std,  
+    rew_local_cost_upper_std, color=tableau20[19], alpha=0.2)  
+
+# For comparison: Central
+plt.plot(time_steps, all_exp_data[0][0], color=tableau20[0], lw=1, label=exp_path[0].split('_')[-1])
+# For comparison: Fully decentralized
+plt.plot(time_steps, all_exp_data[1][0], color=tableau20[2], lw=1, label=exp_path[1].split('_')[-1])
+
+plt.plot(time_steps_local_cost, rew_local_cost_mean, color=tableau20[18], lw=1, label='Central + local costs')
+#print("Mean reward for ", i, ": ", all_exp_data[i][0][-1], " - at iter 625: ", all_exp_data[i][0][624])
+#print(exp_path[i].split('_')[-1], f' && {all_exp_data[i][0][311]:.2f} & ({all_exp_data[i][1][311]:.2f}) && {all_exp_data[i][0][624]:.2f} & ({all_exp_data[i][1][624]:.2f}) && {all_exp_data[i][0][1249]:.2f} & ({all_exp_data[i][1][1249]:.2f})')
+ax_arch.set_xlabel('timesteps', fontsize=14)
+ax_arch.set_ylabel('Return per Episode', fontsize=14)
+#plt.plot([0,500], [200,200], color=tableau20[6], linestyle='--')
+file_name = 'learning_curve__local_costs_mean'
 plt.savefig(file_name + '.pdf')
 plt.legend(loc="lower right")
 plt.savefig(file_name + '_legend.pdf')
