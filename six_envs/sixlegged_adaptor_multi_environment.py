@@ -46,10 +46,11 @@ class SixLeggedMultiPoliciesEnv(MultiAgentEnv):
               
         self.env = gym.make("SixLegged-v1", 
             ctrl_cost_weight=ctrl_cost_weight,
-            contact_cost_weight=contact_cost_weight, hf_smoothness=hf_smoothness)
+            contact_cost_weight=contact_cost_weight, 
+            hf_smoothness=hf_smoothness)
         
-        ant_mass = mujoco_py.functions.mj_getTotalmass(self.env.model)
-        mujoco_py.functions.mj_setTotalmass(self.env.model, 10. * ant_mass)
+        #ant_mass = mujoco_py.functions.mj_getTotalmass(self.env.model)
+        #mujoco_py.functions.mj_setTotalmass(self.env.model, 10. * ant_mass)
         
         self.action_space = self.env.action_space
         self.observation_space = self.env.observation_space

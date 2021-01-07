@@ -24,7 +24,7 @@ register(
 	id='SixLegged-v1',
 	entry_point='six_envs.sixlegged_v1:SixLeggedEnv',
 	max_episode_steps=1000,
-	reward_threshold=6000.0,
+	reward_threshold=1000.0,
 )
 
 #register_env("QuAntruped-v3", lambda config: TimeLimit(QuAntrupedEnv(), max_episode_steps=1000))

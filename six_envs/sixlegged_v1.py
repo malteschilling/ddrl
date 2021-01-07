@@ -56,7 +56,9 @@ class SixLeggedEnv(AntEnv):
     def __init__(self, ctrl_cost_weight=0.5, contact_cost_weight=5e-4, healthy_reward=0., hf_smoothness=1.):
         self.step_counter = 0
         self.ctrl_costs = 0.
-        self.sum_rewards = 0
+        self.sum_rewards = 0.
+        self.vel_rewards = 0.
+        self.target_vel = np.array([0.16])
         super().__init__(xml_file=os.path.join(os.path.dirname(__file__), 'assets','Hexapod_PhantomX_smallJointRanges.xml'), 
             ctrl_cost_weight=ctrl_cost_weight, 
             contact_cost_weight=contact_cost_weight,
@@ -85,19 +87,100 @@ class SixLeggedEnv(AntEnv):
 #    def create_new_random_hfield(self):
 #        create_new_hfield(self.model, self.hf_smoothness, self.hf_bump_scale)
 
-    def step(self, action):
-        obs, reward, done, info = super().step(action)
+#     def control_cost(self, action):
+#         control_cost = self._ctrl_cost_weight * np.sum(np.square(action))
+#         return control_cost
+#         
+#     @property
+#     def contact_cost(self):
+#         contact_cost = self._contact_cost_weight * np.sum(
+#             np.square(self.contact_forces))
+#         return contact_cost
+
+    def set_target_velocity(self, t_vel):
+        self.target_vel = np.array([t_vel])
+
+    def step(self, action): #setpoints):
+        # From ant
+        xy_position_before = self.get_body_com("torso")[:2].copy()
         
-        self.ctrl_costs += info['reward_ctrl']
+        self.do_simulation(action, self.frame_skip)
+        xy_position_after = self.get_body_com("torso")[:2].copy()
+
+        xy_velocity = (xy_position_after - xy_position_before) / self.dt
+        x_velocity, y_velocity = xy_velocity
+
+        # Reward calculation
+        # use scaled action (see above)
+        ctrl_cost = self.control_cost(action) #torques
+        contact_cost = self.contact_cost
+
+        #forward_reward = x_velocity #* 10 # Scaled as ant-sim env is much bigger
+        forward_reward = (1. + 1./self.target_vel[0]) * (1. / (np.abs(x_velocity - self.target_vel[0]) + 1.) - 1. / (self.target_vel[0] + 1.))
+        
+        healthy_reward = 0. #self.healthy_reward
+        
+        done = self.done
+        
+        if (self.calculate_torso_z_orientation() < -0.7):
+            done = True
+            forward_reward += (self.step_counter - 1000)
+        
+        rewards = forward_reward #+ healthy_reward
+        costs = ctrl_cost + contact_cost
+
+        self.ctrl_costs += ctrl_cost
+        #self.contact_costs += contact_cost
+        self.vel_rewards += forward_reward
+        #self.healthy_rewards += healthy_reward
+
+        reward = rewards - costs
         self.sum_rewards += reward
+        #if (self.step_counter % 50 == 0):
+         #   print("REW: ", reward, forward_reward, healthy_reward)
+        
         self.step_counter += 1
         
         if done or self.step_counter == 1000:
-            distance = self.sim.data.qpos[0]
-            print("Hexapod episode: ", distance, (distance/ (self.step_counter * self.dt)), \
+            distance = self.sim.data.qpos[0]# / (self.step_counter * self.dt)
+            print("Hexapod target vel episode: ", distance, \
+                (distance/ (self.step_counter * self.dt)), \
+                x_velocity, self.vel_rewards, \
                 " / ctrl: ", self.ctrl_costs, self.ctrl_cost_weight, \
                 " overall: ", self.sum_rewards, self.step_counter)
-        return obs, reward, done, info
+        
+        observation = self._get_obs()
+        
+        info = {
+            'reward_forward': forward_reward,
+            'reward_ctrl': -ctrl_cost,
+            'reward_contact': -contact_cost,
+            'reward_survive': healthy_reward,
+
+            'x_position': xy_position_after[0],
+            'y_position': xy_position_after[1],
+            'distance_from_origin': np.linalg.norm(xy_position_after, ord=2),
+
+            'x_velocity': x_velocity,
+            'y_velocity': y_velocity,
+            'forward_reward': forward_reward,
+        }
+
+        return observation, reward, done, info
+
+#     def step(self, action):
+#         obs, reward, done, info = super().step(action)
+#         
+#         self.ctrl_costs += info['reward_ctrl']
+#         self.sum_rewards += reward
+#         self.step_counter += 1
+#         
+#         if done or self.step_counter == 1000:
+#             distance = self.sim.data.qpos[0]
+#             print("Hexapod episode: ", distance, (distance/ (self.step_counter * self.dt)), \
+#                 " / ctrl: ", self.ctrl_costs, self.ctrl_cost_weight, \
+#                 " overall: ", self.sum_rewards, self.step_counter)
+#         return obs, reward, done, info
 
     def _get_obs(self):
         """ 
@@ -178,5 +261,6 @@ class SixLeggedEnv(AntEnv):
         self.step_counter = 0
         self.ctrl_costs = 0.
         self.sum_rewards = 0
+        self.vel_rewards = 0.
 
         return observation

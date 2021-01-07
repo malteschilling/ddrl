@@ -29,7 +29,7 @@ else:
 # Central for 40 Mill.
 if policy_scope=="SixLeggedMultiEnv_FullyDecentral":
     from six_envs.sixlegged_sixDecentralizedController_environments import SixLeggedFullyDecentralizedEnv as HexapodEnv
-if policy_scope=="SixLeggedMultiEnv_DecentralAllInf":
+elif policy_scope=="SixLeggedMultiEnv_DecentralAllInf":
     from six_envs.sixlegged_sixDecentralizedController_environments import SixLegged_Dec_AllInf_Env as HexapodEnv
 # elif policy_scope=="QuantrupedMultiEnv_SingleNeighbor":
 #     from six_envs.quantruped_fourDecentralizedController_environments import Quantruped_LocalSingleNeighboringLeg_Env as HexapodEnv
@@ -111,7 +111,7 @@ config['env_config']['curriculum_learning'] =  False
 config['env_config']['range_smoothness'] =  [1., 0.6]
 config['env_config']['range_last_timestep'] =  4000000
 
-config['env_config']['ctrl_cost_weight'] = 0.05#grid_search([5e-4,5e-3,5e-2])
+config['env_config']['ctrl_cost_weight'] = 0.025#grid_search([5e-4,5e-3,5e-2])
 config['env_config']['contact_cost_weight'] =  0.02 #5e-2 #grid_search([5e-4,5e-3,5e-2])
 
 #def on_train_result(info):
@@ -125,10 +125,10 @@ config['env_config']['contact_cost_weight'] =  0.02 #5e-2 #grid_search([5e-4,5e-
 
 analysis = tune.run(
       "PPO",
-      name=("Six_" + policy_scope),
-      num_samples=10,
+      name=("SixTvel_" + policy_scope),
+      num_samples=5,
       checkpoint_at_end=True,
       checkpoint_freq=312,
-      stop={"timesteps_total": 10000000},
+      stop={"timesteps_total": 20000000},
       config=config,
   )
