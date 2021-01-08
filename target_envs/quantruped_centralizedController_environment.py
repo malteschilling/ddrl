@@ -4,9 +4,9 @@ import numpy as np
 import mujoco_py
 from gym import spaces
 
-from target_envs import QuantrupedMultiPoliciesEnv
+from target_envs.quantruped_adaptor_multi_environment import QuantrupedMultiPolicies_TVel_Env
         
-class Quantruped_Centralized_Env(QuantrupedMultiPoliciesEnv):
+class Quantruped_Centralized_TVel_Env(QuantrupedMultiPolicies_TVel_Env):
     """
     """    
     
@@ -39,7 +39,7 @@ class Quantruped_Centralized_Env(QuantrupedMultiPoliciesEnv):
         # 41: hip HR angle, 42: knee HR angle
         # 35: hip FR angle, 36: knee FR angle
         # The central policy gets all observations
-        self.obs_indices["central_policy"] =  range(0,43)
+        self.obs_indices["central_policy"] =  range(0,44)
         super().__init__(config)
 
     def distribute_observations(self, obs_full):
@@ -54,12 +54,13 @@ class Quantruped_Centralized_Env(QuantrupedMultiPoliciesEnv):
         
     @staticmethod
     def policy_mapping_fn(agent_id):
-        return Quantruped_Centralized_Env.policy_names[0]
+        return Quantruped_Centralized_TVel_Env.policy_names[0]
             
     @staticmethod
-    def return_policies(obs_space):
+    def return_policies():
+        obs_space = spaces.Box(-np.inf, np.inf, (44,), np.float64)
         policies = {
-            Quantruped_Centralized_Env.policy_names[0]: (None,
+            Quantruped_Centralized_TVel_Env.policy_names[0]: (None,
                 obs_space, spaces.Box(np.array([-1.,-1.,-1.,-1., -1.,-1.,-1.,-1.]), np.array([+1.,+1.,+1.,+1., +1.,+1.,+1.,+1.])), {}),
         }
         return policies

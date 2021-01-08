@@ -23,14 +23,18 @@ args = parser.parse_args()
 if 'policy_scope' in args and args.policy_scope: 
     policy_scope = args.policy_scope
 else:
-    policy_scope = 'QuantrupedMultiEnv_Centralized'
+    policy_scope = 'QuantrupedMultiEnv_Centralized_TVel'
  
 # To run: SingleDiagonal, SingleToFront, TwoSides, TwoDiags
 # Central for 40 Mill.
-if policy_scope=="QuantrupedMultiEnv_Local":
-    from target_envs.quantruped_fourDecentralizedController_environments import Quantruped_Local_Env as QuantrupedEnv
+if policy_scope=="QuantrupedMultiEnv_Local_TVel":
+    from target_envs.quantruped_fourDecentralizedController_environments import Quantruped_Local_TVel_Env as QuantrupedEnv
+elif  policy_scope=="QuantrupedMultiEnv_FullyDecentral_TVel":
+    from target_envs.quantruped_fourDecentralizedController_environments import QuantrupedFullyDecentralized_TVel_Env as QuantrupedEnv
+elif policy_scope=="QuantrupedMultiEnv_TwoSides_TVel":
+    from target_envs.quantruped_twoDecentralizedController_environments import Quantruped_TwoSideControllers_TVel_Env as QuantrupedEnv
 else:
-    from target_envs.quantruped_centralizedController_environment import Quantruped_Centralized_Env as QuantrupedEnv
+    from target_envs.quantruped_centralizedController_environment import Quantruped_Centralized_TVel_Env as QuantrupedEnv
 
 #ray.init(num_cpus=6, ignore_reinit_error=True)
 ray.init(ignore_reinit_error=True)
@@ -76,9 +80,9 @@ config['model']['fcnet_hiddens'] = [64, 64]
 
 #config['seed'] = round(time.time())
 
-single_env = gym.make("QuAntruped-v3")
+#single_env = gym.make("QuAntruped-v3")
 #policies = QuantrupedMultiPoliciesEnv.return_policies(single_env.observation_space)
-policies = QuantrupedEnv.return_policies( spaces.Box(-np.inf, np.inf, (43,), np.float64) )
+policies = QuantrupedEnv.return_policies()
 
 config["multiagent"] = {
         "policies": policies,

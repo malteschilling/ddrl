@@ -25,7 +25,7 @@ class SixLeggedControllerSuperEnv(SixLeggedMultiPoliciesEnv):
         #print("From Ant Env: ", self.env.contact_cost)
         raw_contact_forces = self.env.sim.data.cfrc_ext
         contact_forces = np.clip(raw_contact_forces, -1., 1.)
-        contact_costs = self.env.contact_cost_weight * np.square(contact_forces)
+        contact_costs = self.env.contact_cost_weight * np.square(contact_forces)        
         global_contact_costs = np.sum(contact_costs[0:2])/6.
         contact_cost[self.policy_names[0]] = global_contact_costs + np.sum(contact_costs[2:6])
         contact_cost[self.policy_names[1]] = global_contact_costs + np.sum(contact_costs[6:10])

@@ -43,7 +43,7 @@ def create_new_hfield(mj_model, smoothness = 0.15, bump_scale=2.):
     mj_model.hfield_data[:] = hfield.ravel()
     #print("Smoothness set to: ", smoothness)
 
-class QuAntrupedEnv(AntEnv):
+class QuAntruped_TVel_Env(AntEnv):
     """ Environment with a quadruped walker - derived from the ant_v3 environment
         
         Uses a different observation space compared to the ant environment (less inputs).
@@ -54,11 +54,13 @@ class QuAntrupedEnv(AntEnv):
         called, ideally before a reset of the system).
     """ 
     def __init__(self, ctrl_cost_weight=0.5, contact_cost_weight=5e-4, healthy_reward=0., hf_smoothness=1.):
-        self.target_vel = 1.
+        self.target_vel = np.array([1.]) 
+        #self.target_vel = np.array([1.])
         
         self.start_pos = None
         self.step_counter = 0
         self.vel_rewards = 0.
+        self.sum_rewards = 0.
         self.ctrl_costs = 0.
         
         self.max_steps = 1000
@@ -84,12 +86,16 @@ class QuAntrupedEnv(AntEnv):
         self.start_pos = self.sim.data.qpos[0] #self.get_body_com("torso")[:2].copy()
         self.step_counter = 0
         self.vel_rewards = 0.
+        self.sum_rewards = 0.
         self.ctrl_costs = 0.
         return obs
         
 #    @property
  #   def healthy_reward(self):
   #      return 0.
+  
+    def set_target_velocity(self, t_vel):
+        self.target_vel = np.array([t_vel])
   
     def create_new_random_hfield(self):
         create_new_hfield(self.model, self.hf_smoothness, self.hf_bump_scale)
@@ -109,7 +115,7 @@ class QuAntrupedEnv(AntEnv):
         contact_cost = self.contact_cost
 
         #forward_reward = #x_velocity
-        forward_reward = (1. + 1./self.target_vel) * (1. / (np.abs(x_velocity - self.target_vel) + 1.) - 1. / (self.target_vel + 1.))
+        forward_reward = (1. + 1./self.target_vel[0]) * (1. / (np.abs(x_velocity - self.target_vel[0]) + 1.) - 1. / (self.target_vel[0] + 1.))
 
         healthy_reward = self.healthy_reward
 
@@ -121,14 +127,15 @@ class QuAntrupedEnv(AntEnv):
         
         self.ctrl_costs += ctrl_cost
         self.vel_rewards += forward_reward
+        self.sum_rewards += rewards
         self.step_counter += 1
         
         if done or self.step_counter == self.max_steps:
             distance = (self.sim.data.qpos[0] - self.start_pos)# / (self.step_counter * self.dt)
             print("Quantruped episode: ", distance, " / vel: : ",\
-                (distance/ (self.step_counter * self.dt)), self.target_vel, \
-                x_velocity, self.vel_rewards, \
-                " / ctrl: ", self.ctrl_costs, self.step_counter)
+                (distance/ (self.step_counter * self.dt)), \
+                x_velocity, self.target_vel[0], self.vel_rewards, \
+                " / ctrl: ", self.ctrl_costs, " / sum rew: ", self.sum_rewards, self.step_counter)
         
         observation = self._get_obs()
         info = {
@@ -194,7 +201,7 @@ class QuAntrupedEnv(AntEnv):
         if self._exclude_current_positions_from_observation:
             position = position[2:]
 
-        observations = np.concatenate((position, velocity, joint_sensor_forces, last_control))#, last_control)) #, contact_force))
+        observations = np.concatenate((position, velocity, joint_sensor_forces, last_control, self.target_vel))#, last_control)) #, contact_force))
 
         return observations
     

@@ -4,8 +4,9 @@ import numpy as np
 import mujoco_py
 from gym import spaces
 from mujoco_py import functions
+import random
 
-class QuantrupedMultiPoliciesEnv(MultiAgentEnv):
+class QuantrupedMultiPolicies_TVel_Env(MultiAgentEnv):
     """ RLLib multiagent Environment that encapsulates a quadruped walker environment.
     
         This is the parent class for rllib environments in which control can be 
@@ -44,7 +45,7 @@ class QuantrupedMultiPoliciesEnv(MultiAgentEnv):
         else: 
             hf_smoothness = 1.
               
-        self.env = gym.make("QuAntruped-v3", 
+        self.env = gym.make("QuAntrupedTvel-v3", 
             ctrl_cost_weight=ctrl_cost_weight,
             contact_cost_weight=contact_cost_weight, hf_smoothness=hf_smoothness)
         
@@ -66,6 +67,8 @@ class QuantrupedMultiPoliciesEnv(MultiAgentEnv):
             self.curriculum_target_smoothness = config['range_smoothness'][1]
         if 'range_last_timestep' in config.keys():
             self.curriculum_last_timestep = config['range_last_timestep']
+        
+        self.target_velocity_list = [1.0, 2.0]
         
         #self.policy_B = "dec_B_policy"
         
@@ -137,7 +140,7 @@ class QuantrupedMultiPoliciesEnv(MultiAgentEnv):
     def reset(self):
         # From TimeLimit
         #self._elapsed_steps = 0
-        
+        self.env.set_target_velocity( random.choice( self.target_velocity_list ) )
         obs_original = self.env.reset()
         return self.distribute_observations(obs_original)
 
@@ -173,12 +176,13 @@ class QuantrupedMultiPoliciesEnv(MultiAgentEnv):
         
     @staticmethod
     def policy_mapping_fn(agent_id):
-        return QuantrupedMultiPoliciesEnv.policy_names[0]
+        return QuantrupedMultiPolicies_TVel_Env.policy_names[0]
             
     @staticmethod
-    def return_policies(obs_space):
+    def return_policies():
+        obs_space = spaces.Box(-np.inf, np.inf, (44,), np.float64)
         policies = {
-            QuantrupedMultiPoliciesEnv.policy_names[0]: (None,
+            QuantrupedMultiPolicies_TVel_Env.policy_names[0]: (None,
                 obs_space, spaces.Box(np.array([-1.,-1.,-1.,-1., -1.,-1.,-1.,-1.]), np.array([+1.,+1.,+1.,+1., +1.,+1.,+1.,+1.])), {}),
         }
         return policies
