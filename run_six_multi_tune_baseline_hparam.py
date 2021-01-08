@@ -48,7 +48,7 @@ elif policy_scope=="SixLeggedMultiEnv_DecentralAllInf":
 else:
     from six_envs.sixlegged_centralizedController_environment import SixLegged_Centralized_Env as HexapodEnv
 
-#ray.init(num_cpus=30, ignore_reinit_error=True)
+#ray.init(num_cpus=12, ignore_reinit_error=True)
 ray.init(ignore_reinit_error=True)
 
 config = ppo.DEFAULT_CONFIG.copy()
@@ -111,7 +111,7 @@ config['env_config']['curriculum_learning'] =  False
 config['env_config']['range_smoothness'] =  [1., 0.6]
 config['env_config']['range_last_timestep'] =  4000000
 
-config['env_config']['ctrl_cost_weight'] = 0.025#grid_search([5e-4,5e-3,5e-2])
+config['env_config']['ctrl_cost_weight'] = 0.01#grid_search([5e-4,5e-3,5e-2])
 config['env_config']['contact_cost_weight'] =  0.02 #5e-2 #grid_search([5e-4,5e-3,5e-2])
 
 #def on_train_result(info):
@@ -126,9 +126,9 @@ config['env_config']['contact_cost_weight'] =  0.02 #5e-2 #grid_search([5e-4,5e-
 analysis = tune.run(
       "PPO",
       name=("SixTvel_" + policy_scope),
-      num_samples=5,
+      num_samples=4,
       checkpoint_at_end=True,
       checkpoint_freq=312,
-      stop={"timesteps_total": 20000000},
+      stop={"timesteps_total": 10000000},
       config=config,
   )
