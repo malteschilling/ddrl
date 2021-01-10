@@ -44,6 +44,11 @@ class QuantrupedMultiPolicies_TVel_Env(MultiAgentEnv):
             hf_smoothness = config['hf_smoothness']
         else: 
             hf_smoothness = 1.
+            
+        if 'target_velocity' in config.keys():
+            self.target_velocity_list = [config['target_velocity']]
+        else:
+            self.target_velocity_list = [1.0, 2.0]
               
         self.env = gym.make("QuAntrupedTvel-v3", 
             ctrl_cost_weight=ctrl_cost_weight,
@@ -51,6 +56,8 @@ class QuantrupedMultiPolicies_TVel_Env(MultiAgentEnv):
         
         ant_mass = mujoco_py.functions.mj_getTotalmass(self.env.model)
         mujoco_py.functions.mj_setTotalmass(self.env.model, 10. * ant_mass)
+        
+        self.env.set_target_velocity( random.choice( self.target_velocity_list ) )
         
         self.action_space = self.env.action_space
         self.observation_space = self.env.observation_space
@@ -67,8 +74,6 @@ class QuantrupedMultiPolicies_TVel_Env(MultiAgentEnv):
             self.curriculum_target_smoothness = config['range_smoothness'][1]
         if 'range_last_timestep' in config.keys():
             self.curriculum_last_timestep = config['range_last_timestep']
-        
-        self.target_velocity_list = [1.0, 2.0]
         
         #self.policy_B = "dec_B_policy"
         
