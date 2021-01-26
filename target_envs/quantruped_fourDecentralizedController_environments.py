@@ -7,6 +7,18 @@ from gym import spaces
 from target_envs.quantruped_adaptor_multi_environment import QuantrupedMultiPolicies_TVel_Env
 
 class QuantrupedFourControllerSuper_TVel_Env(QuantrupedMultiPolicies_TVel_Env):
+    """ A decentralized controller for the quantruped agent.
+    
+        This environment is splitting a quantruped agent into 
+        four individual controllers, one for each leg
+        and distributes all available information. 
+        
+        This is the general parent class - the derived classes deal with how   
+        to distribute information to each policy.
+    """  
+
+    # Distribute the observations into the decentralized policies.
+    # In the trivial case, only a single policy is used that gets all information.
     def distribute_observations(self, obs_full):
         """ 
         Construct dictionary that routes to each policy only the relevant
@@ -17,12 +29,12 @@ class QuantrupedFourControllerSuper_TVel_Env(QuantrupedMultiPolicies_TVel_Env):
             obs_distributed[policy_name] = obs_full[self.obs_indices[policy_name],]
         return obs_distributed
 
+    # Distribute the contact costs into the decentralized policies.
+    # In the trivial case, only a single policy is used that gets all information. 
     def distribute_contact_cost(self):
         contact_cost = {}
-        #print("CONTACT COST")
         #from mujoco_py import functions
         #functions.mj_rnePostConstraint(self.env.model, self.env.data)
-        #print("From Ant Env: ", self.env.contact_cost)
         raw_contact_forces = self.env.sim.data.cfrc_ext
         contact_forces = np.clip(raw_contact_forces, -1., 1.)
         contact_costs = self.env.contact_cost_weight * np.square(contact_forces)
@@ -31,11 +43,6 @@ class QuantrupedFourControllerSuper_TVel_Env(QuantrupedMultiPolicies_TVel_Env):
         contact_cost[self.policy_names[1]] = global_contact_costs + np.sum(contact_costs[5:8])
         contact_cost[self.policy_names[2]] = global_contact_costs + np.sum(contact_costs[8:11])
         contact_cost[self.policy_names[3]] = global_contact_costs + np.sum(contact_costs[11:])
-        #print(contact_cost)
-        #sum_c = 0.
-        #for i in self.policy_names:
-         #   sum_c += contact_cost[i]
-        #print("Calculated: ", sum_c)
         return contact_cost
         
     def concatenate_actions(self, action_dict):
@@ -59,7 +66,10 @@ class QuantrupedFourControllerSuper_TVel_Env(QuantrupedMultiPolicies_TVel_Env):
 
 
 class QuantrupedFullyDecentralized_TVel_Env(QuantrupedFourControllerSuper_TVel_Env):
-    """
+    """ A decentralized controller for the quantruped agent.
+    
+        For the fully decentralized case, only information from that particular leg
+        is used as input to the decentralized policies.
     """    
     
     # This is ordering of the policies as applied here:
@@ -113,7 +123,10 @@ class QuantrupedFullyDecentralized_TVel_Env(QuantrupedFourControllerSuper_TVel_E
         return policies
         
 class Quantruped_Local_TVel_Env(QuantrupedFourControllerSuper_TVel_Env):
-    """
+    """ A decentralized controller for the quantruped agent.
+    
+        For the local, decentralized case, information from that particular leg
+        and the two neighboring legs is used as input to the decentralized policies.
     """    
     
     # This is ordering of the policies as applied here:
@@ -155,12 +168,6 @@ class Quantruped_Local_TVel_Env(QuantrupedFourControllerSuper_TVel_Env):
         self.obs_indices["policy_FR"] = [0,1,2,3,4,11,12, 5, 6, 9,10,13,14,15,16,17,18,25,26,19,20,23,24,33,34,27,28,31,32,35,36,37,38,41,42,43]
         super().__init__(config)
         
-#    def distribute_reward(self, reward_full, info, action_dict):
- #       fw_reward = info['reward_forward']
-  #      rew = {}      
-   #     for policy_name in self.policy_names:
-    #        rew[policy_name] = fw_reward / len(self.policy_names) - self.env.ctrl_cost_weight * np.sum(np.square(action_dict[policy_name]))
-     #   return rew
             
     @staticmethod
     def return_policies():

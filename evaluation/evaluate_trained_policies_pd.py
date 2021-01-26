@@ -23,7 +23,7 @@ if args.ray_results_dir is not None and args.ray_results_dir:
 else:
      ray_results_dir = os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_11_02/exp1_20_flat_QuantrupedMultiEnv_Centralized'
 if args.hf_smoothness is not None: 
-    hf_smoothness_eval = args.hf_smoothness
+    hf_smoothness_eval = float(args.hf_smoothness)
 else:
     hf_smoothness_eval = 1.0
 # exp_path = [os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_11_02/exp1_20_flat_QuantrupedMultiEnv_Centralized',

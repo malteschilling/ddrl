@@ -7,7 +7,9 @@ from gym import spaces
 from target_envs.quantruped_adaptor_multi_environment import QuantrupedMultiPolicies_TVel_Env
         
 class Quantruped_Centralized_TVel_Env(QuantrupedMultiPolicies_TVel_Env):
-    """
+    """ A centralized controller for the quantruped agent.
+        It is using a single controller for all legs (but still using the multiagent 
+        wrapper environment) and all available information. Acts as a baseline approach.
     """    
     
     # This is ordering of the policies as applied here:
@@ -61,6 +63,6 @@ class Quantruped_Centralized_TVel_Env(QuantrupedMultiPolicies_TVel_Env):
         obs_space = spaces.Box(-np.inf, np.inf, (44,), np.float64)
         policies = {
             Quantruped_Centralized_TVel_Env.policy_names[0]: (None,
-                obs_space, spaces.Box(np.array([-1.,-1.,-1.,-1., -1.,-1.,-1.,-1.]), np.array([+1.,+1.,+1.,+1., +1.,+1.,+1.,+1.])), {}),
+                obs_space, spaces.Box(-1., +1., (8,) ), {}),
         }
         return policies

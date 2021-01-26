@@ -52,7 +52,12 @@ exp_path = [os.getenv("HOME") + 'eval/ray_results_12_09/HF_10_QuantrupedMultiEnv
     os.getenv("HOME") + 'eval/ray_results_12_09/HF_10_QuantrupedMultiEnv_SingleToFront', 
     os.getenv("HOME") + 'eval/ray_results_12_09/HF_10_QuantrupedMultiEnv_TwoDiags', 
     os.getenv("HOME") + 'eval/ray_results_12_09/HF_10_QuantrupedMultiEnv_TwoSides']
-         
+
+exp_path = [os.getenv("HOME") + '/ray_results/HF_06_QuantrupedMultiEnv_Centralized', 
+    os.getenv("HOME") + '/ray_results/HF_06_QuantrupedMultiEnv_FullyDecentral',
+    os.getenv("HOME") + '/ray_results/HF_06_QuantrupedMultiEnv_Local',
+    os.getenv("HOME") + '/ray_results/HF_06_QuantrupedMultiEnv_TwoSides']
+    
 #exp_path = [os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_12_09/HF_10_QuantrupedMultiEnv_Centralized']
         
 #exp_path = [os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_11_02/exp1_20_flat_QuantrupedMultiEnv_Centralized',

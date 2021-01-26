@@ -55,7 +55,6 @@ class QuAntrupedEnv(AntEnv):
     """ 
     def __init__(self, ctrl_cost_weight=0.5, contact_cost_weight=5e-4, healthy_reward=0., hf_smoothness=1.):
         super().__init__(xml_file=os.path.join(os.path.dirname(__file__), 'assets','ant_hfield.xml'), ctrl_cost_weight=ctrl_cost_weight, contact_cost_weight=contact_cost_weight)
-#        super().__init__(ctrl_cost_weight=ctrl_cost_weight, contact_cost_weight=contact_cost_weight)
         self.ctrl_cost_weight = self._ctrl_cost_weight
         self.contact_cost_weight = self._contact_cost_weight
         self.hf_smoothness = hf_smoothness
@@ -66,15 +65,6 @@ class QuAntrupedEnv(AntEnv):
         # This allows for more collisions.
         self.model.nconmax = 500 
         self.model.njmax = 2000
-  #     self.frame_skip = 1
-
-#    def reset(self):
- #       super().reset()
-  #      create_new_hfield(self.model, self.hf_smoothness, self.hf_bump_scale)
-        
-#    @property
- #   def healthy_reward(self):
-  #      return 0.
   
     def create_new_random_hfield(self):
         create_new_hfield(self.model, self.hf_smoothness, self.hf_bump_scale)
@@ -133,14 +123,6 @@ class QuAntrupedEnv(AntEnv):
         self.hf_smoothness = smoothness
         if bump_scale:
             self.hf_bump_scale = bump_scale
-    
-#     def viewer_setup(self):
-#         print(self.viewer.cam.trackbodyid)
-#         self.viewer.cam.type = 1
-#         self.viewer.cam.trackbodyid = 1
-#         self.viewer.cam.distance = self.model.stat.extent * 0.5
-#         self.viewer.cam.lookat[2] = 1.15
-#         self.viewer.cam.elevation = -20
            
     def viewer_setup(self):
         for key, value in DEFAULT_CAMERA_CONFIG.items():

@@ -5,10 +5,10 @@ from scipy import ndimage
 from scipy.signal import convolve2d
 
 DEFAULT_CAMERA_CONFIG = {
-    'distance': 15.0,
+    'distance': 10.0,
     'type': 1,
     'trackbodyid': 1,
-    'elevation': -20.0,
+    'elevation': -5.0,
 }
 
 def create_new_hfield(mj_model, smoothness = 0.15, bump_scale=2.):
@@ -54,9 +54,10 @@ class QuAntruped_TVel_Env(AntEnv):
         called, ideally before a reset of the system).
     """ 
     def __init__(self, ctrl_cost_weight=0.5, contact_cost_weight=5e-4, healthy_reward=0., hf_smoothness=1.):
+        # Agent is rewarded for reaching a given target velocity.
         self.target_vel = np.array([1.]) 
-        #self.target_vel = np.array([1.])
         
+        # Some statistics collected during running, for debugging.
         self.start_pos = None
         self.step_counter = 0
         self.vel_rewards = 0.
@@ -66,15 +67,17 @@ class QuAntruped_TVel_Env(AntEnv):
         self.max_steps = 1000
         
         super().__init__(xml_file=os.path.join(os.path.dirname(__file__), 'assets','ant_hfield.xml'), ctrl_cost_weight=ctrl_cost_weight, contact_cost_weight=contact_cost_weight)
-#        super().__init__(ctrl_cost_weight=ctrl_cost_weight, contact_cost_weight=contact_cost_weight)
         self.ctrl_cost_weight = self._ctrl_cost_weight
         self.contact_cost_weight = self._contact_cost_weight
+        
+        # Heightfield
         self.hf_smoothness = hf_smoothness
         self.hf_bump_scale = 2.
         create_new_hfield(self.model, self.hf_smoothness, self.hf_bump_scale)
         
         # Otherwise when learning from scratch might abort
         # This allows for more collisions.
+        # Should be moved to xml file.
         self.model.nconmax = 500 
         self.model.njmax = 2000
         
@@ -102,21 +105,18 @@ class QuAntruped_TVel_Env(AntEnv):
 
     def step(self, action):
         xy_position_before = self.get_body_com("torso")[:2].copy()
+        # Call simulation to make a step (frame_skip steps)
         self.do_simulation(action, self.frame_skip)
         xy_position_after = self.get_body_com("torso")[:2].copy()
 
+        # Calculate velocity for reward.
         xy_velocity = (xy_position_after - xy_position_before) / self.dt
         x_velocity, y_velocity = xy_velocity
         
-        #xy_dist = (xy_position_after - xy_position_before)
-        #x_dist, y_dist = xy_dist
-
         ctrl_cost = self.control_cost(action)
         contact_cost = self.contact_cost
 
-        #forward_reward = #x_velocity
         forward_reward = (1. + 1./self.target_vel[0]) * (1. / (np.abs(x_velocity - self.target_vel[0]) + 1.) - 1. / (self.target_vel[0] + 1.))
-
         healthy_reward = self.healthy_reward
 
         rewards = forward_reward + healthy_reward
@@ -130,6 +130,7 @@ class QuAntruped_TVel_Env(AntEnv):
         self.sum_rewards += rewards
         self.step_counter += 1
         
+        # Print results from an episode.
         if done or self.step_counter == self.max_steps:
             distance = (self.sim.data.qpos[0] - self.start_pos)# / (self.step_counter * self.dt)
             print("Quantruped episode: ", distance, " / vel: : ",\
@@ -209,14 +210,6 @@ class QuAntruped_TVel_Env(AntEnv):
         self.hf_smoothness = smoothness
         if bump_scale:
             self.hf_bump_scale = bump_scale
-    
-#     def viewer_setup(self):
-#         print(self.viewer.cam.trackbodyid)
-#         self.viewer.cam.type = 1
-#         self.viewer.cam.trackbodyid = 1
-#         self.viewer.cam.distance = self.model.stat.extent * 0.5
-#         self.viewer.cam.lookat[2] = 1.15
-#         self.viewer.cam.elevation = -20
            
     def viewer_setup(self):
         for key, value in DEFAULT_CAMERA_CONFIG.items():

@@ -71,9 +71,9 @@ for i in range(0,8):
         mean_returns.append(mean_return)
         mean_vels.append(mean_vel)
         
-    print(exp_name[i] + f' & {mean_returns[0]:.1f} & {mean_vels[0]:.3f} & {mean_cots[0]:.3f} && ' + \
-        f'{mean_returns[1]:.1f} & {mean_vels[1]:.3f} & {mean_cots[1]:.3f} && ' + \
-        f'{mean_returns[2]:.1f} & {mean_vels[2]:.3f} & {mean_cots[2]:.3f}')
+    print(exp_name[i] + f' & {mean_returns[0]:.1f} & {20*mean_vels[0]:.2f} & {mean_cots[0]:.3f} && ' + \
+        f'{mean_returns[1]:.1f} & {20*mean_vels[1]:.2f} & {mean_cots[1]:.3f} && ' + \
+        f'{mean_returns[2]:.1f} & {20*mean_vels[2]:.2f} & {mean_cots[2]:.3f}')
 
 # Centralized & 2605.9 & 0.178 & 8.224 && 1110.5 & 0.128 & 9.324 && 201.5 & 0.068 & 12.641
 # FullyDecentral & 2673.0 & 0.166 & 6.283 && 974.0 & 0.107 & 7.424 && -137.5 & 0.032 & 14.099

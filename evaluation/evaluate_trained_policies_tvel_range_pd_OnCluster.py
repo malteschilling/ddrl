@@ -39,6 +39,7 @@ exp_path = [os.getenv("HOME") + '/ray_results/Tvel_QuantrupedMultiEnv_Centralize
 
 experiment_dirs = [[os.path.join(exp_path_item,dI) for dI in os.listdir(exp_path_item) if os.path.isdir(os.path.join(exp_path_item,dI))] for exp_path_item in exp_path]
 
+#ray.init(num_cpus=3, ignore_reinit_error=True)
 ray.init()
 
 # Set panda DataFrame structure
@@ -83,7 +84,7 @@ for exp_dir in experiment_dirs:
         
             # Write detailed data to panda file
             for sim_it in range(0, len(res_rollout[0])):
-                new_pd_entry = pd.Series({"approach": exp_path[exp_it].split('_')[-1], 
+                new_pd_entry = pd.Series({"approach": exp_path[exp_it].split('_')[-2], 
                     "seed": exp_params[experiment].split('0000')[-1][0], 
                     "trained_on": "curriculum", 
                     "evaluated_on": hf_smoothness_eval,
@@ -123,4 +124,4 @@ for exp_dir in experiment_dirs:
     print('Overall Mean for ', exp_path[exp_it].split('_')[-1], f': {np.mean(all_rew):.2f}, std.dev.: {np.std(all_rew):.2f}; CoT: {np.mean(all_cot):.2f}; Vel.: {np.mean(np.sum(all_dist)/np.sum(all_steps)):.2f}')
     print(exp_path[exp_it].split('_')[-1], f' && {np.mean(all_rew):.2f} & ({np.std(all_rew):.2f}) && {np.mean(np.sum(all_dist)/np.sum(all_steps))} & ({np.std(all_vel):.2f}) & {np.mean(all_cot):.2f}')
     exp_it += 1
-    df.to_csv("evaluation_tvel_cur_" + str(hf_smoothness_eval) + ".csv")
+    df.to_csv("evaluation_tvel_range_" + str(hf_smoothness_eval) + ".csv")

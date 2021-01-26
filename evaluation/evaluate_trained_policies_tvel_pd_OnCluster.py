@@ -1,17 +1,17 @@
-# import ray
-# import pickle5 as pickle
+import ray
+import pickle5 as pickle
 import os
-# import numpy as np
+import numpy as np
 import argparse
-# 
-# import pandas as pd
-# 
-# from ray.tune.registry import get_trainable_cls
-# from ray.rllib.evaluation.worker_set import WorkerSet
-# 
-# import simulation_envs
-# import models
-# from evaluation.rollout_episodes import rollout_episodes
+
+import pandas as pd
+
+from ray.tune.registry import get_trainable_cls
+from ray.rllib.evaluation.worker_set import WorkerSet
+
+import target_envs
+import models
+from evaluation.rollout_episodes import rollout_episodes
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--ray_results_dir", required=False)
@@ -23,7 +23,7 @@ if args.ray_results_dir is not None and args.ray_results_dir:
 else:
      ray_results_dir = os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_11_02/exp1_20_flat_QuantrupedMultiEnv_Centralized'
 if args.hf_smoothness is not None: 
-    hf_smoothness_eval = args.hf_smoothness
+    hf_smoothness_eval = float(args.hf_smoothness)
 else:
     hf_smoothness_eval = 1.0
 
@@ -81,7 +81,7 @@ for exp_dir in experiment_dirs:
         
         # Write detailed data to panda file
         for sim_it in range(0, len(res_rollout[0])):
-            new_pd_entry = pd.Series({"approach": exp_path[exp_it].split('_')[-1], 
+            new_pd_entry = pd.Series({"approach": exp_path[exp_it].split('_')[-2], 
                 "seed": exp_params[experiment].split('0000')[-1][0], 
                 "trained_on": "flat", 
                 "evaluated_on": hf_smoothness_eval,

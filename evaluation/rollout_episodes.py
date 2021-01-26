@@ -8,13 +8,29 @@ import numpy as np
 import mujoco_py
 from mujoco_py import functions
 
+"""
+    Running a learned (multiagent) controller,
+    for evaluation or visualisation.
+    This is adapted from rllib's rollout.py
+    (github.com/ray/rllib/rollout.py)
+"""
+
 class DefaultMapping(collections.defaultdict):
-    """default_factory now takes as an argument the missing key."""
+    """ Provides a default mapping.
+    """
     def __missing__(self, key):
         self[key] = value = self.default_factory(key)
         return value
 
 def rollout_episodes(env, agent, num_episodes=1, num_steps=1000, render=True):
+    """
+        Rollout an episode:
+        step through an episode, using the 
+        - agent = trained policies (is a multiagent consisting of a dict of agents)
+        - env = in the given environment
+        for num_steps control steps and running num_episodes episodes.
+    """
+    # Setting up the agent for running an episode.
     multiagent = isinstance(env, MultiAgentEnv)
     if agent.workers.local_worker().multiagent:
         policy_agent_mapping = agent.config["multiagent"]["policy_mapping_fn"]
@@ -27,6 +43,7 @@ def rollout_episodes(env, agent, num_episodes=1, num_steps=1000, render=True):
         for p, m in policy_map.items()
     }
     
+    # Collecting statistics over episodes.
     reward_eps = []
     cot_eps = []
     vel_eps = []
@@ -34,6 +51,7 @@ def rollout_episodes(env, agent, num_episodes=1, num_steps=1000, render=True):
     steps_eps = []
     power_total_eps = []
     for episodes in range(0, num_episodes):
+        # Reset all values for this episode.
         mapping_cache = {}  # in case policy_agent_mapping is stochastic
         #    saver.begin_rollout()
         agent_states = DefaultMapping(
@@ -49,6 +67,7 @@ def rollout_episodes(env, agent, num_episodes=1, num_steps=1000, render=True):
         env.env.create_new_random_hfield()
         obs = env.reset()
         start_pos = env.env.sim.data.qpos[0]
+        # Control stepping:
         while not done and steps<num_steps:
             multi_obs = obs if multiagent else {_DUMMY_AGENT_ID: obs}
             action_dict = {}
@@ -66,6 +85,8 @@ def rollout_episodes(env, agent, num_episodes=1, num_steps=1000, render=True):
                             policy_id=policy_id)
                         agent_states[agent_id] = p_state
                     else:
+                        # Sample an action for the current observation 
+                        # for one entry of the agent dict.
                         a_action = agent.compute_action(
                             a_obs,
                             prev_action=prev_actions[agent_id],
@@ -76,6 +97,7 @@ def rollout_episodes(env, agent, num_episodes=1, num_steps=1000, render=True):
                     prev_actions[agent_id] = a_action
             action = action_dict
             action = action if multiagent else action[_DUMMY_AGENT_ID]
+            # Stepping the environment.
             next_obs, reward, done, info = env.step(action)
             if multiagent:
                 for agent_id, r in reward.items():
@@ -89,7 +111,7 @@ def rollout_episodes(env, agent, num_episodes=1, num_steps=1000, render=True):
                 reward_total += reward
             if render:
                 env.render()
-    #        saver.append_step(obs, action, next_obs, reward, done, info)
+            #saver.append_step(obs, action, next_obs, reward, done, info)
             steps += 1
             obs = next_obs
             # Calculated as torque (during last time step - or in this case sum of 
@@ -99,12 +121,11 @@ def rollout_episodes(env, agent, num_episodes=1, num_steps=1000, render=True):
             # (control signals start with front right leg, front left leg starts at index 2)
             current_power = np.sum(np.abs(np.roll(env.env.sim.data.ctrl, -2) * env.env.sim.data.qvel[6:]))
             power_total += current_power
-    #    saver.end_rollout()
+        #saver.end_rollout()
         distance_x = env.env.sim.data.qpos[0] - start_pos
         com_vel = distance_x/steps
         cost_of_transport = (power_total/steps) / (mujoco_py.functions.mj_getTotalmass(env.env.model) * com_vel)
         # Weight is 8.78710174560547
-        #print(mujoco_py.functions.mj_getTotalmass(env.env.model))
         #print(steps, " - ", power_total, " / ", power_total/steps, "; CoT: ", cost_of_transport)
         cot_eps.append(cost_of_transport)
         reward_eps.append(reward_total)
@@ -113,5 +134,5 @@ def rollout_episodes(env, agent, num_episodes=1, num_steps=1000, render=True):
         steps_eps.append(steps)
         power_total_eps.append(power_total)
         #print(episodes, ' - ', reward_total, '; CoT: ', cost_of_transport, '; Vel: ', com_vel)
-        
+    # Return collected information from episode.
     return (reward_eps, steps_eps, dist_eps, power_total_eps, vel_eps, cot_eps )

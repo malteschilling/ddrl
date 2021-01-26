@@ -63,7 +63,7 @@ for appr_it in range(0,4):
 
 # Plotting functions
 ####################
-fig = plt.figure(figsize=(8, 6))
+fig = plt.figure(figsize=(10, 6))
 # Remove the plot frame lines. They are unnecessary chartjunk.  
 ax_arch = plt.subplot(111)  
 ax_arch.spines["top"].set_visible(False)  
@@ -80,7 +80,7 @@ for appr_it in range(3,-1,-1):
 
 ax_arch.set_xlabel('Number of overall neurons', fontsize=12)
 ax_arch.set_ylabel('Mean return per Episode', fontsize=12)
-plt.legend(loc="lower left")
+#plt.legend(loc="lower left")
 #plt.plot([0,500], [200,200], color=tableau20[6], linestyle='--')
 
 #########################################
@@ -106,7 +106,7 @@ for appr_it in range(0,4):
 
 # Plotting functions
 ####################
-fig = plt.figure(figsize=(8, 6))
+fig = plt.figure(figsize=(10, 6))
 # Remove the plot frame lines. They are unnecessary chartjunk.  
 ax_arch = plt.subplot(111)  
 ax_arch.spines["top"].set_visible(False)  
@@ -123,7 +123,7 @@ for appr_it in range(3,-1,-1):
 
 ax_arch.set_xlabel('Number of overall weights', fontsize=12)
 ax_arch.set_ylabel('Mean return per Episode', fontsize=12)
-plt.legend(loc="lower left")
+#plt.legend(loc="lower left")
 #plt.plot([0,500], [200,200], color=tableau20[6], linestyle='--')
 
 plt.show()
