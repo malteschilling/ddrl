@@ -7,9 +7,20 @@ from gym import spaces
 from simulation_envs import QuantrupedMultiPoliciesEnv
         
 class Quantruped_TwoSideControllers_Env(QuantrupedMultiPoliciesEnv):
-    """
-    """    
-    
+    """ Derived environment for control of the four-legged agent.
+        Uses two different, concurrent control units (policies) 
+        each instantiated as a single agent. 
+        
+        There is one controller for each side of the agent.
+        Input scope of each controller: 
+        - two legs of that side.
+        
+        Class defines 
+        - policy_mapping_fn: defines names of the distributed controllers
+        - distribute_observations: how to distribute observations towards these controllers
+        - distribute_contact_cost: how to distribute (contact) costs individually to controllers 
+        - concatenate_actions: how to integrate the control signals from the controllers
+    """  
     # This is ordering of the policies as applied here:
     policy_names = ["policy_LEFT","policy_RIGHT"]
     
@@ -83,6 +94,7 @@ class Quantruped_TwoSideControllers_Env(QuantrupedMultiPoliciesEnv):
         
     @staticmethod
     def policy_mapping_fn(agent_id):
+        # Each derived class has to define all agents by name.
         if agent_id.startswith("policy_LEFT"):
             return "policy_LEFT"
         else:
@@ -90,6 +102,7 @@ class Quantruped_TwoSideControllers_Env(QuantrupedMultiPoliciesEnv):
             
     @staticmethod
     def return_policies(obs_space):
+        # For each agent the policy interface has to be defined.
         obs_space = spaces.Box(-np.inf, np.inf, (27,), np.float64)
         policies = {
             Quantruped_TwoSideControllers_Env.policy_names[0]: (None,
@@ -100,8 +113,20 @@ class Quantruped_TwoSideControllers_Env(QuantrupedMultiPoliciesEnv):
         return policies
         
 class Quantruped_TwoDiagControllers_Env(QuantrupedMultiPoliciesEnv):
-    """
-    """    
+    """ Derived environment for control of the four-legged agent.
+        Uses two different, concurrent control units (policies) 
+        each instantiated as a single agent. 
+        
+        There is one controller for each pair of diagonal legs of the agent.
+        Input scope of each controller: 
+        - two diagonal legs
+        
+        Class defines 
+        - policy_mapping_fn: defines names of the distributed controllers
+        - distribute_observations: how to distribute observations towards these controllers
+        - distribute_contact_cost: how to distribute (contact) costs individually to controllers 
+        - concatenate_actions: how to integrate the control signals from the controllers
+    """ 
     
     # This is ordering of the policies as applied here:
     policy_names = ["policy_FLHR","policy_HLFR"]
@@ -184,6 +209,7 @@ class Quantruped_TwoDiagControllers_Env(QuantrupedMultiPoliciesEnv):
         
     @staticmethod
     def policy_mapping_fn(agent_id):
+        # Each derived class has to define all agents by name.
         if agent_id.startswith("policy_FLHR"):
             return "policy_FLHR"
         else:
@@ -191,6 +217,7 @@ class Quantruped_TwoDiagControllers_Env(QuantrupedMultiPoliciesEnv):
             
     @staticmethod
     def return_policies(obs_space):
+        # For each agent the policy interface has to be defined.
         obs_space = spaces.Box(-np.inf, np.inf, (27,), np.float64)
         policies = {
             Quantruped_TwoDiagControllers_Env.policy_names[0]: (None,

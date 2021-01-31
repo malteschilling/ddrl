@@ -10,6 +10,8 @@ class Quantruped_Centralized_TVel_Env(QuantrupedMultiPolicies_TVel_Env):
     """ A centralized controller for the quantruped agent.
         It is using a single controller for all legs (but still using the multiagent 
         wrapper environment) and all available information. Acts as a baseline approach.
+        
+        Reward: is aiming for a given target velocity.
     """    
     
     # This is ordering of the policies as applied here:
@@ -56,10 +58,12 @@ class Quantruped_Centralized_TVel_Env(QuantrupedMultiPolicies_TVel_Env):
         
     @staticmethod
     def policy_mapping_fn(agent_id):
+        # Each derived class has to define all agents by name.
         return Quantruped_Centralized_TVel_Env.policy_names[0]
             
     @staticmethod
     def return_policies():
+        # For each agent the policy interface has to be defined.
         obs_space = spaces.Box(-np.inf, np.inf, (44,), np.float64)
         policies = {
             Quantruped_Centralized_TVel_Env.policy_names[0]: (None,

@@ -13,8 +13,18 @@ class QuantrupedFourControllerSuper_TVel_Env(QuantrupedMultiPolicies_TVel_Env):
         four individual controllers, one for each leg
         and distributes all available information. 
         
+        Reward: is aiming for a given target velocity.
+        
         This is the general parent class - the derived classes deal with how   
         to distribute information to each policy.
+        
+        Class defines 
+        - policy_mapping_fn: defines names of the distributed controllers
+        - distribute_observations: how to distribute observations towards these controllers
+            Is defined in derived classes and differs between the different architectures.
+        - distribute_contact_cost: how to distribute (contact) costs individually to controllers 
+        - concatenate_actions: how to integrate the control signals from the controllers
+
     """  
 
     # Distribute the observations into the decentralized policies.
@@ -55,6 +65,7 @@ class QuantrupedFourControllerSuper_TVel_Env(QuantrupedMultiPolicies_TVel_Env):
         
     @staticmethod
     def policy_mapping_fn(agent_id):
+        # Each derived class has to define all agents by name.
         if agent_id.startswith("policy_FL"):
             return "policy_FL"
         elif agent_id.startswith("policy_HL"):
@@ -67,6 +78,8 @@ class QuantrupedFourControllerSuper_TVel_Env(QuantrupedMultiPolicies_TVel_Env):
 
 class QuantrupedFullyDecentralized_TVel_Env(QuantrupedFourControllerSuper_TVel_Env):
     """ A decentralized controller for the quantruped agent.
+    
+        Reward: is aiming for a given target velocity.
     
         For the fully decentralized case, only information from that particular leg
         is used as input to the decentralized policies.
@@ -109,6 +122,7 @@ class QuantrupedFullyDecentralized_TVel_Env(QuantrupedFourControllerSuper_TVel_E
             
     @staticmethod
     def return_policies():
+        # For each agent the policy interface has to be defined.
         obs_space = spaces.Box(-np.inf, np.inf, (20,), np.float64)
         policies = {
             QuantrupedFullyDecentralized_TVel_Env.policy_names[0]: (None,
@@ -124,6 +138,8 @@ class QuantrupedFullyDecentralized_TVel_Env(QuantrupedFourControllerSuper_TVel_E
         
 class Quantruped_Local_TVel_Env(QuantrupedFourControllerSuper_TVel_Env):
     """ A decentralized controller for the quantruped agent.
+    
+        Reward: is aiming for a given target velocity.
     
         For the local, decentralized case, information from that particular leg
         and the two neighboring legs is used as input to the decentralized policies.
@@ -171,6 +187,7 @@ class Quantruped_Local_TVel_Env(QuantrupedFourControllerSuper_TVel_Env):
             
     @staticmethod
     def return_policies():
+        # For each agent the policy interface has to be defined.
         obs_space = spaces.Box(-np.inf, np.inf, (36,), np.float64)
         policies = {
             Quantruped_Local_TVel_Env.policy_names[0]: (None,

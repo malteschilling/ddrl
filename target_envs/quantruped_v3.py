@@ -207,6 +207,7 @@ class QuAntruped_TVel_Env(AntEnv):
         return observations
     
     def set_hf_parameter(self, smoothness, bump_scale=None):
+        # Setting the parameters for the height field.
         self.hf_smoothness = smoothness
         if bump_scale:
             self.hf_bump_scale = bump_scale

@@ -7,8 +7,21 @@ from gym import spaces
 from simulation_envs import QuantrupedMultiPoliciesEnv
 
 class QuantrupedFullyDecentralizedGlobalCostEnv(QuantrupedMultiPoliciesEnv):
-    """
-    """    
+    """ Derived environment for control of the four-legged agent.
+        Uses four different, concurrent control units (policies) 
+        each instantiated as a single agent. 
+        
+        Input scope of each controller: all available information. 
+        
+        Is used for the experiment on 
+        S-II.2. Additional Experiment: Guiding training through local cost structure on flat terrain
+        = using local costs, but global information.
+        
+        Class defines 
+        - policy_mapping_fn: defines names of the distributed controllers
+        - distribute_observations: how to distribute observations towards these controllers
+            Is defined in the obs_indices for each leg.
+    """   
     
     # This is ordering of the policies as applied here:
     policy_names = ["policy_FL","policy_HL","policy_HR","policy_FR"]
@@ -53,25 +66,6 @@ class QuantrupedFullyDecentralizedGlobalCostEnv(QuantrupedMultiPoliciesEnv):
         for policy_name in self.policy_names:
             obs_distributed[policy_name] = obs_full[self.obs_indices[policy_name],]
         return obs_distributed
-
-#     def distribute_contact_cost(self):
-#         contact_cost = {}
-#         raw_contact_forces = self.env.sim.data.cfrc_ext
-#         contact_forces = np.clip(raw_contact_forces, -1., 1.) 
-#         contact_cost[self.policy_names[0]] = 0.25 * self.env.contact_cost_weight * np.sum(
-#             np.square(contact_forces)) #global_contact_costs + np.sum(contact_costs[2:5])
-#         contact_cost[self.policy_names[1]] = 0.25 * self.env.contact_cost_weight * np.sum(
-#             np.square(contact_forces)) #global_contact_costs + np.sum(contact_costs[5:8])
-#         contact_cost[self.policy_names[2]] = 0.25 * self.env.contact_cost_weight * np.sum(
-#             np.square(contact_forces)) #global_contact_costs + np.sum(contact_costs[8:11])
-#         contact_cost[self.policy_names[3]] = 0.25 * self.env.contact_cost_weight * np.sum(
-#             np.square(contact_forces)) #global_contact_costs + np.sum(contact_costs[11:])
-#         #print(contact_cost)
-#         #sum_c = 0.
-#         #for i in self.policy_names:
-#          #   sum_c += contact_cost[i]
-#         #print("Calculated: ", sum_c)
-#         return contact_cost
         
     def distribute_contact_cost(self):
         contact_cost = {}
@@ -120,6 +114,7 @@ class QuantrupedFullyDecentralizedGlobalCostEnv(QuantrupedMultiPoliciesEnv):
 
     @staticmethod
     def return_policies(obs_space):
+        # For each agent the policy interface has to be defined.
         obs_space = spaces.Box(-np.inf, np.inf, (19,), np.float64)
         policies = {
             QuantrupedFullyDecentralizedGlobalCostEnv.policy_names[0]: (None,
@@ -135,6 +130,7 @@ class QuantrupedFullyDecentralizedGlobalCostEnv(QuantrupedMultiPoliciesEnv):
         
     @staticmethod
     def policy_mapping_fn(agent_id):
+        # Each derived class has to define all agents by name.
         if agent_id.startswith("policy_FL"):
             return "policy_FL"
         elif agent_id.startswith("policy_HL"):

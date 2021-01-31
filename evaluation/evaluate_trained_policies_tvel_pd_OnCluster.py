@@ -14,29 +14,19 @@ import models
 from evaluation.rollout_episodes import rollout_episodes
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--ray_results_dir", required=False)
 parser.add_argument("--hf_smoothness", required=False)
 parser.add_argument("--target_velocity", required=False)
 args = parser.parse_args()
-if args.ray_results_dir is not None and args.ray_results_dir: 
-    ray_results_dir = args.ray_results_dir
-else:
-     ray_results_dir = os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_11_02/exp1_20_flat_QuantrupedMultiEnv_Centralized'
 if args.hf_smoothness is not None: 
     hf_smoothness_eval = float(args.hf_smoothness)
 else:
     hf_smoothness_eval = 1.0
 
-exp_path = [os.getenv("HOME") + '/ray_results/Tvel_QuantrupedMultiEnv_Centralized_TVel', 
-    os.getenv("HOME") + '/ray_results/Tvel_QuantrupedMultiEnv_FullyDecentral_TVel',
-    os.getenv("HOME") + '/ray_results/Tvel_QuantrupedMultiEnv_Local_TVel',
-    os.getenv("HOME") + '/ray_results/Tvel_QuantrupedMultiEnv_TwoSides_TVel']
+exp_path = [os.getenv("HOME") + 'Results/experiment_3_models_curriculum_tvel/Tvel_QuantrupedMultiEnv_Centralized_TVel', 
+    os.getenv("HOME") + 'Results/experiment_3_models_curriculum_tvel/Tvel_QuantrupedMultiEnv_FullyDecentral_TVel',
+    os.getenv("HOME") + 'Results/experiment_3_models_curriculum_tvel/Tvel_QuantrupedMultiEnv_Local_TVel',
+    os.getenv("HOME") + 'Results/experiment_3_models_curriculum_tvel/Tvel_QuantrupedMultiEnv_TwoSides_TVel']
     
-#exp_path = [os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_12_09/HF_10_QuantrupedMultiEnv_Centralized']
-        
-#exp_path = [os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_11_02/exp1_20_flat_QuantrupedMultiEnv_Centralized',
- #   os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_11_02/exp1_20_flat_QuantrupedMultiEnv_FullyDecentral']
-
 experiment_dirs = [[os.path.join(exp_path_item,dI) for dI in os.listdir(exp_path_item) if os.path.isdir(os.path.join(exp_path_item,dI))] for exp_path_item in exp_path]
 
 ray.init()

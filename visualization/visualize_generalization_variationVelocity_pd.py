@@ -8,6 +8,17 @@ import matplotlib.patches as patches
 import seaborn as sns
 from evaluation.compare_learning_performance_atEnd import boxplot_annotate_brackets_group
 
+"""
+    Visualizes generalization to different target velocities
+    and on changing of terrain.
+    
+    All trained controller had been evaluated for 10 episodes, for 
+    variation of target velocity and on different uneven terrains.
+    Performance is measured and plotted here
+    - as a figure showing how performance develops for the architectures 
+    - boxplot for specific type of terrains
+"""
+
 # These are the "Tableau 20" colors as RGB.    
 tableau20 = [(31, 119, 180), (174, 199, 232), (255, 127, 14), (255, 187, 120),    
              (44, 160, 44), (152, 223, 138), (214, 39, 40), (255, 152, 150),    
@@ -38,7 +49,7 @@ data_velocity_steps = np.arange(0.5, 2.6, 0.1)
 # 3 - singe diag, 4 - single neig.
 # 5 - two contr. diag, 6 - two neighb. contr.
 # 7 - connections towards front
-path = 'Results/trained_cur_tvel_eval_generalizationVelocity' # use your path
+path = 'Results/3_trained_cur_tvel_eval_generalization_velocity' # use your path
 all_files = glob.glob(path + "/*.csv")
 
 eval_list = []

@@ -5,6 +5,18 @@ from matplotlib.colors import LogNorm
 
 from visualization.catscatter import catscatter
 
+"""
+    Visualizes Importance Map:
+    
+    Importance map showing how a small change in one input 
+    (rows, y-axis, named on the left) feature dimension affects the 
+    control signals (columns, shown on the bottom). 
+    
+    For the joint inputs, ordering is front left leg (hip, followed by 
+    knee joint for all legs), hind left leg, hind right leg, 
+    and front right leg. 
+"""
+
 # Plotting Presets
 # These are the "Tableau 20" colors as RGB.    
 tableau20 = [(31, 119, 180), (174, 199, 232), (255, 127, 14), (255, 187, 120),    
@@ -36,8 +48,7 @@ plt.rcParams['pdf.fonttype'] = 42
 # Along the DRL rollout trajectory all this gradient values are summed 
 # (we are using the absolute value of gradient as an indicator).
 
-#manual_grads = np.load("grads_3.npy")
-manual_grads_abs = np.load("computed_grads/grads_tvel1_abs_8.npy")
+manual_grads_abs = np.load("4_computed_grads/grads_tvel1_abs_8.npy")
 norm_grads_abs = manual_grads_abs / np.sum(manual_grads_abs,axis=0)
 
 
@@ -52,16 +63,16 @@ ax.set_aspect('auto')
 ax.set_xticks(np.arange(8))
 
 # Use categorical scatter plot
-df = pd.DataFrame([], columns=["row", "col", "strength"])
+fig, ax = plt.subplots(figsize=(4, 12))
+df = pd.DataFrame([], columns=["row", "column", "strength"])
 log_grads_abs = (np.log(norm_grads_abs) - np.min(np.log(norm_grads_abs)))
 for i in range(0,log_grads_abs.shape[0]):
     for j in range(0,log_grads_abs.shape[1]):
-        new_pd_entry = pd.Series({"row": i, 
-                "column": j, 
+        new_pd_entry = pd.Series({"row": str(i), 
+                "column": str(j), 
                 "strength": log_grads_abs[i,j]})
-        print(i,j)
         df = df.append(new_pd_entry, ignore_index=True)
-
+catscatter(df,'column','row','strength')
 
 #####################################
 # Differentiate different contributions:

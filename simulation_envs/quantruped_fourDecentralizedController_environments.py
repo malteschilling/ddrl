@@ -7,6 +7,21 @@ from gym import spaces
 from simulation_envs import QuantrupedMultiPoliciesEnv
 
 class QuantrupedFourControllerSuperEnv(QuantrupedMultiPoliciesEnv):
+    """ Derived environment for control of the four-legged agent.
+        Allows to instantiate multiple agents for control.
+        
+        Super class for all decentralized controller - control is split
+        into four different, concurrent control units (policies) 
+        each instantiated as a single agent. 
+        
+        Class defines 
+        - policy_mapping_fn: defines names of the distributed controllers
+        - distribute_observations: how to distribute observations towards these controllers
+            Is defined in derived classes and differs between the different architectures.
+        - distribute_contact_cost: how to distribute (contact) costs individually to controllers 
+        - concatenate_actions: how to integrate the control signals from the controllers
+    """  
+
     def distribute_observations(self, obs_full):
         """ 
         Construct dictionary that routes to each policy only the relevant
@@ -48,6 +63,7 @@ class QuantrupedFourControllerSuperEnv(QuantrupedMultiPoliciesEnv):
         
     @staticmethod
     def policy_mapping_fn(agent_id):
+        # Each derived class has to define all agents by name.
         if agent_id.startswith("policy_FL"):
             return "policy_FL"
         elif agent_id.startswith("policy_HL"):
@@ -59,8 +75,17 @@ class QuantrupedFourControllerSuperEnv(QuantrupedMultiPoliciesEnv):
 
 
 class QuantrupedFullyDecentralizedEnv(QuantrupedFourControllerSuperEnv):
-    """
-    """    
+    """ Derived environment for control of the four-legged agent.
+        Uses four different, concurrent control units (policies) 
+        each instantiated as a single agent. 
+        
+        Input scope of each controller: only the controlled leg.
+        
+        Class defines 
+        - policy_mapping_fn: defines names of the distributed controllers
+        - distribute_observations: how to distribute observations towards these controllers
+            Is defined in the obs_indices for each leg.
+    """ 
     
     # This is ordering of the policies as applied here:
     policy_names = ["policy_FL","policy_HL","policy_HR","policy_FR"]
@@ -98,6 +123,7 @@ class QuantrupedFullyDecentralizedEnv(QuantrupedFourControllerSuperEnv):
             
     @staticmethod
     def return_policies(obs_space):
+        # For each agent the policy interface has to be defined.
         obs_space = spaces.Box(-np.inf, np.inf, (19,), np.float64)
         policies = {
             QuantrupedFullyDecentralizedEnv.policy_names[0]: (None,
@@ -112,8 +138,19 @@ class QuantrupedFullyDecentralizedEnv(QuantrupedFourControllerSuperEnv):
         return policies
         
 class Quantruped_LocalSingleNeighboringLeg_Env(QuantrupedFourControllerSuperEnv):
-    """
-    """    
+    """ Derived environment for control of the four-legged agent.
+        Uses four different, concurrent control units (policies) 
+        each instantiated as a single agent. 
+        
+        Input scope of each controller: 
+        - controlled leg
+        - plus from an additional neighboring leg (counterclockwise)
+        
+        Class defines 
+        - policy_mapping_fn: defines names of the distributed controllers
+        - distribute_observations: how to distribute observations towards these controllers
+            Is defined in the obs_indices for each leg.
+    """ 
     
     # This is ordering of the policies as applied here:
     policy_names = ["policy_FL","policy_HL","policy_HR","policy_FR"]
@@ -155,6 +192,7 @@ class Quantruped_LocalSingleNeighboringLeg_Env(QuantrupedFourControllerSuperEnv)
             
     @staticmethod
     def return_policies(obs_space):
+        # For each agent the policy interface has to be defined.
         obs_space = spaces.Box(-np.inf, np.inf, (27,), np.float64)
         policies = {
             Quantruped_LocalSingleNeighboringLeg_Env.policy_names[0]: (None,
@@ -169,8 +207,19 @@ class Quantruped_LocalSingleNeighboringLeg_Env(QuantrupedFourControllerSuperEnv)
         return policies
 
 class Quantruped_LocalSingleDiagonalLeg_Env(QuantrupedFourControllerSuperEnv):
-    """
-    """    
+    """ Derived environment for control of the four-legged agent.
+        Uses four different, concurrent control units (policies) 
+        each instantiated as a single agent. 
+        
+        Input scope of each controller: 
+        - controlled leg
+        - plus from the diagonal leg
+        
+        Class defines 
+        - policy_mapping_fn: defines names of the distributed controllers
+        - distribute_observations: how to distribute observations towards these controllers
+            Is defined in the obs_indices for each leg.
+    """ 
     
     # This is ordering of the policies as applied here:
     policy_names = ["policy_FL","policy_HL","policy_HR","policy_FR"]
@@ -208,6 +257,7 @@ class Quantruped_LocalSingleDiagonalLeg_Env(QuantrupedFourControllerSuperEnv):
             
     @staticmethod
     def return_policies(obs_space):
+        # For each agent the policy interface has to be defined.
         obs_space = spaces.Box(-np.inf, np.inf, (27,), np.float64)
         policies = {
             Quantruped_LocalSingleDiagonalLeg_Env.policy_names[0]: (None,
@@ -222,7 +272,20 @@ class Quantruped_LocalSingleDiagonalLeg_Env(QuantrupedFourControllerSuperEnv):
         return policies
         
 class Quantruped_LocalSingleToFront_Env(QuantrupedFourControllerSuperEnv):
-    """
+    """ Derived environment for control of the four-legged agent.
+        Uses four different, concurrent control units (policies) 
+        each instantiated as a single agent. 
+        
+        Input scope of each controller: 
+        - controlled leg
+        - plus from an additional neighboring leg:
+            for front legs from hind legs
+            for hind legs from other hind leg
+        
+        Class defines 
+        - policy_mapping_fn: defines names of the distributed controllers
+        - distribute_observations: how to distribute observations towards these controllers
+            Is defined in the obs_indices for each leg.
     """    
     
     # This is ordering of the policies as applied here:
@@ -265,6 +328,7 @@ class Quantruped_LocalSingleToFront_Env(QuantrupedFourControllerSuperEnv):
             
     @staticmethod
     def return_policies(obs_space):
+        # For each agent the policy interface has to be defined.
         obs_space = spaces.Box(-np.inf, np.inf, (27,), np.float64)
         policies = {
             Quantruped_LocalSingleToFront_Env.policy_names[0]: (None,
@@ -279,7 +343,18 @@ class Quantruped_LocalSingleToFront_Env(QuantrupedFourControllerSuperEnv):
         return policies
         
 class Quantruped_Local_Env(QuantrupedFourControllerSuperEnv):
-    """
+    """ Derived environment for control of the four-legged agent.
+        Uses four different, concurrent control units (policies) 
+        each instantiated as a single agent. 
+        
+        Input scope of each controller: 
+        - controlled leg
+        - plus from both neighboring legs
+        
+        Class defines 
+        - policy_mapping_fn: defines names of the distributed controllers
+        - distribute_observations: how to distribute observations towards these controllers
+            Is defined in the obs_indices for each leg.
     """    
     
     # This is ordering of the policies as applied here:
@@ -319,16 +394,10 @@ class Quantruped_Local_Env(QuantrupedFourControllerSuperEnv):
         # FR also gets local information from FL and HR
         self.obs_indices["policy_FR"] = [0,1,2,3,4,11,12, 5, 6, 9,10,13,14,15,16,17,18,25,26,19,20,23,24,33,34,27,28,31,32,35,36,37,38,41,42]
         super().__init__(config)
-        
-#    def distribute_reward(self, reward_full, info, action_dict):
- #       fw_reward = info['reward_forward']
-  #      rew = {}      
-   #     for policy_name in self.policy_names:
-    #        rew[policy_name] = fw_reward / len(self.policy_names) - self.env.ctrl_cost_weight * np.sum(np.square(action_dict[policy_name]))
-     #   return rew
             
     @staticmethod
     def return_policies(obs_space):
+        # For each agent the policy interface has to be defined.
         obs_space = spaces.Box(-np.inf, np.inf, (35,), np.float64)
         policies = {
             Quantruped_Local_Env.policy_names[0]: (None,

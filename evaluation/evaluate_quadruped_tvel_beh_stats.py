@@ -35,7 +35,7 @@ data_smoothn_steps = np.array([1., 0.9, 0.8, 0.7, 0.6])
 # 3 - singe diag, 4 - single neig.
 # 5 - two contr. diag, 6 - two neighb. contr.
 # 7 - connections towards front
-path = 'Results/trained_cur_tvel_eval' # use your path
+path = 'Results/3_trained_cur_tvel_eval' # use your path
 all_files = glob.glob(path + "/*.csv")
 
 eval_list = []

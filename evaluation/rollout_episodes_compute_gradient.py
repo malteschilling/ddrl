@@ -11,6 +11,15 @@ from mujoco_py import functions
 import matplotlib.pyplot as plt
 from matplotlib import cm
 
+"""
+    Running a learned (multiagent) controller,
+    for evaluation - numerically compute the importance matrix 
+    through collecting the gradient.
+    
+    This is adapted from rllib's rollout.py
+    (github.com/ray/rllib/rollout.py)
+"""
+
 class DefaultMapping(collections.defaultdict):
     """default_factory now takes as an argument the missing key."""
     def __missing__(self, key):
@@ -37,6 +46,9 @@ def rollout_episodes(env, agent, num_episodes=1, num_steps=1000, render=True, ex
     steps_eps = []
     power_total_eps = []
 
+    # For numerical calculation of gradients:
+    # for each input dimension set the step size which 
+    # is based on the standard deviation of the specific input channel.
     step_dim_low = np.zeros((44,44))
     step_dim_high = np.zeros((44,44))
     for i in range(0,44):
@@ -86,6 +98,9 @@ def rollout_episodes(env, agent, num_episodes=1, num_steps=1000, render=True, ex
                             prev_reward=prev_rewards[agent_id],
                             policy_id=policy_id)
                 
+                        # Variation of inputs by small steps
+                        # and observe how the output (for the mean value)
+                        # changes for all action channels.
                         variation_obs_high = a_obs.reshape(1,44) + step_dim_high
                         variation_obs_low = a_obs.reshape(1,44) + step_dim_low
                         act_low = np.zeros((44,8))
@@ -141,13 +156,5 @@ def rollout_episodes(env, agent, num_episodes=1, num_steps=1000, render=True, ex
     #print("GRADS: ", manual_grads)
     np.save("grads_tvel1_" + str(experiment_nr) + ".npy", manual_grads)
     np.save("grads_tvel1_abs_" + str(experiment_nr) + ".npy", manual_grads_abs)
-    #fig, ax = plt.subplots(figsize=(6, 8))
-    #ax.imshow(manual_grads, interpolation='none', cmap=cm.coolwarm)
-    #plt.set_title("Gradients accumulated")
-    
-    #fig, ax_2 = plt.subplots(figsize=(6, 8))
-    #ax_2.imshow(manual_grads_abs, interpolation='none', cmap=cm.coolwarm)
-    #plt.set_title("Absolute Gradients")
-    #plt.show()
 
     return (reward_eps, steps_eps, dist_eps, power_total_eps, vel_eps, cot_eps )

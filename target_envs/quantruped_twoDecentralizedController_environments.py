@@ -7,8 +7,22 @@ from gym import spaces
 from target_envs.quantruped_adaptor_multi_environment import QuantrupedMultiPolicies_TVel_Env
         
 class Quantruped_TwoSideControllers_TVel_Env(QuantrupedMultiPolicies_TVel_Env):
-    """
-    """    
+    """ Derived environment for control of the four-legged agent.
+        Uses two different, concurrent control units (policies) 
+        each instantiated as a single agent. 
+        
+        Reward: is aiming for a given target velocity.
+        
+        There is one controller for each side of the agent.
+        Input scope of each controller: 
+        - two legs of that side.
+        
+        Class defines 
+        - policy_mapping_fn: defines names of the distributed controllers
+        - distribute_observations: how to distribute observations towards these controllers
+        - distribute_contact_cost: how to distribute (contact) costs individually to controllers 
+        - concatenate_actions: how to integrate the control signals from the controllers
+    """  
     
     # This is ordering of the policies as applied here:
     policy_names = ["policy_LEFT","policy_RIGHT"]
@@ -84,6 +98,7 @@ class Quantruped_TwoSideControllers_TVel_Env(QuantrupedMultiPolicies_TVel_Env):
         
     @staticmethod
     def policy_mapping_fn(agent_id):
+        # Each derived class has to define all agents by name.
         if agent_id.startswith("policy_LEFT"):
             return "policy_LEFT"
         else:
@@ -91,6 +106,7 @@ class Quantruped_TwoSideControllers_TVel_Env(QuantrupedMultiPolicies_TVel_Env):
             
     @staticmethod
     def return_policies():
+        # For each agent the policy interface has to be defined.
         obs_space = spaces.Box(-np.inf, np.inf, (28,), np.float64)
         policies = {
             Quantruped_TwoSideControllers_TVel_Env.policy_names[0]: (None,

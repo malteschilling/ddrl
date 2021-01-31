@@ -2,6 +2,11 @@ from gym.envs.mujoco.ant_v3 import AntEnv
 from mujoco_py import functions
 import numpy as np
 
+"""
+    Extending the Ant-v3 environment to work with Mujoco 2.
+    In Mujoco_2 the contact forces are not directly calculated,
+    but calculation must be explicitly invoked.
+"""
 class AntEnvMujoco2(AntEnv):
         @property
         def contact_forces(self):

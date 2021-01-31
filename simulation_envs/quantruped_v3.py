@@ -57,6 +57,8 @@ class QuAntrupedEnv(AntEnv):
         super().__init__(xml_file=os.path.join(os.path.dirname(__file__), 'assets','ant_hfield.xml'), ctrl_cost_weight=ctrl_cost_weight, contact_cost_weight=contact_cost_weight)
         self.ctrl_cost_weight = self._ctrl_cost_weight
         self.contact_cost_weight = self._contact_cost_weight
+        
+        # Heightfield
         self.hf_smoothness = hf_smoothness
         self.hf_bump_scale = 2.
         create_new_hfield(self.model, self.hf_smoothness, self.hf_bump_scale)
@@ -120,6 +122,7 @@ class QuAntrupedEnv(AntEnv):
         return observations
     
     def set_hf_parameter(self, smoothness, bump_scale=None):
+        # Setting the parameters for the height field.
         self.hf_smoothness = smoothness
         if bump_scale:
             self.hf_bump_scale = bump_scale

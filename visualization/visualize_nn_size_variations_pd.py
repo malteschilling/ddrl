@@ -6,6 +6,14 @@ import glob
 import seaborn as sns
 from evaluation.compare_learning_performance_atEnd import boxplot_annotate_brackets_group
 
+"""
+    Visualizes variation of neural network sizes.
+    
+    Compared are controller architectures wrt. overall neural capacity
+    - shown is mean performance 
+    Horizontal axis represents size of networks.
+"""
+
 # These are the "Tableau 20" colors as RGB.    
 tableau20 = [(31, 119, 180), (174, 199, 232), (255, 127, 14), (255, 187, 120),    
              (44, 160, 44), (152, 223, 138), (214, 39, 40), (255, 152, 150),    
@@ -28,7 +36,7 @@ plt.rcParams['ytick.color']='#333F4B'
 plt.rcParams['pdf.fonttype'] = 42
 # matplotlib.rcParams['ps.fonttype'] = 42
 
-df = pd.read_csv('Results/nn_hidden_sizes_comparison.csv', index_col=None, header=0)
+df = pd.read_csv('Results/experiment_2_nn_hidden_sizes_comparison.csv', index_col=None, header=0)
 
 exp_name = ['Centralized', 'FullyDecentralized', 'Local', 'TwoSides']
 exp_name_written = ['Centralized', 'Fully \n Decentralized', 'Local \n Neighbors', 

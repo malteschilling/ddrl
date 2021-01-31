@@ -14,6 +14,8 @@ class QuantrupedMultiPolicies_TVel_Env(MultiAgentEnv):
         One simulation environment is spawned (a QuAntruped-v3) and this wrapper
         class organizes control and sensory signals.
         
+        Reward: is aiming for a given target velocity.
+        
         This parent class realizes still a central approach which means that
         all sensory inputs are routed to the single, central control instance and 
         all of the control signals of that instance are directly send towards the 
@@ -81,6 +83,10 @@ class QuantrupedMultiPolicies_TVel_Env(MultiAgentEnv):
 
     # Change environment during learning - called from tune.
     def update_environment_after_epoch(self, timesteps_total):
+        """
+            Called after each training epoch.
+            Can be used to set a curriculum during learning.
+        """
         if self.curriculum_learning:
             if self.curriculum_last_timestep > timesteps_total:
                 # Two different variants:

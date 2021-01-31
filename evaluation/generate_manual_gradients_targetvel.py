@@ -15,7 +15,6 @@ from evaluation.rollout_episodes_compute_gradient import rollout_episodes
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--hf_smoothness", required=False)
-parser.add_argument("--target_velocity", required=False)
 args = parser.parse_args()
 
 if args.hf_smoothness is not None: 
@@ -23,7 +22,7 @@ if args.hf_smoothness is not None:
 else:
     hf_smoothness_eval = 0.8
 
-exp_path = [os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_targetvel/Tvel_QuantrupedMultiEnv_Centralized_TVel']
+exp_path = [os.getenv("HOME") + 'Results/experiment_3_models_curriculum_tvel//Tvel_QuantrupedMultiEnv_Centralized_TVel']
 experiment_dirs = [[os.path.join(exp_path_item,dI) for dI in os.listdir(exp_path_item) if os.path.isdir(os.path.join(exp_path_item,dI))] for exp_path_item in exp_path]
 
 ray.init()

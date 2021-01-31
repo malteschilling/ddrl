@@ -7,8 +7,18 @@ from gym import spaces
 from simulation_envs import QuantrupedMultiPoliciesEnv
         
 class Quantruped_Centralized_Env(QuantrupedMultiPoliciesEnv):
-    """
-    """    
+    """ Derived environment for control of the four-legged agent.
+        Allows to instantiate multiple agents for control.
+        
+        Centralized approach: Single agent (as standard DRL approach)
+        controls all degrees of freedom of the agent.
+        
+        Class defines 
+        - policy_mapping_fn: defines names of the distributed controllers
+        - distribute_observations: how to distribute observations towards these controllers
+        - distribute_contact_cost: how to distribute (contact) costs individually to controllers 
+        - concatenate_actions: how to integrate the control signals from the controllers
+    """  
     
     # This is ordering of the policies as applied here:
     policy_names = ["central_policy"]
@@ -54,10 +64,12 @@ class Quantruped_Centralized_Env(QuantrupedMultiPoliciesEnv):
         
     @staticmethod
     def policy_mapping_fn(agent_id):
+        # Each derived class has to define all agents by name.
         return Quantruped_Centralized_Env.policy_names[0]
             
     @staticmethod
     def return_policies(obs_space):
+        # For each agent the policy interface has to be defined.
         policies = {
             Quantruped_Centralized_Env.policy_names[0]: (None,
                 obs_space, spaces.Box(np.array([-1.,-1.,-1.,-1., -1.,-1.,-1.,-1.]), np.array([+1.,+1.,+1.,+1., +1.,+1.,+1.,+1.])), {}),
