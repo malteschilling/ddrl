@@ -22,10 +22,10 @@ if args.hf_smoothness is not None:
 else:
     hf_smoothness_eval = 1.0
 
-exp_path = [os.getenv("HOME") + 'Results/experiment_3_models_curriculum_tvel/Tvel_QuantrupedMultiEnv_Centralized_TVel', 
-    os.getenv("HOME") + 'Results/experiment_3_models_curriculum_tvel/Tvel_QuantrupedMultiEnv_FullyDecentral_TVel',
-    os.getenv("HOME") + 'Results/experiment_3_models_curriculum_tvel/Tvel_QuantrupedMultiEnv_Local_TVel',
-    os.getenv("HOME") + 'Results/experiment_3_models_curriculum_tvel/Tvel_QuantrupedMultiEnv_TwoSides_TVel']
+exp_path = [os.getcwd() + '/Results/experiment_3_models_curriculum_tvel/Tvel_QuantrupedMultiEnv_Centralized_TVel', 
+    os.getcwd() + '/Results/experiment_3_models_curriculum_tvel/Tvel_QuantrupedMultiEnv_FullyDecentral_TVel',
+    os.getcwd() + '/Results/experiment_3_models_curriculum_tvel/Tvel_QuantrupedMultiEnv_Local_TVel',
+    os.getcwd() + '/Results/experiment_3_models_curriculum_tvel/Tvel_QuantrupedMultiEnv_TwoSides_TVel']
     
 experiment_dirs = [[os.path.join(exp_path_item,dI) for dI in os.listdir(exp_path_item) if os.path.isdir(os.path.join(exp_path_item,dI))] for exp_path_item in exp_path]
 

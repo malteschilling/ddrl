@@ -6,7 +6,7 @@ from scipy.signal import convolve2d
 
 DEFAULT_CAMERA_CONFIG = {
     'distance': 15.0,
-    'type': 1,
+    'type': 1, # 1 = Tracking camera, 2 = Fixed
     'trackbodyid': 1,
     'elevation': -20.0,
 }

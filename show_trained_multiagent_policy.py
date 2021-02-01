@@ -6,7 +6,6 @@ from ray.tune.registry import get_trainable_cls
 from ray.rllib.evaluation.worker_set import WorkerSet
 
 import simulation_envs
-#import hexapod_envs
 import models
 from evaluation.rollout_episodes import rollout_episodes
 
@@ -19,7 +18,7 @@ from evaluation.rollout_episodes import rollout_episodes
 """
 
 # Setting number of steps and episodes
-num_steps = int(1000)
+num_steps = int(400)
 num_episodes = int(1)
 
 # Selecting checkpoint to load

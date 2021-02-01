@@ -22,7 +22,7 @@ if args.hf_smoothness is not None:
 else:
     hf_smoothness_eval = 0.8
 
-exp_path = [os.getenv("HOME") + 'Results/experiment_3_models_curriculum_tvel//Tvel_QuantrupedMultiEnv_Centralized_TVel']
+exp_path = [os.getcwd() + '/Results/experiment_3_models_curriculum_tvel//Tvel_QuantrupedMultiEnv_Centralized_TVel']
 experiment_dirs = [[os.path.join(exp_path_item,dI) for dI in os.listdir(exp_path_item) if os.path.isdir(os.path.join(exp_path_item,dI))] for exp_path_item in exp_path]
 
 ray.init()

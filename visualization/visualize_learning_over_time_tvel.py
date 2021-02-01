@@ -33,12 +33,12 @@ plt.rcParams['pdf.fonttype'] = 42
 
 # Requires detailed training logs - not part of the git.
 # Log file directories 
-exp_path = [os.getenv("HOME") + '../Results/experiment_3/Tvel_QuantrupedMultiEnv_Centralized_TVel', 
-     os.getenv("HOME") + '../Results/experiment_3/Tvel_QuantrupedMultiEnv_FullyDecentral_TVel', 
-     os.getenv("HOME") + '../Results/experiment_3/Tvel_QuantrupedMultiEnv_Local_TVel',  
-     os.getenv("HOME") + '../Results/experiment_3/Tvel_QuantrupedMultiEnv_TwoSides_TVel'] 
+exp_path = [os.getcwd() + '/Results/experiment_3/Tvel_QuantrupedMultiEnv_Centralized_TVel', 
+     os.getcwd() + '/Results/experiment_3/Tvel_QuantrupedMultiEnv_FullyDecentral_TVel', 
+     os.getcwd() + '/Results/experiment_3/Tvel_QuantrupedMultiEnv_Local_TVel',  
+     os.getcwd() + '/Results/experiment_3/Tvel_QuantrupedMultiEnv_TwoSides_TVel'] 
      
-#exp_path = [os.getenv("HOME") + '/Desktop/gpu_cluster/ray_results_12_09/HF_10_QuantrupedMultiEnv_Centralized']
+#exp_path = [os.getcwd() + '/Desktop/gpu_cluster/ray_results_12_09/HF_10_QuantrupedMultiEnv_Centralized']
 
 experiment_dirs = [[os.path.join(exp_path_item,dI) for dI in os.listdir(exp_path_item) if os.path.isdir(os.path.join(exp_path_item,dI))] for exp_path_item in exp_path]
 

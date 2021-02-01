@@ -34,14 +34,14 @@ plt.rcParams['ytick.color']='#333F4B'
 plt.rcParams['pdf.fonttype'] = 42
 
 # Important: requires detailed logs of results (not part of the git).
-exp_path = [os.getenv("HOME") + '../Results/experiment_1/HF_10_QuantrupedMultiEnv_Centralized', 
-     os.getenv("HOME") + '../Results/experiment_1/HF_10_QuantrupedMultiEnv_FullyDecentral', 
-     os.getenv("HOME") + '../Results/experiment_1/HF_10_QuantrupedMultiEnv_Local', 
-     os.getenv("HOME") + '../Results/experiment_1/HF_10_QuantrupedMultiEnv_SingleDiagonal', 
-     os.getenv("HOME") + '../Results/experiment_1/HF_10_QuantrupedMultiEnv_SingleNeighbor', 
-     os.getenv("HOME") + '../Results/experiment_1/HF_10_QuantrupedMultiEnv_SingleToFront', 
-     os.getenv("HOME") + '../Results/experiment_1/HF_10_QuantrupedMultiEnv_TwoDiags', 
-     os.getenv("HOME") + '../Results/experiment_1/HF_10_QuantrupedMultiEnv_TwoSides']
+exp_path = [os.getcwd() + '/Results/experiment_1/HF_10_QuantrupedMultiEnv_Centralized', 
+     os.getcwd() + '/Results/experiment_1/HF_10_QuantrupedMultiEnv_FullyDecentral', 
+     os.getcwd() + '/Results/experiment_1/HF_10_QuantrupedMultiEnv_Local', 
+     os.getcwd() + '/Results/experiment_1/HF_10_QuantrupedMultiEnv_SingleDiagonal', 
+     os.getcwd() + '/Results/experiment_1/HF_10_QuantrupedMultiEnv_SingleNeighbor', 
+     os.getcwd() + '/Results/experiment_1/HF_10_QuantrupedMultiEnv_SingleToFront', 
+     os.getcwd() + '/Results/experiment_1/HF_10_QuantrupedMultiEnv_TwoDiags', 
+     os.getcwd() + '/Results/experiment_1/HF_10_QuantrupedMultiEnv_TwoSides']
         
 experiment_dirs = [[os.path.join(exp_path_item,dI) for dI in os.listdir(exp_path_item) if os.path.isdir(os.path.join(exp_path_item,dI))] for exp_path_item in exp_path]
 

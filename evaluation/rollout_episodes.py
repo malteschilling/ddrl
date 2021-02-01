@@ -8,6 +8,8 @@ import numpy as np
 import mujoco_py
 from mujoco_py import functions
 
+import matplotlib.pyplot as plt
+
 """
     Running a learned (multiagent) controller,
     for evaluation or visualisation.
@@ -22,7 +24,7 @@ class DefaultMapping(collections.defaultdict):
         self[key] = value = self.default_factory(key)
         return value
 
-def rollout_episodes(env, agent, num_episodes=1, num_steps=1000, render=True):
+def rollout_episodes(env, agent, num_episodes=1, num_steps=1000, render=True, save_images=None, explore_during_rollout=None):
     """
         Rollout an episode:
         step through an episode, using the 
@@ -42,6 +44,9 @@ def rollout_episodes(env, agent, num_episodes=1, num_steps=1000, render=True):
         p: flatten_to_single_ndarray(m.action_space.sample())
         for p, m in policy_map.items()
     }
+    
+    #if save_images:
+     #   viewer = mujoco_py.MjRenderContextOffscreen(env.env.sim, 0)
     
     # Collecting statistics over episodes.
     reward_eps = []
@@ -82,7 +87,8 @@ def rollout_episodes(env, agent, num_episodes=1, num_steps=1000, render=True):
                             state=agent_states[agent_id],
                             prev_action=prev_actions[agent_id],
                             prev_reward=prev_rewards[agent_id],
-                            policy_id=policy_id)
+                            policy_id=policy_id,
+                            explore=explore_during_rollout)
                         agent_states[agent_id] = p_state
                     else:
                         # Sample an action for the current observation 
@@ -110,7 +116,14 @@ def rollout_episodes(env, agent, num_episodes=1, num_steps=1000, render=True):
             else:
                 reward_total += reward
             if render:
-                env.render()
+                if save_images:
+                    #viewer.render(1280, 800, 0)
+                    img = env.env.sim.render(width=1280,height=800, camera_name="side_run")
+                    #data = np.asarray(viewer.read_pixels(800, 1280, depth=False)[::-1, :, :], dtype=np.uint8)                
+                    #img_array = env.env.render('rgb_array')
+                    plt.imsave(save_images + str(steps).zfill(4) + '.png', img, origin='lower')
+                else:
+                    env.render()
             #saver.append_step(obs, action, next_obs, reward, done, info)
             steps += 1
             obs = next_obs
