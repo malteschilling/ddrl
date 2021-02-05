@@ -23,6 +23,13 @@ from evaluation.rollout_episodes import rollout_episodes
     
     Produces a panda dataframe for the simulation runs which
     is used for visualization.
+    
+    Output:
+        1_trained_flat_eval - directory with panda csv files
+    Output used in:
+        evaluate_quadruped_beh_stats.py - uses for CoT
+		compare_generalization_trained_on_flat.py - uses for statistical evaluation
+		visualize_generalization_different_heightfields_pd.py
 """
 
 hf_smoothness_eval = 1.0
@@ -39,13 +46,13 @@ if args.hf_smoothness is not None:
 else:
     hf_smoothness_eval = 1.0
  
-exp_path = [os.getenv("HOME") + 'Results/experiment_1_models_architectures_on_flat/HF_10_QuantrupedMultiEnv_FullyDecentral', 
-     os.getenv("HOME") + 'Results/experiment_1_models_architectures_on_flat/HF_10_QuantrupedMultiEnv_Local', 
-     os.getenv("HOME") + 'Results/experiment_1_models_architectures_on_flat/HF_10_QuantrupedMultiEnv_SingleDiagonal', 
-     os.getenv("HOME") + 'Results/experiment_1_models_architectures_on_flat/HF_10_QuantrupedMultiEnv_SingleNeighbor', 
-     os.getenv("HOME") + 'Results/experiment_1_models_architectures_on_flat/HF_10_QuantrupedMultiEnv_SingleToFront', 
-     os.getenv("HOME") + 'Results/experiment_1_models_architectures_on_flat/HF_10_QuantrupedMultiEnv_TwoDiags', 
-     os.getenv("HOME") + 'Results/experiment_1_models_architectures_on_flat/HF_10_QuantrupedMultiEnv_TwoSides']
+exp_path = [os.getcwd() + '/Results/experiment_1_models_architectures_on_flat/HF_10_QuantrupedMultiEnv_FullyDecentral', 
+     os.getcwd() + '/Results/experiment_1_models_architectures_on_flat/HF_10_QuantrupedMultiEnv_Local', 
+     os.getcwd() + '/Results/experiment_1_models_architectures_on_flat/HF_10_QuantrupedMultiEnv_SingleDiagonal', 
+     os.getcwd() + '/Results/experiment_1_models_architectures_on_flat/HF_10_QuantrupedMultiEnv_SingleNeighbor', 
+     os.getcwd() + '/Results/experiment_1_models_architectures_on_flat/HF_10_QuantrupedMultiEnv_SingleToFront', 
+     os.getcwd() + '/Results/experiment_1_models_architectures_on_flat/HF_10_QuantrupedMultiEnv_TwoDiags', 
+     os.getcwd() + '/Results/experiment_1_models_architectures_on_flat/HF_10_QuantrupedMultiEnv_TwoSides']
          
 experiment_dirs = [[os.path.join(exp_path_item,dI) for dI in os.listdir(exp_path_item) if os.path.isdir(os.path.join(exp_path_item,dI))] for exp_path_item in exp_path]
 
@@ -70,7 +77,7 @@ for exp_dir in experiment_dirs:
     all_cot = []
     all_vel = []
     
-    for experiment in range(0, len(exp_params) ):
+    for experiment in range(0, len(exp_params) ):    
         with open(exp_params[experiment], "rb") as f:
             config = pickle.load(f)
         if "num_workers" in config:

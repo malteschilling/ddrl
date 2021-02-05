@@ -23,7 +23,7 @@ num_episodes = int(1)
 
 ray.init()
 
-smoothness = 0.6
+smoothness = 1.0
 
 # Selecting checkpoint to load
 config_checkpoints = [os.getcwd() + "/Results/experiment_1_models_architectures_on_flat/HF_10_QuantrupedMultiEnv_Centralized/PPO_QuantrupedMultiEnv_Centralized_989cd_00006_6_2020-12-08_18-34-17/checkpoint_1250/checkpoint-1250",
@@ -41,6 +41,12 @@ config_checkpoints = [os.getcwd() + "/Results/experiment_1_models_architectures_
 #config_checkpoints = [os.getcwd() + "/Results/experiment_1_models_architectures_on_flat/HF_10_QuantrupedMultiEnv_Centralized/PPO_QuantrupedMultiEnv_Centralized_989cd_00007_7_2020-12-08_18-34-17/checkpoint_1250/checkpoint-1250",
 config_checkpoints = [os.getcwd() + "/Results/experiment_1_models_architectures_on_flat/HF_10_QuantrupedMultiEnv_Local/PPO_QuantrupedMultiEnv_Local_1a49c_00005_5_2020-12-05_06-20-13/checkpoint_1250/checkpoint-1250",
 #    os.getcwd() + "/Results/experiment_1_models_architectures_on_flat/HF_10_QuantrupedMultiEnv_TwoSides/PPO_QuantrupedMultiEnv_TwoSides_6654b_00006_6_2020-12-06_17-42-00/checkpoint_1250/checkpoint-1250",
+    os.getcwd() + "/Results/experiment_1_models_architectures_on_flat/HF_10_QuantrupedMultiEnv_FullyDecentral/PPO_QuantrupedMultiEnv_FullyDecentral_19697_00003_3_2020-12-04_12-08-56/checkpoint_1250/checkpoint-1250"]
+    
+# Selecting checkpoint to load
+config_checkpoints = [os.getcwd() + "/Results/experiment_1_models_architectures_on_flat/HF_10_QuantrupedMultiEnv_Centralized/PPO_QuantrupedMultiEnv_Centralized_989cd_00006_6_2020-12-08_18-34-17/checkpoint_1250/checkpoint-1250",
+    os.getcwd() + "/Results/experiment_1_models_architectures_on_flat/HF_10_QuantrupedMultiEnv_Local/PPO_QuantrupedMultiEnv_Local_1a49c_00005_5_2020-12-05_06-20-13/checkpoint_1250/checkpoint-1250",
+    os.getcwd() + "/Results/experiment_1_models_architectures_on_flat/HF_10_QuantrupedMultiEnv_TwoSides/PPO_QuantrupedMultiEnv_TwoSides_6654b_00003_3_2020-12-06_02-21-44/checkpoint_1250/checkpoint-1250",
     os.getcwd() + "/Results/experiment_1_models_architectures_on_flat/HF_10_QuantrupedMultiEnv_FullyDecentral/PPO_QuantrupedMultiEnv_FullyDecentral_19697_00003_3_2020-12-04_12-08-56/checkpoint_1250/checkpoint-1250"]
     
 # Afterwards put together using

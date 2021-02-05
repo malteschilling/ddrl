@@ -1,19 +1,35 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
-import glob
+import glob, os
 
 from scipy import stats
 import scikit_posthocs as sp
 
+"""
+    Calculate statistics from evaluation runs for experiment three
+    (trained on curriculum of terrains (1. - 0.8 smoothness), 
+    aiming for given target velocity).
+    
+    Four architectures are used for training and evaluation.
+    
+    Script groups results from evaluation (for each arch. 10 seeds, 100 runs), 
+    calculates mean values for return on different terrains.
+    Done for both used target velocities (1. and 2.).
+    
+    This produces statistics as given in Sect. 4.6
+    
+    Input: 
+        Evaluation runs for controller (see sect. 4.6)
+        3_trained_cur_tvel_eval - trained on curr. of terrains, target velocity
+            output of evaluate script: evaluate_trained_policies_tvel_pd.py
+"""
+
 data_smoothn_steps = np.array([1., 0.9, 0.8, 0.7, 0.6])
-# Data from generalization of architectures: architecture trained on flat terrain,
-# evaluated on 8 different uneven terrain (see smoothness above, 1. = flat).
-# 0 - centralized, 1 - fully dec, 2 - local, 
-# 3 - singe diag, 4 - single neig.
-# 5 - two contr. diag, 6 - two neighb. contr.
-# 7 - connections towards front
-path = 'Results/trained_cur_tvel_eval' # use your path
+# Data from generalization of architectures:
+# evaluated on 5 different uneven terrain (see smoothness above, 1. = flat).
+# In Experiment 3, only 0, 1, 2, 7 are used.
+path = os.getcwd() + '/Results/3_trained_cur_tvel_eval' # use your path
 all_files = glob.glob(path + "/*.csv")
 
 eval_list = []
@@ -29,7 +45,8 @@ exp_name = ['Centralized', 'FullyDecentral', 'Local', 'SingleDiagonal',
 
 df_mean_eval_06_tv2 = pd.DataFrame([], columns=["approach", "seed", "mean", "std_dev"])
 
-# Target velocity: 1.
+# Can be done for different smoothness: change evaluated on below in the queries.
+# Target velocity: 2.
 select_appr = [0,1,2,7]
 for appr_i in range(0, len(select_appr)):
     for seed_i in range(0,10):
@@ -45,7 +62,7 @@ for appr_i in range(0, len(select_appr)):
         
 df_mean_eval_06_tv1 = pd.DataFrame([], columns=["approach", "seed", "mean", "std_dev"])
 
-# Target velocity 2.
+# Target velocity 1.
 select_appr = [0,1,2,7]
 for appr_i in range(0, len(select_appr)):
     for seed_i in range(0,10):
@@ -61,6 +78,14 @@ for appr_i in range(0, len(select_appr)):
 
 #########################################
 # Statistics: Test for differences between groups
+#
+# We analyzed the performance (mean return) of the unpaired samples from the different 
+# architectures using the non-parametric Kruskal-Wallis test [Kruskal & Wallis 1952] 
+# (as the data appears not normally distributed) and for post-hoc analysis using the 
+# Dunn [Dunn & Dunn 1961] post-hoc test (applying Bonferroni correction) 
+# following [Raff 2019].
+#
+# We compared the mean return for smoothness 0.6
 #########################################
 
 # For smoothness 0.6, target velocity = 2.0

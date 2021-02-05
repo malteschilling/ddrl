@@ -6,8 +6,13 @@ import os
 """
     Visualizes the learning performances over time, taken from the ray_results json files.
     The measure calculates the running mean over all training epochs of returns.
-    Taken from Andrychowicz et al. (2020): What Matters In On-Policy Reinforcement Learning? A Large-Scale Empirical Study.
-    Google Brain Research: "We then average these score to obtain a single performance score of the seed which is proportional to the area under the learning curve. This ensures we assign higher scores to agents that learn quickly. The performance score of a hyperparameter configuration is finally set to the median performance score across the 3 seeds."
+    Taken from Andrychowicz et al. (2020): What Matters In On-Policy Reinforcement Learning? 
+    A Large-Scale Empirical Study.
+    Google Brain Research: "We then average these score to obtain a single performance 
+    score of the seed which is proportional to the area under the learning curve. 
+    This ensures we assign higher scores to agents that learn quickly. 
+    The performance score of a hyperparameter configuration is finally 
+    set to the median performance score across the 3 seeds."
     
     Here, run on the system trained on flat terrain.
 """

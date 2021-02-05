@@ -24,14 +24,20 @@ class DefaultMapping(collections.defaultdict):
         self[key] = value = self.default_factory(key)
         return value
 
-def rollout_episodes(env, agent, num_episodes=1, num_steps=1000, render=True, save_images=None, explore_during_rollout=None):
+def rollout_episodes(env, agent, num_episodes=1, num_steps=1000, render=True, save_images=None, explore_during_rollout=None, tvel=None):
     """
         Rollout an episode:
         step through an episode, using the 
         - agent = trained policies (is a multiagent consisting of a dict of agents)
         - env = in the given environment
         for num_steps control steps and running num_episodes episodes.
+        
+        render: shows OpenGL window
+        save_images: save individual frames (can be combined to video)
+        tvel: set target velocity
     """
+    if tvel:
+        env.target_velocity_list = [tvel]
     # Setting up the agent for running an episode.
     multiagent = isinstance(env, MultiAgentEnv)
     if agent.workers.local_worker().multiagent:
@@ -118,6 +124,8 @@ def rollout_episodes(env, agent, num_episodes=1, num_steps=1000, render=True, sa
             if render:
                 if save_images:
                     #viewer.render(1280, 800, 0)
+                    if tvel:
+                        env.env.model.body_pos[14][0] += tvel * 0.05
                     img = env.env.sim.render(width=1280,height=800, camera_name="side_run")
                     #data = np.asarray(viewer.read_pixels(800, 1280, depth=False)[::-1, :, :], dtype=np.uint8)                
                     #img_array = env.env.render('rgb_array')

@@ -26,6 +26,16 @@ class DefaultMapping(collections.defaultdict):
         self[key] = value = self.default_factory(key)
         return value
 
+"""
+    Rollout an episode:
+    step through an episode, using the 
+        - agent = trained policies (is a multiagent consisting of a dict of agents)
+        - env = in the given environment
+    for num_steps control steps and running num_episodes episodes.
+        
+    render: shows OpenGL window
+"""
+
 def rollout_episodes(env, agent, num_episodes=1, num_steps=1000, render=True, experiment_nr=0):
     multiagent = isinstance(env, MultiAgentEnv)
     if agent.workers.local_worker().multiagent:

@@ -46,6 +46,21 @@ def boxplot_annotate_brackets_group(num1, target_list, data, center, height, dh=
 """
     Visualizes the learning performances after 20M steps and does 
     statistics (non-parametric, unpaired) on the different groups.
+    
+    For Experiment 1 = trained on flat terrain, aiming for high velocity.
+    
+    Directly loads progress.csv log files from training (not provided in git repository).
+    This shows a highly significant learning performance difference 
+    (stats not provided in detail in paper, but see sect 4.1)
+    
+    Learning performance over learning time: evaluated as the average score over time 
+    during the learning phase. It is important to distinguish this from the learning 
+    curves which show the mean return at a specific point in time. 
+    Learning performance was especially introduced as a measure for learning up to a 
+    specific point in time. It is meant as a summary of all learning up to that point 
+    in time. It is evaluated as the mean of the episode return over learning epochs 
+    during that particular run which is proportional to the area under the learning curves.
+
 """
 if __name__ == "__main__":
     # These are the "Tableau 20" colors as RGB.    
@@ -70,6 +85,7 @@ if __name__ == "__main__":
     plt.rcParams['pdf.fonttype'] = 42
     # matplotlib.rcParams['ps.fonttype'] = 42
     
+    # Load data - ! progress.csv are not given in git (are too huge)
     exp_path = [os.getcwd() + '/Results/experiment_1_models_architectures_on_flat/HF_10_QuantrupedMultiEnv_Centralized', 
          os.getcwd() + '/Results/experiment_1_models_architectures_on_flat/HF_10_QuantrupedMultiEnv_FullyDecentral', 
          os.getcwd() + '/Results/experiment_1_models_architectures_on_flat/HF_10_QuantrupedMultiEnv_Local', 
@@ -81,6 +97,7 @@ if __name__ == "__main__":
      
     experiment_dirs = [[os.path.join(exp_path_item,dI) for dI in os.listdir(exp_path_item) if os.path.isdir(os.path.join(exp_path_item,dI))] for exp_path_item in exp_path]
 
+    # Access progress.csv files and accumulate learning performance.
     all_exp_data = []
     for exp_dir in experiment_dirs:
         for i in range(0, len(exp_dir)):
@@ -105,6 +122,7 @@ if __name__ == "__main__":
         all_exp_data.append( [rew_mean, rew_std, rew_lower_std, rew_upper_std, reward_values, mean_cum_rew] )
         print("Loaded ", exp_dir)
 
+    # Look at different points in time (5M, 10M, 15M, 20M steps)
     architecture_samples_at312 = np.zeros((8,10))
     for arch in range(0, architecture_samples_at312.shape[0]):
         for i in range(0,10):
@@ -122,7 +140,16 @@ if __name__ == "__main__":
     for arch in range(0, architecture_learn_perf_samples_at1250.shape[0]):
         for i in range(0,10):
             architecture_learn_perf_samples_at1250[arch][i] = all_exp_data[arch][5][i][1249]
-        
+    
+    #########################################
+    # Statistics: Test for differences between groups
+    #
+    # We analyzed the learning performance of the unpaired samples from the different 
+    # architectures using the non-parametric Kruskal-Wallis test [Kruskal & Wallis 1952] 
+    # (as the data appears not normally distributed) and for post-hoc analysis using the 
+    # Dunn [Dunn & Dunn 1961] post-hoc test (applying Bonferroni correction) 
+    # following [Raff 2019].
+    #########################################
     from scipy import stats
     import scikit_posthocs as sp
     stats.kruskal(architecture_samples_at312[0], architecture_samples_at312[1], 
@@ -152,6 +179,8 @@ if __name__ == "__main__":
         architecture_learn_perf_samples_at1250[6], architecture_learn_perf_samples_at1250[7])
     sp.posthoc_mannwhitney(architecture_learn_perf_samples_at1250, p_adjust = 'bonferroni')
 
+    # Plotting: Box-plot
+    ###########
     arch_names = [exp_path[i].split('_')[-1] for i in range(0,8)]
     colors = [tableau20[i] for i in range(0,16,2)]
     medianprops = dict(color="black",linewidth=1.5)

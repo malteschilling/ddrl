@@ -1,40 +1,28 @@
 import numpy as np
-#import matplotlib.pyplot as plt
 import pandas as pd
 import glob
 
-#import seaborn as sns
-#from evaluation.compare_learning_performance_atEnd import boxplot_annotate_brackets_group
-
-# These are the "Tableau 20" colors as RGB.    
-# tableau20 = [(31, 119, 180), (174, 199, 232), (255, 127, 14), (255, 187, 120),    
-#              (44, 160, 44), (152, 223, 138), (214, 39, 40), (255, 152, 150),    
-#              (148, 103, 189), (197, 176, 213), (140, 86, 75), (196, 156, 148),    
-#              (227, 119, 194), (247, 182, 210), (127, 127, 127), (199, 199, 199),    
-#              (188, 189, 34), (219, 219, 141), (23, 190, 207), (158, 218, 229)] 
-# # Scale the RGB values to the [0, 1] range, which is the format matplotlib accepts.    
-# for i in range(len(tableau20)):    
-#     r, g, b = tableau20[i]    
-#     tableau20[i] = (r / 255., g / 255., b / 255.) 
-#     
-# plt.rcParams['font.family'] = 'sans-serif'
-# plt.rcParams['font.sans-serif'] = 'Helvetica'
-# plt.rcParams['axes.edgecolor']='#333F4B'
-# plt.rcParams['axes.linewidth']=0.8
-# plt.rcParams['xtick.color']='#333F4B'
-# plt.rcParams['ytick.color']='#333F4B'
-# 
-# # Remove Type 3 fonts for latex
-# plt.rcParams['pdf.fonttype'] = 42
-# # matplotlib.rcParams['ps.fonttype'] = 42
+"""
+    Summarizing evaluation runs (exp. 1) - producing mean stats, formatted for Tex.
+    
+    Produces:
+        - Mean return
+        - Mean velocities
+        - Mean Cost of Transport
+    for different terrains, smoothness: 1., 0.8, 0.6
+    
+    Input is taken from:
+        1_trained_flat_eval
+"""
 
 data_smoothn_steps = np.array([1., 0.9, 0.8, 0.7, 0.6])
 # Data from generalization of architectures: architecture trained on flat terrain,
 # evaluated on 8 different uneven terrain (see smoothness above, 1. = flat).
-# 0 - centralized, 1 - fully dec, 2 - local, 
-# 3 - singe diag, 4 - single neig.
-# 5 - two contr. diag, 6 - two neighb. contr.
-# 7 - connections towards front
+exp_name = ['Centralized', 'FullyDecentral', 'Local', 'SingleDiagonal',
+       'SingleNeighbor', 'SingleToFront', 'TwoDiags', 'TwoSides']
+exp_name_written = ['Centralized', 'Fully \n Decentralized', 'Local \n Neighbors', 
+    'Single \n Diag. N.', 'Single \n Neigh.', 'Towards \n Front',
+    'Two contr. \n diagonal', 'Two contr. \n neighbors']
 path = 'Results/1_trained_flat_eval' # use your path
 all_files = glob.glob(path + "/*.csv")
 
@@ -45,12 +33,6 @@ for filename in all_files:
     eval_list.append(df)
 
 df = pd.concat(eval_list, axis=0, ignore_index=True)
-
-exp_name = ['Centralized', 'FullyDecentral', 'Local', 'SingleDiagonal',
-       'SingleNeighbor', 'SingleToFront', 'TwoDiags', 'TwoSides']
-exp_name_written = ['Centralized', 'Fully \n Decentralized', 'Local \n Neighbors', 
-    'Single \n Diag. N.', 'Single \n Neigh.', 'Towards \n Front',
-    'Two contr. \n diagonal', 'Two contr. \n neighbors']
 
 for i in range(0,8):
     mean_cots = []

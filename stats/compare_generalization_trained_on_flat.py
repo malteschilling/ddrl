@@ -1,19 +1,42 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
-import glob
+import glob, os
 
 from scipy import stats
 import scikit_posthocs as sp
 
+"""
+    Calculate statistics from evaluation runs for experiment one
+    (trained on flat terrain, aiming for maximal velocity).
+    
+    Eight architectures are used for training and evaluation.
+    
+    Script groups results from evaluation (for each arch. 10 seeds, 100 runs), 
+    calculates mean values for return on different terrains.
+    
+    This produces statistics as given in Sect. 4.2
+    
+    Input: 
+        Evaluation runs for controller (see sect. 4.2)
+        1_trained_flat_eval - trained on flat terrain
+            output of evaluate script: evaluate_trained_policies_pd.py
+        1_trained_hf06_eval - trained on uneven terrain (smooothness 0.6, S-III.)
+            here used for comparison to expert policies: trained already on uneven terrain
+"""
+
 data_smoothn_steps = np.array([1., 0.9, 0.8, 0.7, 0.6])
 # Data from generalization of architectures: architecture trained on flat terrain,
 # evaluated on 8 different uneven terrain (see smoothness above, 1. = flat).
-# 0 - centralized, 1 - fully dec, 2 - local, 
-# 3 - singe diag, 4 - single neig.
-# 5 - two contr. diag, 6 - two neighb. contr.
-# 7 - connections towards front
-path = 'Results/1_trained_flat_eval' # use your path
+exp_name = ['Centralized', 'FullyDecentral', 'Local', 'SingleDiagonal',
+       'SingleNeighbor', 'SingleToFront', 'TwoDiags', 'TwoSides']
+# Load evaluation results from first experiment 1, sect. 4.2
+path = os.getcwd() + '/Results/1_trained_flat_eval' # use your path
+select_arch = [0,1,2,3,4,5,6,7]
+# Load for comparison evaluation results for trained experts (on height field 
+# of smoothness 0.6, supplement S-III.)
+#path = os.getcwd() + '/Results/1_trained_hf06_eval' # use your path
+#select_arch = [0,1,2,7]
 all_files = glob.glob(path + "/*.csv")
 
 eval_list = []
@@ -24,12 +47,9 @@ for filename in all_files:
 
 df = pd.concat(eval_list, axis=0, ignore_index=True)
 
-exp_name = ['Centralized', 'FullyDecentral', 'Local', 'SingleDiagonal',
-       'SingleNeighbor', 'SingleToFront', 'TwoDiags', 'TwoSides']
-
 df_mean_eval_06 = pd.DataFrame([], columns=["approach", "seed", "mean", "std_dev"])
 
-for appr_i in range(0,8):
+for appr_i in select_arch:
     for seed_i in range(0,10):
         select_data_p = df.query('evaluated_on==0.6 and seed==' + str(seed_i) + \
             ' and approach=="' + exp_name[appr_i] + '"')['reward']
@@ -42,7 +62,7 @@ for appr_i in range(0,8):
 
 df_mean_eval_08 = pd.DataFrame([], columns=["approach", "seed", "mean", "std_dev"])
 
-for appr_i in range(0,8):
+for appr_i in select_arch:
     for seed_i in range(0,10):
         select_data_p = df.query('evaluated_on==0.8 and seed==' + str(seed_i) + \
             ' and approach=="' + exp_name[appr_i] + '"')['reward']
@@ -55,6 +75,14 @@ for appr_i in range(0,8):
 
 #########################################
 # Statistics: Test for differences between groups
+#
+# We analyzed the performance (mean return) of the unpaired samples from the different 
+# architectures using the non-parametric Kruskal-Wallis test [Kruskal & Wallis 1952] 
+# (as the data appears not normally distributed) and for post-hoc analysis using the 
+# Dunn [Dunn & Dunn 1961] post-hoc test (applying Bonferroni correction) 
+# following [Raff 2019].
+#
+# We compared the mean return on two different, novel terrains.
 #########################################
 
 # For smoothness 0.6
@@ -72,20 +100,9 @@ stats.kruskal( (df_mean_eval_06.loc[df_mean_eval_06["approach"] == exp_name[0]])
 # Eta square 0.2324
 # Epsilon Squared = H / ((n^2-1)/(n+1)); 0.300
 # = relatively strong
-#sp.posthoc_mannwhitney(architecture_samples_at312, p_adjust = 'holm')
-sp.posthoc_mannwhitney(df_mean_eval_06, val_col='mean', group_col='approach', p_adjust = 'bonferroni')
-# OR posthoc_dunn, posthoc_conover
+sp.posthoc_dunn(df_mean_eval_06, val_col='mean', group_col='approach', p_adjust = 'bonferroni')
+# OR posthoc_mannwhitney, posthoc_conover
 
-# sp.posthoc_mannwhitney(df_mean_eval_06, val_col='mean', group_col='approach', p_adjust = 'bonferroni')
-#                 Centralized  FullyDecentral     Local  SingleDiagonal  SingleNeighbor  SingleToFront  TwoDiags  TwoSides
-# Centralized        1.000000        0.317232  1.000000             1.0        1.000000            1.0  1.000000  0.317232
-# FullyDecentral     0.317232        1.000000  0.061662             1.0        0.128419            1.0  0.483209  1.000000
-# Local              1.000000        0.061662  1.000000             1.0        1.000000            1.0  1.000000  0.036818
-# SingleDiagonal     1.000000        1.000000  1.000000             1.0        1.000000            1.0  1.000000  1.000000
-# SingleNeighbor     1.000000        0.128419  1.000000             1.0        1.000000            1.0  1.000000  0.101094
-# SingleToFront      1.000000        1.000000  1.000000             1.0        1.000000            1.0  1.000000  1.000000
-# TwoDiags           1.000000        0.483209  1.000000             1.0        1.000000            1.0  1.000000  0.483209
-# TwoSides           0.317232        1.000000  0.036818             1.0        0.101094            1.0  0.483209  1.000000
 # >>> sp.posthoc_dunn(df_mean_eval_06, val_col='mean', group_col='approach', p_adjust = 'bonferroni')
 #                 Centralized  FullyDecentral     Local  SingleDiagonal  SingleNeighbor  SingleToFront  TwoDiags  TwoSides
 # Centralized        1.000000        0.085101  1.000000             1.0        1.000000            1.0  1.000000  0.085101
@@ -96,16 +113,6 @@ sp.posthoc_mannwhitney(df_mean_eval_06, val_col='mean', group_col='approach', p_
 # SingleToFront      1.000000        1.000000  1.000000             1.0        1.000000            1.0  1.000000  1.000000
 # TwoDiags           1.000000        0.336639  1.000000             1.0        1.000000            1.0  1.000000  0.336639
 # TwoSides           0.085101        1.000000  0.012443             1.0        0.241236            1.0  0.336639  1.000000
-# >>> sp.posthoc_conover(df_mean_eval_06, val_col='mean', group_col='approach', p_adjust = 'bonferroni')
-#                 Centralized  FullyDecentral     Local  SingleDiagonal  SingleNeighbor  SingleToFront  TwoDiags  TwoSides
-# Centralized        1.000000        0.032581  1.000000        1.000000        1.000000            1.0  1.000000  0.032581
-# FullyDecentral     0.032581        1.000000  0.004123        0.875555        0.104282            1.0  0.152259  1.000000
-# Local              1.000000        0.004123  1.000000        1.000000        1.000000            1.0  1.000000  0.004123
-# SingleDiagonal     1.000000        0.875555  1.000000        1.000000        1.000000            1.0  1.000000  0.875555
-# SingleNeighbor     1.000000        0.104282  1.000000        1.000000        1.000000            1.0  1.000000  0.104282
-# SingleToFront      1.000000        1.000000  1.000000        1.000000        1.000000            1.0  1.000000  1.000000
-# TwoDiags           1.000000        0.152259  1.000000        1.000000        1.000000            1.0  1.000000  0.152259
-# TwoSides           0.032581        1.000000  0.004123        0.875555        0.104282            1.0  0.152259  1.000000
 
 # For smoothness 0.8
 ####################
@@ -135,9 +142,10 @@ stats.kruskal( (df_mean_eval_08.loc[df_mean_eval_08["approach"] == exp_name[0]])
 #0.64 < 1.00 - Very strong
 #sp.posthoc_mannwhitney(architecture_samples_at312, p_adjust = 'holm')
 #A Kruskal-Wallis test showed that Location had a significant relatively strong effect on how motivated students were by the teacher, χ2(2, N = 54) = 21.33, p < .001, ε2 = .40. A post-hoc test using Dunn's test with Bonferroni correction showed the significant differences between Diemen and Haarlem, p < .05, and between Diemen and Rotterdam, p < .001
-sp.posthoc_mannwhitney(df_mean_eval_08, val_col='mean', group_col='approach', p_adjust = 'bonferroni')
-# OR posthoc_dunn, posthoc_conover
+sp.posthoc_dunn(df_mean_eval_08, val_col='mean', group_col='approach', p_adjust = 'bonferroni')
+# OR posthoc_mannwhitney, posthoc_conover
 
+# Outputs are shown for results from Experiment 1 (trained on flat terrain).
 # sp.posthoc_mannwhitney(df_mean_eval_08, val_col='mean', group_col='approach', p_adjust = 'bonferroni')
 #                 Centralized  FullyDecentral     Local  SingleDiagonal  SingleNeighbor  SingleToFront  TwoDiags  TwoSides
 # Centralized        1.000000        1.000000  0.873852        1.000000        1.000000       1.000000       1.0  1.000000

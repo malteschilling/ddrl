@@ -26,6 +26,7 @@
   <worldbody>
     <light cutoff="100" diffuse="1 1 1" dir="0 0 -1" directional="true" exponent="1" pos="0 0 3" specular=".1 .1 .1" mode="trackcom"/>
     <camera name="sideon" pos="0 -10 5" fovy="45" mode="targetbody" target="torso" />
+    <camera name="side_run" pos="10 -20 3" fovy="45" xyaxes="1 0 0 0 0 1" mode="fixed"/>
     <camera name="float_far"  pos="-4 0 2" xyaxes="0 -1 0 .5 0 1" mode="trackcom" fovy="90"/>
     <geom name='floor' material="MatPlane" pos='0 0 0' size='400 40 0.1' type='hfield' conaffinity='1' rgba='0.8 0.9 0.8 1' condim='3' hfield="hill"/>
     <body name="torso" pos="0 0 0.75">
@@ -76,6 +77,12 @@
           </body>
         </body>
       </body>
+    </body>
+    <body name="z_tvel_column" pos='0 0 0'>
+        <geom name='z_targetvel' pos='0 0 0.001' size='0.5 40 0.1' type='plane' conaffinity='0' contype ='0' rgba='0.8 0.2 0.2 0.5'/>
+    </body>
+    <body name="x_axis" pos='0 0 0'>
+        <geom name='x_axis' pos='-5. 0 0.001' size='40 0.4 0.1' type='plane' conaffinity='0' contype ='0' rgba='0.2 0.2 0.8 0.2'/>
     </body>
   </worldbody>
   <actuator>

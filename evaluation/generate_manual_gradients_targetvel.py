@@ -13,6 +13,29 @@ import target_envs
 import models
 from evaluation.rollout_episodes_compute_gradient import rollout_episodes
 
+"""
+    Generating Importance Matrix - section 4.8
+    
+    This shows how a small change in one input feature dimension affects the 
+    control signals for the centralized control architecture at end of training.
+    
+    As we are dealing with DRL, we are accumulating this gradient over multiple rollouts 
+    and runs of the agent in the environment. 
+    Each seed from experiment three of the centralized architecture was run for ten 
+    evaluation runs (producing multiple trajectories) of each t=1000 control steps. 
+    
+    We are interested in how a change in the input (observation over all i=44 dimensions) 
+    changes the output of the network (mean value of the normal distribution 
+    from which actions are sampled).
+    
+    For measuring this gradient, we recorded the original output of the policy network 
+    during each control step and computed the gradient numerically with respect to the 
+    individual input dimensions of the observation space. 
+    As the different input dimensions are of quite different scale and variation during 
+    walking, we had to normalize the computed gradient for which we used the standard 
+    deviation of the particular feature dimension (measured over time as sigma_i).
+"""
+
 parser = argparse.ArgumentParser()
 parser.add_argument("--hf_smoothness", required=False)
 args = parser.parse_args()
@@ -22,6 +45,7 @@ if args.hf_smoothness is not None:
 else:
     hf_smoothness_eval = 0.8
 
+# Path to trained models.
 exp_path = [os.getcwd() + '/Results/experiment_3_models_curriculum_tvel//Tvel_QuantrupedMultiEnv_Centralized_TVel']
 experiment_dirs = [[os.path.join(exp_path_item,dI) for dI in os.listdir(exp_path_item) if os.path.isdir(os.path.join(exp_path_item,dI))] for exp_path_item in exp_path]
 
@@ -44,8 +68,12 @@ for exp_dir in experiment_dirs:
     for experiment in range(0, len(exp_params) ):
         #with open(exp_params[experiment], "rb") as f:
          #   config = pickle.load(f)
-        with open('/Users/mschilling/Desktop/gpu_cluster/ray_results_targetvel/params_py36_Centralized.pkl', "rb") as f:
-            config = pickle.load(f)
+        try:
+            with open(exp_params[experiment], "rb") as f:
+                config = pickle.load(f)
+        except:
+            with open(exp_dir[experiment] + "/../params_py36.pkl", "rb") as f:
+                config = pickle.load(f)
         if "num_workers" in config:
             config["num_workers"] = min(2, config["num_workers"]) 
         config['env_config']['target_velocity'] = 1.0
@@ -60,7 +88,7 @@ for exp_dir in experiment_dirs:
         if hasattr(agent, "workers") and isinstance(agent.workers, WorkerSet):
             env = agent.workers.local_worker().env
     
-
+        # Call rollouts that collect gradients along the trajectory as well.
         res_rollout = rollout_episodes(env, agent, num_episodes=10, num_steps=1000, render=False, experiment_nr=experiment)
 
         # Write detailed data to panda file
