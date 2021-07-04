@@ -10,7 +10,9 @@ from ray import tune
 from ray.tune import grid_search
 import time
 
-import simulation_envs
+from ray.rllib.agents.callbacks import DefaultCallbacks
+
+import exp1_simulation_envs
 import models
 
 import argparse
@@ -46,23 +48,23 @@ else:
     policy_scope = 'QuantrupedMultiEnv_Centralized'
  
 if policy_scope=="QuantrupedMultiEnv_FullyDecentral":
-    from simulation_envs.quantruped_fourDecentralizedController_environments import QuantrupedFullyDecentralizedEnv as QuantrupedEnv
+    from exp1_simulation_envs.quantruped_fourDecentralizedController_environments import QuantrupedFullyDecentralizedEnv as QuantrupedEnv
 elif policy_scope=="QuantrupedMultiEnv_SingleNeighbor":
-    from simulation_envs.quantruped_fourDecentralizedController_environments import Quantruped_LocalSingleNeighboringLeg_Env as QuantrupedEnv
+    from exp1_simulation_envs.quantruped_fourDecentralizedController_environments import Quantruped_LocalSingleNeighboringLeg_Env as QuantrupedEnv
 elif policy_scope=="QuantrupedMultiEnv_SingleDiagonal":
-    from simulation_envs.quantruped_fourDecentralizedController_environments import Quantruped_LocalSingleDiagonalLeg_Env as QuantrupedEnv
+    from exp1_simulation_envs.quantruped_fourDecentralizedController_environments import Quantruped_LocalSingleDiagonalLeg_Env as QuantrupedEnv
 elif policy_scope=="QuantrupedMultiEnv_SingleToFront":
-    from simulation_envs.quantruped_fourDecentralizedController_environments import Quantruped_LocalSingleToFront_Env as QuantrupedEnv
+    from exp1_simulation_envs.quantruped_fourDecentralizedController_environments import Quantruped_LocalSingleToFront_Env as QuantrupedEnv
 elif policy_scope=="QuantrupedMultiEnv_Local":
-    from simulation_envs.quantruped_fourDecentralizedController_environments import Quantruped_Local_Env as QuantrupedEnv
+    from exp1_simulation_envs.quantruped_fourDecentralizedController_environments import Quantruped_Local_Env as QuantrupedEnv
 elif policy_scope=="QuantrupedMultiEnv_TwoSides":
-    from simulation_envs.quantruped_twoDecentralizedController_environments import Quantruped_TwoSideControllers_Env as QuantrupedEnv
+    from exp1_simulation_envs.quantruped_twoDecentralizedController_environments import Quantruped_TwoSideControllers_Env as QuantrupedEnv
 elif policy_scope=="QuantrupedMultiEnv_TwoDiags":
-    from simulation_envs.quantruped_twoDecentralizedController_environments import Quantruped_TwoDiagControllers_Env as QuantrupedEnv
+    from exp1_simulation_envs.quantruped_twoDecentralizedController_environments import Quantruped_TwoDiagControllers_Env as QuantrupedEnv
 elif policy_scope=="QuantrupedMultiEnv_FullyDecentralGlobalCost":
-    from simulation_envs.quantruped_fourDecentralizedController_GlobalCosts_environments import QuantrupedFullyDecentralizedGlobalCostEnv as QuantrupedEnv
+    from exp1_simulation_envs.quantruped_fourDecentralizedController_GlobalCosts_environments import QuantrupedFullyDecentralizedGlobalCostEnv as QuantrupedEnv
 else:
-    from simulation_envs.quantruped_centralizedController_environment import Quantruped_Centralized_Env as QuantrupedEnv
+    from exp1_simulation_envs.quantruped_centralizedController_environment import Quantruped_Centralized_Env as QuantrupedEnv
 
 # Init ray: First line on server, second for laptop
 #ray.init(num_cpus=30, ignore_reinit_error=True)
@@ -124,20 +126,28 @@ config['env_config']['range_smoothness'] =  [1., 0.6]
 config['env_config']['range_last_timestep'] =  10000000
 
 # For curriculum learning: environment has to be updated every epoch
-def on_train_result(info):
-    result = info["result"]
-    trainer = info["trainer"]
-    timesteps_res = result["timesteps_total"]
-    trainer.workers.foreach_worker(
-        lambda ev: ev.foreach_env( lambda env: env.update_environment_after_epoch( timesteps_res ) )) 
-config["callbacks"]={"on_train_result": on_train_result,}
+# def on_train_result(info):
+#     result = info["result"]
+#     trainer = info["trainer"]
+#     timesteps_res = result["timesteps_total"]
+#     trainer.workers.foreach_worker(
+#         lambda ev: ev.foreach_env( lambda env: env.update_environment_after_epoch( timesteps_res ) )) 
+# config["callbacks"]={"on_train_result": on_train_result,}
+class curriculumCallback(DefaultCallbacks):
+    def on_train_result(self, *, trainer, result: dict, **kwargs):
+        timesteps_res = result["timesteps_total"]
+        trainer.workers.foreach_worker(
+            lambda ev: ev.foreach_env(lambda env: env.update_environment_after_epoch(timesteps_res)))
+config["callbacks"] = curriculumCallback  # {"on_train_result": on_train_result, }
+
+
 
 # Call tune and run (for evaluation: 10 seeds up to 20M steps; only centralized controller
 # required that much of time; decentralized controller should show very good results 
 # after 5M steps.
 analysis = tune.run(
       "PPO",
-      name=("HF_10_" + policy_scope),
+      name=("GR_" + policy_scope),
       num_samples=10,
       checkpoint_at_end=True,
       checkpoint_freq=312,
