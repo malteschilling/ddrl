@@ -12,7 +12,7 @@ import time
 
 from ray.rllib.agents.callbacks import DefaultCallbacks
 
-import exp1_simulation_envs
+import simulation_envs_norm_rew
 import models
 
 import argparse
@@ -48,21 +48,21 @@ else:
     policy_scope = 'QuantrupedMultiEnv_Centralized'
  
 if policy_scope=="QuantrupedMultiEnv_FullyDecentral":
-    from exp1_simulation_envs.quantruped_fourDecentralizedController_environments import QuantrupedFullyDecentralizedEnv as QuantrupedEnv
+    from simulation_envs_norm_rew.quantruped_fourDecentralizedController_environments import QuantrupedFullyDecentralizedEnv as QuantrupedEnv
 elif policy_scope=="QuantrupedMultiEnv_SingleNeighbor":
-    from exp1_simulation_envs.quantruped_fourDecentralizedController_environments import Quantruped_LocalSingleNeighboringLeg_Env as QuantrupedEnv
+    from simulation_envs_norm_rew.quantruped_fourDecentralizedController_environments import Quantruped_LocalSingleNeighboringLeg_Env as QuantrupedEnv
 elif policy_scope=="QuantrupedMultiEnv_SingleDiagonal":
-    from exp1_simulation_envs.quantruped_fourDecentralizedController_environments import Quantruped_LocalSingleDiagonalLeg_Env as QuantrupedEnv
+    from simulation_envs_norm_rew.quantruped_fourDecentralizedController_environments import Quantruped_LocalSingleDiagonalLeg_Env as QuantrupedEnv
 elif policy_scope=="QuantrupedMultiEnv_SingleToFront":
-    from exp1_simulation_envs.quantruped_fourDecentralizedController_environments import Quantruped_LocalSingleToFront_Env as QuantrupedEnv
+    from simulation_envs_norm_rew.quantruped_fourDecentralizedController_environments import Quantruped_LocalSingleToFront_Env as QuantrupedEnv
 elif policy_scope=="QuantrupedMultiEnv_Local":
-    from exp1_simulation_envs.quantruped_fourDecentralizedController_environments import Quantruped_Local_Env as QuantrupedEnv
+    from simulation_envs_norm_rew.quantruped_fourDecentralizedController_environments import Quantruped_Local_Env as QuantrupedEnv
 elif policy_scope=="QuantrupedMultiEnv_TwoSides":
-    from exp1_simulation_envs.quantruped_twoDecentralizedController_environments import Quantruped_TwoSideControllers_Env as QuantrupedEnv
+    from simulation_envs_norm_rew.quantruped_twoDecentralizedController_environments import Quantruped_TwoSideControllers_Env as QuantrupedEnv
 elif policy_scope=="QuantrupedMultiEnv_TwoDiags":
-    from exp1_simulation_envs.quantruped_twoDecentralizedController_environments import Quantruped_TwoDiagControllers_Env as QuantrupedEnv
+    from simulation_envs_norm_rew.quantruped_twoDecentralizedController_environments import Quantruped_TwoDiagControllers_Env as QuantrupedEnv
 else:
-    from exp1_simulation_envs.quantruped_centralizedController_environment import Quantruped_Centralized_Env as QuantrupedEnv
+    from simulation_envs_norm_rew.quantruped_centralizedController_environment import Quantruped_Centralized_Env as QuantrupedEnv
 
 # Init ray: First line on server, second for laptop
 ray.init(num_cpus=30, ignore_reinit_error=True)

@@ -4,7 +4,7 @@ import numpy as np
 import mujoco_py
 from gym import spaces
 
-from simulation_envs import QuantrupedMultiPoliciesEnv
+from simulation_envs_norm_rew import QuantrupedMultiPoliciesEnv
 
 class QuantrupedFullyDecentralizedGlobalCostEnv(QuantrupedMultiPoliciesEnv):
     """ Derived environment for control of the four-legged agent.
