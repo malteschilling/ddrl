@@ -1,5 +1,8 @@
 import ray
-import pickle5 as pickle
+import pickle
+# When using older versions of python (3.6 <=), use pickle5 when you want to interchange
+# saved picklefiles
+#import pickle5 as pickle
 import os
 import numpy as np
 import argparse
@@ -36,6 +39,7 @@ hf_smoothness_eval = 1.0
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--ray_results_dir", required=False)
+parser.add_argument("--hf_smoothness", required=False)
 args = parser.parse_args()
 if args.ray_results_dir is not None and args.ray_results_dir: 
     ray_results_dir = args.ray_results_dir

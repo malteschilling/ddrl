@@ -1,5 +1,8 @@
 import ray
-import pickle5 as pickle
+import pickle
+# When using older versions of python (3.6 <=), use pickle5 when you want to interchange
+# saved picklefiles
+#import pickle5 as pickle
 import os
 import numpy as np
 import argparse

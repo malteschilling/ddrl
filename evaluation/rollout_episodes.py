@@ -24,7 +24,7 @@ class DefaultMapping(collections.defaultdict):
         self[key] = value = self.default_factory(key)
         return value
 
-def rollout_episodes(env, agent, num_episodes=1, num_steps=1000, render=True, save_images=None, explore_during_rollout=None, tvel=None):
+def rollout_episodes(env, agent, num_episodes=1, num_steps=1000, render=True, save_images=None, explore_during_rollout=None, tvel=None, save_obs=None):
     """
         Rollout an episode:
         step through an episode, using the 
@@ -61,6 +61,8 @@ def rollout_episodes(env, agent, num_episodes=1, num_steps=1000, render=True, sa
     dist_eps = []
     steps_eps = []
     power_total_eps = []
+    if save_obs:
+        obs_list = []
     for episodes in range(0, num_episodes):
         # Reset all values for this episode.
         mapping_cache = {}  # in case policy_agent_mapping is stochastic
@@ -135,6 +137,8 @@ def rollout_episodes(env, agent, num_episodes=1, num_steps=1000, render=True, sa
             #saver.append_step(obs, action, next_obs, reward, done, info)
             steps += 1
             obs = next_obs
+            if save_obs:
+                obs_list.append(obs)
             # Calculated as torque (during last time step - or in this case sum of 
             # proportional control signal (clipped to [-1,1], multiplied by 150 to torque)
             # multiplied by joint velocity for each joint.
@@ -156,4 +160,6 @@ def rollout_episodes(env, agent, num_episodes=1, num_steps=1000, render=True, sa
         power_total_eps.append(power_total)
         #print(episodes, ' - ', reward_total, '; CoT: ', cost_of_transport, '; Vel: ', com_vel)
     # Return collected information from episode.
+    if save_obs:
+        np.save( str(save_obs+'/obs_list'), obs_list)
     return (reward_eps, steps_eps, dist_eps, power_total_eps, vel_eps, cot_eps )

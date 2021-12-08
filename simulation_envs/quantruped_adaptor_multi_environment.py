@@ -51,6 +51,8 @@ class QuantrupedMultiPoliciesEnv(MultiAgentEnv):
         ant_mass = mujoco_py.functions.mj_getTotalmass(self.env.model)
         mujoco_py.functions.mj_setTotalmass(self.env.model, 10. * ant_mass)
         
+        
+        
         self.action_space = self.env.action_space
         self.observation_space = self.env.observation_space
         
