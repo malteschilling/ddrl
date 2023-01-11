@@ -1,7 +1,7 @@
 # DDRL
 Deep Decentralized Reinforcement Learning - locally structured architecture for DRL in a continuous locomotion control task on a four-legged simulated agent.
 
-The repository holds results and implementation for training a decentralized control architecture of a four-legged robot. It accompanies a submitted article: Malte Schilling, Andrew Melnik, Frank W. Ohl, Helge Ritter, and Barbara Hammer, Decentralized Control and Local Information for Robust and Adaptive Decentralized Deep Reinforcement Learning.
+The repository holds results and implementation for training a decentralized control architecture of a four-legged robot. It accompanies the Neural Networks article: Malte Schilling, Andrew Melnik, Frank W. Ohl, Helge Ritter, and Barbara Hammer (2021), Decentralized Control and Local Information for Robust and Adaptive Decentralized Deep Reinforcement Learning. Neural Networks 144:699-725, https://doi.org/10.1016/j.neunet.2021.09.017.
 
 For questions, please contact: Malte Schilling, mschilli@techfak.uni-bielefeld.de
 
@@ -15,7 +15,8 @@ Decentralization is a central characteristic of biological motor control that al
 
 The repository consists of multiple parts, all written in Python, and there are multiple experiments:
 
-* train_experiment_1_architecture_on_flat.py = Script for training models.  The first learning experiment aims to answer the question how does different control architectures—w.r.t. decentralization of the action space and input scope of the observation space–affect learning over time. Trained on flat terrain and aiming for running as fast as possible. Details, sect. 4.1 - 4.3.* train_experiment_3_architecture_curriculum_targetvel.py Script for training models. The goal of the last task is to turn towards a more realistic scenario which brings us closer to realization on a robot. We aim for training an agent towards a stable walking speed in increasingly more and more difficult terrain. Details, sect. 4.6 and 4.7.
+* train_experiment_1_architecture_on_flat.py = Script for training models.  The first learning experiment aims to answer the question how does different control architectures—w.r.t. decentralization of the action space and input scope of the observation space–affect learning over time. Trained on flat terrain and aiming for running as fast as possible. Details, sect. 4.1 - 4.3.
+* train_experiment_3_architecture_curriculum_targetvel.py Script for training models. The goal of the last task is to turn towards a more realistic scenario which brings us closer to realization on a robot. We aim for training an agent towards a stable walking speed in increasingly more and more difficult terrain. Details, sect. 4.6 and 4.7.
 * evaluation = Folder with scripts for evaluation. These scripts are running trained controller and collecting data (velocity, return, distance, cost of transport) which are saved in panda files.
 * Results = Contains trained models from first and third experiment, plus results from all the evaluations.
 * stats = calculating statistical comparisons, based on previously run evaluations.
